@@ -1,0 +1,20 @@
+name: "🤺 fix"
+description: "수정사항에 대한 버그 템플릿"
+title: "[fix] "
+labels: "fix"
+
+body:
+  - type: textarea
+    attributes:
+      label: 🏋🏻 어떤 오류인가요?
+      description: 오류에 대해 설명해주세요.
+      placeholder: 오류에 대해서 적어주세요.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: 💪🏻 TODO
+      description: 주어진 이슈에 대해서 체크박스를 만들어주세요.
+      placeholder: 할 일을 나열해 주세요.
+    validations:
+      required: true
