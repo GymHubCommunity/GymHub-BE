@@ -1,0 +1,20 @@
+name: "⚾️ etc"
+description: "기타 이슈 템플릿"
+title: "[etc] "
+labels: "etc"
+
+body:
+  - type: textarea
+    attributes:
+      label: 🏋🏻 어떤 이슈인가요?
+      description: 이슈에 대해 설명해주세요.
+      placeholder: 이슈에 대해서 적어주세요.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: 💪🏻 TODO
+      description: 주어진 이슈에 대해서 체크박스를 만들어주세요.
+      placeholder: 할 일을 나열해 주세요.
+    validations:
+      required: true

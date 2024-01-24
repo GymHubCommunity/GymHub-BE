@@ -1,0 +1,20 @@
+name: "💪🏻 feat"
+description: "새로운 기능 템플릿"
+title: "[feat] "
+labels: "feat"
+
+body:
+  - type: textarea
+    attributes:
+      label: 🏋🏻 어떤 개발 사항인가요?
+      description: 기능에 대해 설명해주세요.
+      placeholder: 기능에 대해서 적어주세요.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: 💪🏻 TODO
+      description: 주어진 이슈에 대해서 체크박스를 만들어주세요.
+      placeholder: 할 일을 나열해 주세요.
+    validations:
+      required: true
