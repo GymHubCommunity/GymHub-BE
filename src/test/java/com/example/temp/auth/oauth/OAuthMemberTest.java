@@ -13,7 +13,7 @@ class OAuthMemberTest {
     @DisplayName("OAuthResponse 인스턴스와 Member 인스턴스를 사용해 OAuthMember를 생성한다")
     void createOAuthMemberUsingOAuthResponse() throws Exception {
         // given
-        OAuthResponse oAuthResponse = new OAuthResponse("이메일", "닉네임", 1L, "프로필주소");
+        OAuthResponse oAuthResponse = new OAuthResponse(OAuthProviderType.GOOGLE, "이메일", "닉네임", 1L, "프로필주소");
         Member member = Member.builder().build();
 
         // when

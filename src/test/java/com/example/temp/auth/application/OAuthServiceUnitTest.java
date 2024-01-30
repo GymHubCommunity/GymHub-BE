@@ -48,7 +48,7 @@ class OAuthServiceUnitTest {
     @BeforeEach
     void setUp() {
         oAuthService = new OAuthService(oAuthProviderResolver, oAuthMemberRepository, memberRepository);
-        oAuthResponse = new OAuthResponse("이메일", "닉네임", 1L, "프로필주소");
+        oAuthResponse = new OAuthResponse(OAuthProviderType.GOOGLE, "이메일", "닉네임", 1L, "프로필주소");
         member = Member.builder().build();
         oAuthMember = OAuthMember.builder()
             .member(member)

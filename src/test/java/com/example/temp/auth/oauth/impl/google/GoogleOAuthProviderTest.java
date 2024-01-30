@@ -16,11 +16,14 @@ class GoogleOAuthProviderTest {
     GoogleOAuthProvider provider;
 
     @Mock
+    GoogleOAuthClient client;
+
+    @Mock
     GoogleOAuthProperties properties;
 
     @BeforeEach
     void setUp() {
-        provider = new GoogleOAuthProvider(properties);
+        provider = new GoogleOAuthProvider(client, properties);
     }
 
     @Test
