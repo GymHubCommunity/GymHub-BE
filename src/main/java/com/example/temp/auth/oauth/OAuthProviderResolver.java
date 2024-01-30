@@ -10,7 +10,7 @@ public class OAuthProviderResolver {
 
     private final Set<OAuthProvider> providers;
 
-    public OAuthResponse fetch(String provider, String authCode) {
+    public OAuthResponse fetch(OAuthProviderType providerType, String authCode) {
         return null;
     }
 }

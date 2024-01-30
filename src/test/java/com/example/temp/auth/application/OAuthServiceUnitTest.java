@@ -59,7 +59,7 @@ class OAuthServiceUnitTest {
     @DisplayName("OAuth 로그인을 처음 한 사용자는 로그인에 성공한다")
     void successFirstLogin() throws Exception {
         // given
-        when(oAuthProviderResolver.fetch(anyString(), anyString()))
+        when(oAuthProviderResolver.fetch(any(OAuthProviderType.class), anyString()))
             .thenReturn(oAuthResponse);
         when(oAuthMemberRepository.findByIdUsingResourceServerAndType(anyLong(), any(OAuthProviderType.class)))
             .thenReturn(Optional.empty());
@@ -77,7 +77,7 @@ class OAuthServiceUnitTest {
     @DisplayName("기존 OAuth 로그인을 했던 사용자는 로그인에 성공한다")
     void successLoginThatUserAlreadyLogin() throws Exception {
         // given
-        when(oAuthProviderResolver.fetch(anyString(), anyString()))
+        when(oAuthProviderResolver.fetch(any(OAuthProviderType.class), anyString()))
             .thenReturn(oAuthResponse);
         when(oAuthMemberRepository.findByIdUsingResourceServerAndType(anyLong(), any(OAuthProviderType.class)))
             .thenReturn(Optional.of(oAuthMember));
@@ -93,7 +93,7 @@ class OAuthServiceUnitTest {
     @DisplayName("OAuth 로그인을 처음 한 사용자는 DB에 저장된다")
     void saveDatabaseIfFirstLogin() throws Exception {
         // given
-        when(oAuthProviderResolver.fetch(anyString(), anyString()))
+        when(oAuthProviderResolver.fetch(any(OAuthProviderType.class), anyString()))
             .thenReturn(oAuthResponse);
         when(oAuthMemberRepository.findByIdUsingResourceServerAndType(anyLong(), any(OAuthProviderType.class)))
             .thenReturn(Optional.empty());
@@ -114,7 +114,7 @@ class OAuthServiceUnitTest {
     @DisplayName("기존에 OAuth 로그인을 한 사용자는 DB에 저장되지 않는다")
     void notSaveDatabaseIfAlreadyLogin() throws Exception {
         // given
-        when(oAuthProviderResolver.fetch(anyString(), anyString()))
+        when(oAuthProviderResolver.fetch(any(OAuthProviderType.class), anyString()))
             .thenReturn(oAuthResponse);
         when(oAuthMemberRepository.findByIdUsingResourceServerAndType(anyLong(), any(OAuthProviderType.class)))
             .thenReturn(Optional.of(oAuthMember));
