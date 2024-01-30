@@ -1,19 +1,38 @@
 package com.example.temp.auth.oauth.impl.google;
 
+import com.example.temp.auth.oauth.OAuthUserInfo;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public record GoogleUserInfo(
+public class GoogleUserInfo implements OAuthUserInfo {
     @JsonProperty("picture")
-    String profileUrl,
+    String profileUrl;
 
     @JsonProperty("email")
-    String email,
+    String email;
 
     @JsonProperty("sub")
-    String idUsingResourceServer,
+    String idUsingResourceServer;
 
     @JsonProperty("name")
-    String name
-) {
+    String name;
 
+    @Override
+    public String getProfileUrl() {
+        return profileUrl;
+    }
+
+    @Override
+    public String getEmail() {
+        return email;
+    }
+
+    @Override
+    public String getIdUsingResourceServer() {
+        return idUsingResourceServer;
+    }
+
+    @Override
+    public String getName() {
+        return name;
+    }
 }
