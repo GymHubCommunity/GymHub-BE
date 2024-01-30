@@ -70,7 +70,9 @@ class OAuthServiceUnitTest {
         LoginInfoResponse response = oAuthService.login("google", "1234");
 
         // then
-        assertThat(response).isNotNull(); // TODO
+        assertThat(response.id()).isEqualTo(member.getId());
+        assertThat(response.email()).isEqualTo(member.getEmail());
+        assertThat(response.profileUrl()).isEqualTo(member.getProfileUrl());
     }
 
     @Test
@@ -86,7 +88,9 @@ class OAuthServiceUnitTest {
         LoginInfoResponse response = oAuthService.login("google", "1234");
 
         // then
-        assertThat(response).isNotNull(); // TODO
+        assertThat(response.id()).isEqualTo(member.getId());
+        assertThat(response.email()).isEqualTo(member.getEmail());
+        assertThat(response.profileUrl()).isEqualTo(member.getProfileUrl());
     }
 
     @Test
