@@ -11,6 +11,11 @@ public class OAuthProviderResolver {
     private final Set<OAuthProvider> providers;
 
     public OAuthResponse fetch(OAuthProviderType providerType, String authCode) {
-        return null;
+        OAuthProvider oAuthProvider = providers.stream()
+            .filter(provider -> provider.support(providerType))
+            .findAny()
+            .orElseThrow(() -> new IllegalArgumentException("지원하지 않는 OAuth 타입입니다."));
+        return oAuthProvider.fetch(authCode);
     }
 }
+
