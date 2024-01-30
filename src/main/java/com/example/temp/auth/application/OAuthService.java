@@ -3,6 +3,7 @@ package com.example.temp.auth.application;
 import com.example.temp.auth.dto.response.LoginInfoResponse;
 import com.example.temp.auth.oauth.OAuthMember;
 import com.example.temp.auth.oauth.OAuthProviderResolver;
+import com.example.temp.auth.oauth.OAuthProviderType;
 import com.example.temp.auth.oauth.OAuthResponse;
 import com.example.temp.auth.oauth.domain.OAuthMemberRepository;
 import com.example.temp.member.domain.Member;
@@ -29,8 +30,9 @@ public class OAuthService {
     }
 
     private Member findOrSaveMember(String provider, OAuthResponse oAuthResponse) {
-        Optional<OAuthMember> oAuthMemberOpt = oAuthMemberRepository.findByS(oAuthResponse.idUsingResourceServer(),
-            provider);
+        Optional<OAuthMember> oAuthMemberOpt = oAuthMemberRepository.findByIdUsingResourceServerAndType(
+            oAuthResponse.idUsingResourceServer(),
+            OAuthProviderType.find(provider));
         if (oAuthMemberOpt.isPresent()) {
             return oAuthMemberOpt.get().getMember();
         }

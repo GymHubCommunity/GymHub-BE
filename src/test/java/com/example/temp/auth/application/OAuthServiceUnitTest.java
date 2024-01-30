@@ -12,6 +12,7 @@ import static org.mockito.Mockito.when;
 import com.example.temp.auth.dto.response.LoginInfoResponse;
 import com.example.temp.auth.oauth.OAuthMember;
 import com.example.temp.auth.oauth.OAuthProviderResolver;
+import com.example.temp.auth.oauth.OAuthProviderType;
 import com.example.temp.auth.oauth.OAuthResponse;
 import com.example.temp.auth.oauth.domain.OAuthMemberRepository;
 import com.example.temp.member.domain.Member;
@@ -60,7 +61,7 @@ class OAuthServiceUnitTest {
         // given
         when(oAuthProviderResolver.fetch(anyString(), anyString()))
             .thenReturn(oAuthResponse);
-        when(oAuthMemberRepository.findByS(anyLong(), anyString()))
+        when(oAuthMemberRepository.findByIdUsingResourceServerAndType(anyLong(), any(OAuthProviderType.class)))
             .thenReturn(Optional.empty());
         when(memberRepository.save(any(Member.class)))
             .thenReturn(member);
@@ -78,7 +79,7 @@ class OAuthServiceUnitTest {
         // given
         when(oAuthProviderResolver.fetch(anyString(), anyString()))
             .thenReturn(oAuthResponse);
-        when(oAuthMemberRepository.findByS(anyLong(), anyString()))
+        when(oAuthMemberRepository.findByIdUsingResourceServerAndType(anyLong(), any(OAuthProviderType.class)))
             .thenReturn(Optional.of(oAuthMember));
 
         // when
@@ -94,7 +95,7 @@ class OAuthServiceUnitTest {
         // given
         when(oAuthProviderResolver.fetch(anyString(), anyString()))
             .thenReturn(oAuthResponse);
-        when(oAuthMemberRepository.findByS(anyLong(), anyString()))
+        when(oAuthMemberRepository.findByIdUsingResourceServerAndType(anyLong(), any(OAuthProviderType.class)))
             .thenReturn(Optional.empty());
         when(memberRepository.save(any(Member.class)))
             .thenReturn(member);
@@ -115,7 +116,7 @@ class OAuthServiceUnitTest {
         // given
         when(oAuthProviderResolver.fetch(anyString(), anyString()))
             .thenReturn(oAuthResponse);
-        when(oAuthMemberRepository.findByS(anyLong(), anyString()))
+        when(oAuthMemberRepository.findByIdUsingResourceServerAndType(anyLong(), any(OAuthProviderType.class)))
             .thenReturn(Optional.of(oAuthMember));
 
         // when
