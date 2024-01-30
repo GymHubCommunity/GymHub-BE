@@ -2,6 +2,7 @@ package com.example.temp.auth.oauth;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.example.temp.auth.oauth.domain.OAuthMember;
 import com.example.temp.member.domain.Member;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

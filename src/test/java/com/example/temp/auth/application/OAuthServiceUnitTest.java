@@ -10,7 +10,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.example.temp.auth.dto.response.LoginInfoResponse;
-import com.example.temp.auth.oauth.OAuthMember;
+import com.example.temp.auth.oauth.domain.OAuthMember;
 import com.example.temp.auth.oauth.OAuthProviderResolver;
 import com.example.temp.auth.oauth.OAuthProviderType;
 import com.example.temp.auth.oauth.OAuthResponse;

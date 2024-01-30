@@ -1,5 +1,6 @@
-package com.example.temp.auth.oauth;
+package com.example.temp.auth.oauth.domain;
 
+import com.example.temp.auth.oauth.OAuthResponse;
 import com.example.temp.member.domain.Member;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
