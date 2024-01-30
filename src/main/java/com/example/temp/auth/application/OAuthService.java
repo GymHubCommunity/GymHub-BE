@@ -24,17 +24,20 @@ public class OAuthService {
     @Transactional
     public LoginInfoResponse login(String provider, String authCode) {
         OAuthResponse oAuthResponse = oAuthProviderResolver.fetch(provider, authCode);
+        Member member = findOrSaveMember(provider, oAuthResponse);
+        return LoginInfoResponse.of(member);
+    }
+
+    private Member findOrSaveMember(String provider, OAuthResponse oAuthResponse) {
         Optional<OAuthMember> oAuthMemberOpt = oAuthMemberRepository.findByS(oAuthResponse.idUsingResourceServer(),
             provider);
-        if (oAuthMemberOpt.isEmpty()) {
-            Member savedMember = memberRepository.save(Member.of(oAuthResponse));
-            OAuthMember oAuthMember = OAuthMember.from(oAuthResponse, savedMember);
-            oAuthMemberRepository.save(oAuthMember);
-            return LoginInfoResponse.of(savedMember);
-        } else {
-            OAuthMember oAuthMember = oAuthMemberOpt.get();
-            return LoginInfoResponse.of(oAuthMember.getMember());
+        if (oAuthMemberOpt.isPresent()) {
+            return oAuthMemberOpt.get().getMember();
         }
+        Member savedMember = memberRepository.save(Member.of(oAuthResponse));
+        OAuthMember oAuthMember = OAuthMember.from(oAuthResponse, savedMember);
+        oAuthMemberRepository.save(oAuthMember);
+        return savedMember;
     }
 
 }
