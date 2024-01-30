@@ -13,7 +13,7 @@ class MemberTest {
     @DisplayName("OAuthResponse 객체를 사용해 Member를 생성한다")
     void createMemberUsingOAuthResponse() throws Exception {
         // given
-        OAuthResponse oAuthResponse = new OAuthResponse(OAuthProviderType.GOOGLE, "이메일", "닉네임", 1L, "프로필주소");
+        OAuthResponse oAuthResponse = new OAuthResponse(OAuthProviderType.GOOGLE, "이메일", "닉네임", "123", "프로필주소");
 
         // when
         Member member = Member.of(oAuthResponse);

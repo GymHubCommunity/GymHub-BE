@@ -6,5 +6,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface OAuthMemberRepository extends JpaRepository<OAuthMember, Long> {
 
-    Optional<OAuthMember> findByIdUsingResourceServerAndType(Long idUsingResourceServer, OAuthProviderType type);
+    Optional<OAuthMember> findByIdUsingResourceServerAndType(String idUsingResourceServer, OAuthProviderType type);
 }

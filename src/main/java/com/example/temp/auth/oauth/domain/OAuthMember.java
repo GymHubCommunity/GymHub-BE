@@ -34,7 +34,7 @@ public class OAuthMember {
     private String nickname;
 
     @Column(nullable = false)
-    private Long idUsingResourceServer;
+    private String idUsingResourceServer;
 
     @Column(nullable = false)
     private OAuthProviderType type;
@@ -47,7 +47,7 @@ public class OAuthMember {
     private Member member;
 
     @Builder
-    private OAuthMember(String email, String nickname, Long idUsingResourceServer, OAuthProviderType type,
+    private OAuthMember(String email, String nickname, String idUsingResourceServer, OAuthProviderType type,
         String profileUrl,
         Member member) {
         this.email = email;
@@ -61,7 +61,7 @@ public class OAuthMember {
     public static OAuthMember of(OAuthResponse response, Member member, OAuthProviderType oAuthProviderType) {
         return OAuthMember.builder()
             .email(response.email())
-            .nickname(response.nickname())
+            .nickname(response.name())
             .idUsingResourceServer(response.idUsingResourceServer())
             .profileUrl(response.profileUrl())
             .member(member)

@@ -48,7 +48,7 @@ class OAuthServiceUnitTest {
     @BeforeEach
     void setUp() {
         oAuthService = new OAuthService(oAuthProviderResolver, oAuthMemberRepository, memberRepository);
-        oAuthResponse = new OAuthResponse(OAuthProviderType.GOOGLE, "이메일", "닉네임", 1L, "프로필주소");
+        oAuthResponse = new OAuthResponse(OAuthProviderType.GOOGLE, "이메일", "닉네임", "123", "프로필주소");
         member = Member.builder().build();
         oAuthMember = OAuthMember.builder()
             .member(member)
@@ -61,7 +61,7 @@ class OAuthServiceUnitTest {
         // given
         when(oAuthProviderResolver.fetch(any(OAuthProviderType.class), anyString()))
             .thenReturn(oAuthResponse);
-        when(oAuthMemberRepository.findByIdUsingResourceServerAndType(anyLong(), any(OAuthProviderType.class)))
+        when(oAuthMemberRepository.findByIdUsingResourceServerAndType(anyString(), any(OAuthProviderType.class)))
             .thenReturn(Optional.empty());
         when(memberRepository.save(any(Member.class)))
             .thenReturn(member);
@@ -79,7 +79,7 @@ class OAuthServiceUnitTest {
         // given
         when(oAuthProviderResolver.fetch(any(OAuthProviderType.class), anyString()))
             .thenReturn(oAuthResponse);
-        when(oAuthMemberRepository.findByIdUsingResourceServerAndType(anyLong(), any(OAuthProviderType.class)))
+        when(oAuthMemberRepository.findByIdUsingResourceServerAndType(anyString(), any(OAuthProviderType.class)))
             .thenReturn(Optional.of(oAuthMember));
 
         // when
@@ -95,7 +95,7 @@ class OAuthServiceUnitTest {
         // given
         when(oAuthProviderResolver.fetch(any(OAuthProviderType.class), anyString()))
             .thenReturn(oAuthResponse);
-        when(oAuthMemberRepository.findByIdUsingResourceServerAndType(anyLong(), any(OAuthProviderType.class)))
+        when(oAuthMemberRepository.findByIdUsingResourceServerAndType(anyString(), any(OAuthProviderType.class)))
             .thenReturn(Optional.empty());
         when(memberRepository.save(any(Member.class)))
             .thenReturn(member);
@@ -116,7 +116,7 @@ class OAuthServiceUnitTest {
         // given
         when(oAuthProviderResolver.fetch(any(OAuthProviderType.class), anyString()))
             .thenReturn(oAuthResponse);
-        when(oAuthMemberRepository.findByIdUsingResourceServerAndType(anyLong(), any(OAuthProviderType.class)))
+        when(oAuthMemberRepository.findByIdUsingResourceServerAndType(anyString(), any(OAuthProviderType.class)))
             .thenReturn(Optional.of(oAuthMember));
 
         // when
