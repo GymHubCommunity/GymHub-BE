@@ -3,10 +3,8 @@ package com.example.temp.auth.oauth.impl.google;
 import java.util.Arrays;
 import java.util.Objects;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.context.properties.ConfigurationPropertiesBinding;
 
 @ConfigurationProperties(prefix = "oauth.google")
-@ConfigurationPropertiesBinding
 public record GoogleOAuthProperties(
     String clientId,
     String clientSecret,
