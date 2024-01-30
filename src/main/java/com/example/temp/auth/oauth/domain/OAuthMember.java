@@ -1,5 +1,6 @@
 package com.example.temp.auth.oauth.domain;
 
+import com.example.temp.auth.oauth.OAuthProviderType;
 import com.example.temp.auth.oauth.OAuthResponse;
 import com.example.temp.member.domain.Member;
 import jakarta.persistence.Column;
@@ -36,6 +37,9 @@ public class OAuthMember {
     private Long idUsingResourceServer;
 
     @Column(nullable = false)
+    private OAuthProviderType type;
+
+    @Column(nullable = false)
     private String profileUrl;
 
     @OneToOne(fetch = FetchType.LAZY)
@@ -43,21 +47,25 @@ public class OAuthMember {
     private Member member;
 
     @Builder
-    private OAuthMember(String email, String nickname, Long idUsingResourceServer, String profileUrl, Member member) {
+    private OAuthMember(String email, String nickname, Long idUsingResourceServer, OAuthProviderType type,
+        String profileUrl,
+        Member member) {
         this.email = email;
         this.nickname = nickname;
         this.idUsingResourceServer = idUsingResourceServer;
+        this.type = type;
         this.profileUrl = profileUrl;
         this.member = member;
     }
 
-    public static OAuthMember from(OAuthResponse response, Member member) {
+    public static OAuthMember of(OAuthResponse response, Member member, OAuthProviderType oAuthProviderType) {
         return OAuthMember.builder()
             .email(response.email())
             .nickname(response.nickname())
             .idUsingResourceServer(response.idUsingResourceServer())
             .profileUrl(response.profileUrl())
             .member(member)
+            .type(oAuthProviderType)
             .build();
     }
 }

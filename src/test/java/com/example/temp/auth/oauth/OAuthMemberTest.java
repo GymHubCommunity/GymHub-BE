@@ -17,7 +17,7 @@ class OAuthMemberTest {
         Member member = Member.builder().build();
 
         // when
-        OAuthMember oAuthMember = OAuthMember.from(oAuthResponse, member);
+        OAuthMember oAuthMember = OAuthMember.of(oAuthResponse, member, OAuthProviderType.GOOGLE);
 
         // then
         assertThat(oAuthMember).isNotNull();

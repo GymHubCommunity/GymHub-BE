@@ -38,7 +38,7 @@ public class OAuthService {
             return oAuthMemberOpt.get().getMember();
         }
         Member savedMember = memberRepository.save(Member.of(oAuthResponse));
-        OAuthMember oAuthMember = OAuthMember.from(oAuthResponse, savedMember);
+        OAuthMember oAuthMember = OAuthMember.of(oAuthResponse, savedMember, oAuthProviderType);
         oAuthMemberRepository.save(oAuthMember);
         return savedMember;
     }
