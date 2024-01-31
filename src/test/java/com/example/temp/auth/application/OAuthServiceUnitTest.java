@@ -9,14 +9,14 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.example.temp.auth.dto.response.LoginInfoResponse;
-import com.example.temp.oauth.application.OAuthService;
-import com.example.temp.oauth.domain.OAuthMember;
+import com.example.temp.member.application.MemberService;
+import com.example.temp.member.domain.Member;
 import com.example.temp.oauth.OAuthProviderResolver;
 import com.example.temp.oauth.OAuthProviderType;
 import com.example.temp.oauth.OAuthResponse;
+import com.example.temp.oauth.application.OAuthService;
+import com.example.temp.oauth.domain.OAuthMember;
 import com.example.temp.oauth.domain.OAuthMemberRepository;
-import com.example.temp.member.domain.Member;
-import com.example.temp.member.domain.MemberRepository;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -37,7 +37,7 @@ class OAuthServiceUnitTest {
     OAuthMemberRepository oAuthMemberRepository;
 
     @Mock
-    MemberRepository memberRepository;
+    MemberService memberService;
 
     OAuthResponse oAuthResponse;
 
@@ -47,7 +47,7 @@ class OAuthServiceUnitTest {
 
     @BeforeEach
     void setUp() {
-        oAuthService = new OAuthService(oAuthProviderResolver, oAuthMemberRepository, memberRepository);
+        oAuthService = new OAuthService(oAuthProviderResolver, oAuthMemberRepository, memberService);
         oAuthResponse = new OAuthResponse(OAuthProviderType.GOOGLE, "이메일", "닉네임", "123", "프로필주소");
         member = Member.builder().build();
         oAuthMember = OAuthMember.builder()
@@ -63,7 +63,7 @@ class OAuthServiceUnitTest {
             .thenReturn(oAuthResponse);
         when(oAuthMemberRepository.findByIdUsingResourceServerAndType(anyString(), any(OAuthProviderType.class)))
             .thenReturn(Optional.empty());
-        when(memberRepository.save(any(Member.class)))
+        when(memberService.register(any(OAuthResponse.class)))
             .thenReturn(member);
 
         // when
@@ -101,15 +101,15 @@ class OAuthServiceUnitTest {
             .thenReturn(oAuthResponse);
         when(oAuthMemberRepository.findByIdUsingResourceServerAndType(anyString(), any(OAuthProviderType.class)))
             .thenReturn(Optional.empty());
-        when(memberRepository.save(any(Member.class)))
+        when(memberService.register(any(OAuthResponse.class)))
             .thenReturn(member);
 
         // when
         oAuthService.login("google", "1234");
 
         // then
-        verify(memberRepository, times(1))
-            .save(any(Member.class));
+        verify(memberService, times(1))
+            .register(any(OAuthResponse.class));
         verify(oAuthMemberRepository, times(1))
             .save(any(OAuthMember.class));
     }
@@ -127,8 +127,8 @@ class OAuthServiceUnitTest {
         oAuthService.login("google", "1234");
 
         // then
-        verify(memberRepository, never())
-            .save(any(Member.class));
+        verify(memberService, never())
+            .register(any(OAuthResponse.class));
     }
 
 }

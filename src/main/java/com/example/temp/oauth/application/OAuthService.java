@@ -1,13 +1,13 @@
 package com.example.temp.oauth.application;
 
 import com.example.temp.auth.dto.response.LoginInfoResponse;
+import com.example.temp.member.application.MemberService;
+import com.example.temp.member.domain.Member;
 import com.example.temp.oauth.OAuthProviderResolver;
 import com.example.temp.oauth.OAuthProviderType;
 import com.example.temp.oauth.OAuthResponse;
 import com.example.temp.oauth.domain.OAuthMember;
 import com.example.temp.oauth.domain.OAuthMemberRepository;
-import com.example.temp.member.domain.Member;
-import com.example.temp.member.domain.MemberRepository;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -20,7 +20,7 @@ public class OAuthService {
 
     private final OAuthProviderResolver oAuthProviderResolver;
     private final OAuthMemberRepository oAuthMemberRepository;
-    private final MemberRepository memberRepository;
+    private final MemberService memberService;
 
     @Transactional
     public LoginInfoResponse login(String provider, String authCode) {
@@ -37,7 +37,7 @@ public class OAuthService {
         if (oAuthMemberOpt.isPresent()) {
             return oAuthMemberOpt.get().getMember();
         }
-        Member savedMember = memberRepository.save(Member.of(oAuthResponse));
+        Member savedMember = memberService.register(oAuthResponse);
         OAuthMember oAuthMember = OAuthMember.of(oAuthResponse.idUsingResourceServer(), oAuthProviderType, savedMember);
         oAuthMemberRepository.save(oAuthMember);
         return savedMember;
