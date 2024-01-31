@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 @Component
 @RequiredArgsConstructor
@@ -23,9 +24,33 @@ public class GoogleOAuthProvider implements OAuthProvider {
 
     @Override
     public OAuthResponse fetch(String authCode) {
-        GoogleToken googleToken = googleOAuthClient.fetchToken(getFetchTokenParams(authCode));
-        GoogleUserInfo googleUserInfo = googleOAuthClient.fetchUserInfo(googleToken.getValueUsingAuthorizationHeader());
+        GoogleToken googleToken = fetchToken(authCode);
+        GoogleUserInfo googleUserInfo = fetchUserInfo(googleToken);
         return OAuthResponse.of(OAuthProviderType.GOOGLE, googleUserInfo);
+    }
+
+    private GoogleUserInfo fetchUserInfo(GoogleToken googleToken) {
+        try {
+            return googleOAuthClient.fetchUserInfo(googleToken.getValueUsingAuthorizationHeader());
+        } catch (WebClientResponseException e) {
+            if (e.getStatusCode().is5xxServerError()) {
+                throw new IllegalArgumentException("Google 서버에서 문제가 발생했습니다.");
+            }
+            throw e;
+        }
+    }
+
+    private GoogleToken fetchToken(String authCode) {
+        try {
+            return googleOAuthClient.fetchToken(getFetchTokenParams(authCode));
+        } catch (WebClientResponseException.BadRequest e) {
+            throw new IllegalArgumentException("적절하지 않은 Auth Code 입니다.");
+        } catch (WebClientResponseException e) {
+            if (e.getStatusCode().is5xxServerError()) {
+                throw new IllegalArgumentException("Google 서버에서 문제가 발생했습니다.");
+            }
+            throw e;
+        }
     }
 
     private MultiValueMap<String, String> getFetchTokenParams(String authCode) {
