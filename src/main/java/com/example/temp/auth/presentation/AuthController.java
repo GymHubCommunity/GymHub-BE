@@ -1,6 +1,6 @@
 package com.example.temp.auth.presentation;
 
-import com.example.temp.auth.application.OAuthService;
+import com.example.temp.oauth.application.OAuthService;
 import com.example.temp.auth.dto.request.OAuthLoginRequest;
 import com.example.temp.auth.dto.response.AccessToken;
 import com.example.temp.auth.dto.response.LoginInfoResponse;

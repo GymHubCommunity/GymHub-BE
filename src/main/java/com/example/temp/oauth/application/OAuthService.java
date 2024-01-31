@@ -1,4 +1,4 @@
-package com.example.temp.auth.application;
+package com.example.temp.oauth.application;
 
 import com.example.temp.auth.dto.response.LoginInfoResponse;
 import com.example.temp.oauth.OAuthProviderResolver;
