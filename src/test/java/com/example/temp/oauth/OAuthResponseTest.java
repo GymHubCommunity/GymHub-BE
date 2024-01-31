@@ -2,20 +2,18 @@ package com.example.temp.oauth;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.example.temp.oauth.OAuthProviderType;
-import com.example.temp.oauth.OAuthResponse;
-import com.example.temp.oauth.OAuthUserInfo;
+import com.example.temp.member.domain.Member;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 class OAuthResponseTest {
 
-    @Test
-    @DisplayName("OAuthProviderType과 OAuthUserInfo를 사용해 OAuthResponse를 생성한다")
-    void create() throws Exception {
-        // given
-        OAuthProviderType type = OAuthProviderType.GOOGLE;
-        OAuthUserInfo info = new OAuthUserInfo() {
+    OAuthUserInfo oAuthUserInfo;
+
+    @BeforeEach
+    void setUp() {
+        oAuthUserInfo = new OAuthUserInfo() {
             @Override
             public String getProfileUrl() {
                 return "profile";
@@ -36,16 +34,38 @@ class OAuthResponseTest {
                 return "name";
             }
         };
+    }
+
+    @Test
+    @DisplayName("OAuthProviderType과 OAuthUserInfo를 사용해 OAuthResponse를 생성한다")
+    void create() throws Exception {
+        // given
+        OAuthProviderType type = OAuthProviderType.GOOGLE;
 
         // when
-        OAuthResponse result = OAuthResponse.of(type, info);
+        OAuthResponse result = OAuthResponse.of(type, oAuthUserInfo);
 
         // then
         assertThat(result.type()).isEqualTo(type);
-        assertThat(result.email()).isEqualTo(info.getEmail());
-        assertThat(result.name()).isEqualTo(info.getName());
-        assertThat(result.idUsingResourceServer()).isEqualTo(info.getIdUsingResourceServer());
-        assertThat(result.profileUrl()).isEqualTo(info.getProfileUrl());
+        assertThat(result.email()).isEqualTo(oAuthUserInfo.getEmail());
+        assertThat(result.name()).isEqualTo(oAuthUserInfo.getName());
+        assertThat(result.idUsingResourceServer()).isEqualTo(oAuthUserInfo.getIdUsingResourceServer());
+        assertThat(result.profileUrl()).isEqualTo(oAuthUserInfo.getProfileUrl());
     }
 
+    @Test
+    @DisplayName("OAuthResponse와 nickname을 사용해 Member 객체를 만든다.")
+    void createMemberUsingOAuthResponse() throws Exception {
+        // given
+        String nickname = "닉네임";
+        OAuthResponse oAuthResponse = OAuthResponse.of(OAuthProviderType.GOOGLE, oAuthUserInfo);
+
+        // when
+        Member result = oAuthResponse.toMemberWithNickname(nickname);
+
+        // then
+        assertThat(result.getNickname()).isEqualTo(nickname);
+        assertThat(result.getEmail()).isEqualTo(oAuthResponse.email());
+        assertThat(result.getProfileUrl()).isEqualTo(oAuthResponse.profileUrl());
+    }
 }
