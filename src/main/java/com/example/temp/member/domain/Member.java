@@ -31,10 +31,4 @@ public class Member {
         this.profileUrl = profileUrl;
     }
 
-    public static Member of(OAuthResponse oAuthResponse) {
-        return Member.builder()
-            .email(oAuthResponse.email())
-            .profileUrl(oAuthResponse.profileUrl())
-            .build();
-    }
 }
