@@ -7,6 +7,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.example.temp.member.domain.Member;
+import com.example.temp.member.exception.NicknameDuplicatedException;
 import com.example.temp.member.infrastructure.nickname.NicknameGenerator;
 import com.example.temp.oauth.OAuthProviderType;
 import com.example.temp.oauth.OAuthResponse;
@@ -18,7 +19,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
@@ -72,7 +72,7 @@ class MemberServiceTest {
 
         // when & then
         assertThatThrownBy(() -> memberService.register(oAuthResponse))
-            .isInstanceOf(DataIntegrityViolationException.class);
+            .isInstanceOf(NicknameDuplicatedException.class);
     }
 
     @Test
@@ -86,7 +86,7 @@ class MemberServiceTest {
 
         // when & then
         assertThatThrownBy(() -> memberService.register(oAuthResponse))
-            .isInstanceOf(DataIntegrityViolationException.class);
+            .isInstanceOf(NicknameDuplicatedException.class);
         verify(nicknameGenerator, times(5))
             .generate();
     }
