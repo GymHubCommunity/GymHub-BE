@@ -1,4 +1,4 @@
-package com.example.temp.auth.oauth.impl.google;
+package com.example.temp.oauth.impl.google;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -6,8 +6,13 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
-import com.example.temp.auth.oauth.OAuthProviderType;
-import com.example.temp.auth.oauth.OAuthResponse;
+import com.example.temp.oauth.OAuthProviderType;
+import com.example.temp.oauth.OAuthResponse;
+import com.example.temp.oauth.impl.google.GoogleOAuthClient;
+import com.example.temp.oauth.impl.google.GoogleOAuthProperties;
+import com.example.temp.oauth.impl.google.GoogleOAuthProvider;
+import com.example.temp.oauth.impl.google.GoogleToken;
+import com.example.temp.oauth.impl.google.GoogleUserInfo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

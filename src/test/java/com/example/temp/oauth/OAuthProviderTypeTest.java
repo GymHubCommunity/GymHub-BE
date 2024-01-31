@@ -1,8 +1,9 @@
-package com.example.temp.auth.oauth;
+package com.example.temp.oauth;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.example.temp.oauth.OAuthProviderType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

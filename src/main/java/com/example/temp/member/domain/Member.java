@@ -1,6 +1,6 @@
 package com.example.temp.member.domain;
 
-import com.example.temp.auth.oauth.OAuthResponse;
+import com.example.temp.oauth.OAuthResponse;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;

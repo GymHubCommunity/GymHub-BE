@@ -1,4 +1,4 @@
-package com.example.temp.auth.oauth.impl.google;
+package com.example.temp.oauth.impl.google;
 
 import java.util.Arrays;
 import java.util.Objects;

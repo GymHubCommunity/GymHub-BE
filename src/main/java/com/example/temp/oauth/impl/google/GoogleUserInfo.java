@@ -1,6 +1,6 @@
-package com.example.temp.auth.oauth.impl.google;
+package com.example.temp.oauth.impl.google;
 
-import com.example.temp.auth.oauth.OAuthUserInfo;
+import com.example.temp.oauth.OAuthUserInfo;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class GoogleUserInfo implements OAuthUserInfo {

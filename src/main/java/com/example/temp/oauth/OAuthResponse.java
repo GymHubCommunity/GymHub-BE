@@ -1,4 +1,4 @@
-package com.example.temp.auth.oauth;
+package com.example.temp.oauth;
 
 public record OAuthResponse(
     OAuthProviderType type,

@@ -1,8 +1,8 @@
-package com.example.temp.auth.oauth.impl.google;
+package com.example.temp.oauth.impl.google;
 
-import com.example.temp.auth.oauth.OAuthProvider;
-import com.example.temp.auth.oauth.OAuthProviderType;
-import com.example.temp.auth.oauth.OAuthResponse;
+import com.example.temp.oauth.OAuthProvider;
+import com.example.temp.oauth.OAuthProviderType;
+import com.example.temp.oauth.OAuthResponse;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;

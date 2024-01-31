@@ -1,8 +1,10 @@
-package com.example.temp.auth.oauth.domain;
+package com.example.temp.oauth.domain;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.example.temp.auth.oauth.OAuthProviderType;
+import com.example.temp.oauth.OAuthProviderType;
+import com.example.temp.oauth.domain.OAuthMember;
+import com.example.temp.oauth.domain.OAuthMemberRepository;
 import jakarta.persistence.EntityManager;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;

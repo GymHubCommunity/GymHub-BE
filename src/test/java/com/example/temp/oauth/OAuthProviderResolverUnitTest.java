@@ -1,4 +1,4 @@
-package com.example.temp.auth.oauth;
+package com.example.temp.oauth;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
@@ -8,6 +8,9 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.example.temp.oauth.OAuthProvider;
+import com.example.temp.oauth.OAuthProviderResolver;
+import com.example.temp.oauth.OAuthProviderType;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;

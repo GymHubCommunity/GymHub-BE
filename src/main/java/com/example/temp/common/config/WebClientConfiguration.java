@@ -1,6 +1,6 @@
 package com.example.temp.common.config;
 
-import com.example.temp.auth.oauth.impl.google.GoogleOAuthClient;
+import com.example.temp.oauth.impl.google.GoogleOAuthClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.reactive.function.client.WebClient;

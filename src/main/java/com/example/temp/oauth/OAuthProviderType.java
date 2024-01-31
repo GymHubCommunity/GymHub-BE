@@ -1,4 +1,4 @@
-package com.example.temp.auth.oauth;
+package com.example.temp.oauth;
 
 import java.util.Arrays;
 import java.util.Objects;

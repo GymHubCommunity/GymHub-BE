@@ -1,6 +1,6 @@
-package com.example.temp.auth.oauth.domain;
+package com.example.temp.oauth.domain;
 
-import com.example.temp.auth.oauth.OAuthProviderType;
+import com.example.temp.oauth.OAuthProviderType;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 

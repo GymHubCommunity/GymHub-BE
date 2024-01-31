@@ -1,4 +1,4 @@
-package com.example.temp.auth.oauth.impl.google;
+package com.example.temp.oauth.impl.google;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
