@@ -34,6 +34,9 @@ public class MemberService {
     public Member register(OAuthResponse oAuthResponse) {
         try {
             String nickname = nicknameGenerator.generate();
+            if (memberRepository.existsByNickname(nickname)) {
+                throw new NicknameDuplicatedException();
+            }
 
             Member member = Member.builder()
                 .email(oAuthResponse.email())

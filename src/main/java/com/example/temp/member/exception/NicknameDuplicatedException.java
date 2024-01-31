@@ -7,4 +7,8 @@ public class NicknameDuplicatedException extends RuntimeException {
     public NicknameDuplicatedException(Throwable cause) {
         super(NICKNAME_DUPLICATED_MSG, cause);
     }
+
+    public NicknameDuplicatedException() {
+        super(NICKNAME_DUPLICATED_MSG);
+    }
 }
