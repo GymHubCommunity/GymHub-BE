@@ -6,6 +6,7 @@ import com.example.temp.member.infrastructure.nickname.NicknameGenerator;
 import com.example.temp.oauth.OAuthResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,6 +14,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class MemberService {
+
+    public static final int LOOP_MAX_CNT = 5;
 
     private final MemberRepository memberRepository;
     private final NicknameGenerator nicknameGenerator;
@@ -23,9 +26,9 @@ public class MemberService {
      * @param oAuthResponse
      * @return 저장된 Member 객체를 반환합니다.
      * @throws DataIntegrityViolationException 중복된 닉네임으로 Member를 저장하려 할 때 발생합니다.
-     * 이 예외는 MemberServiceFacade 계층에서 처리합니다.
      */
     @Transactional
+    @Retryable(retryFor = DataIntegrityViolationException.class, maxAttempts = LOOP_MAX_CNT)
     public Member register(OAuthResponse oAuthResponse) {
         String nickname = nicknameGenerator.generate();
 

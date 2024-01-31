@@ -2,6 +2,8 @@ package com.example.temp.member.application;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.example.temp.member.domain.Member;
@@ -71,6 +73,41 @@ class MemberServiceTest {
         // when & then
         assertThatThrownBy(() -> memberService.register(oAuthResponse))
             .isInstanceOf(DataIntegrityViolationException.class);
+    }
+
+    @Test
+    @DisplayName("중복된 닉네임으로 회원가입 요청 시, 다섯 번까지 재시도한다.")
+    void trySeveralTimeIfDuplicatedNickname() throws Exception {
+        // given
+        String createdNickname = "중복된_닉네임";
+        saveMember(createdNickname);
+        when(nicknameGenerator.generate())
+            .thenReturn(createdNickname);
+
+        // when & then
+        assertThatThrownBy(() -> memberService.register(oAuthResponse))
+            .isInstanceOf(DataIntegrityViolationException.class);
+        verify(nicknameGenerator, times(5))
+            .generate();
+    }
+
+    @Test
+    @DisplayName("닉네임 중복으로 회원가입 실패 후 다시 시도했을 때, 다섯 번 안에 중복되지 않은 닉네임이 만들어지면 회원가입이 가능하다")
+    void trySuccessRecovery() throws Exception {
+        // given
+        String duplicatedNickname = "중복된_닉네임";
+        String createdNickname = "중복되지_않은_닉네임";
+        saveMember(duplicatedNickname);
+        when(nicknameGenerator.generate())
+            .thenReturn(duplicatedNickname, duplicatedNickname, duplicatedNickname,
+                duplicatedNickname, createdNickname);
+
+        // when
+        Member result = memberService.register(oAuthResponse);
+
+        // then
+        assertThat(result.getNickname()).isEqualTo(createdNickname);
+        validateMemberIsSame(result, oAuthResponse);
     }
 
     private Member saveMember(String nickname) {

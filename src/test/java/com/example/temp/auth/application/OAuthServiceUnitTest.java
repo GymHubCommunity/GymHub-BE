@@ -9,7 +9,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.example.temp.auth.dto.response.LoginInfoResponse;
-import com.example.temp.member.application.MemberServiceFacade;
+import com.example.temp.member.application.MemberService;
 import com.example.temp.member.domain.Member;
 import com.example.temp.oauth.OAuthProviderResolver;
 import com.example.temp.oauth.OAuthProviderType;
@@ -37,7 +37,7 @@ class OAuthServiceUnitTest {
     OAuthMemberRepository oAuthMemberRepository;
 
     @Mock
-    MemberServiceFacade memberServiceFacade;
+    MemberService memberService;
 
     OAuthResponse oAuthResponse;
 
@@ -47,7 +47,7 @@ class OAuthServiceUnitTest {
 
     @BeforeEach
     void setUp() {
-        oAuthService = new OAuthService(oAuthProviderResolver, oAuthMemberRepository, memberServiceFacade);
+        oAuthService = new OAuthService(oAuthProviderResolver, oAuthMemberRepository, memberService);
         oAuthResponse = new OAuthResponse(OAuthProviderType.GOOGLE, "이메일", "닉네임", "123", "프로필주소");
         member = Member.builder().build();
         oAuthMember = OAuthMember.builder()
@@ -63,7 +63,7 @@ class OAuthServiceUnitTest {
             .thenReturn(oAuthResponse);
         when(oAuthMemberRepository.findByIdUsingResourceServerAndType(anyString(), any(OAuthProviderType.class)))
             .thenReturn(Optional.empty());
-        when(memberServiceFacade.register(any(OAuthResponse.class)))
+        when(memberService.register(any(OAuthResponse.class)))
             .thenReturn(member);
 
         // when
@@ -101,14 +101,14 @@ class OAuthServiceUnitTest {
             .thenReturn(oAuthResponse);
         when(oAuthMemberRepository.findByIdUsingResourceServerAndType(anyString(), any(OAuthProviderType.class)))
             .thenReturn(Optional.empty());
-        when(memberServiceFacade.register(any(OAuthResponse.class)))
+        when(memberService.register(any(OAuthResponse.class)))
             .thenReturn(member);
 
         // when
         oAuthService.login("google", "1234");
 
         // then
-        verify(memberServiceFacade, times(1))
+        verify(memberService, times(1))
             .register(any(OAuthResponse.class));
         verify(oAuthMemberRepository, times(1))
             .save(any(OAuthMember.class));
@@ -127,7 +127,7 @@ class OAuthServiceUnitTest {
         oAuthService.login("google", "1234");
 
         // then
-        verify(memberServiceFacade, never())
+        verify(memberService, never())
             .register(any(OAuthResponse.class));
     }
 
