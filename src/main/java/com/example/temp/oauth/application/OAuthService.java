@@ -2,6 +2,7 @@ package com.example.temp.oauth.application;
 
 import com.example.temp.auth.dto.response.LoginInfoResponse;
 import com.example.temp.member.application.MemberService;
+import com.example.temp.member.application.MemberServiceFacade;
 import com.example.temp.member.domain.Member;
 import com.example.temp.oauth.OAuthProviderResolver;
 import com.example.temp.oauth.OAuthProviderType;
@@ -20,7 +21,7 @@ public class OAuthService {
 
     private final OAuthProviderResolver oAuthProviderResolver;
     private final OAuthMemberRepository oAuthMemberRepository;
-    private final MemberService memberService;
+    private final MemberServiceFacade memberServiceFacade;
 
     @Transactional
     public LoginInfoResponse login(String provider, String authCode) {
@@ -37,7 +38,7 @@ public class OAuthService {
         if (oAuthMemberOpt.isPresent()) {
             return oAuthMemberOpt.get().getMember();
         }
-        Member savedMember = memberService.register(oAuthResponse);
+        Member savedMember = memberServiceFacade.register(oAuthResponse);
         OAuthMember oAuthMember = OAuthMember.of(oAuthResponse.idUsingResourceServer(), oAuthProviderType, savedMember);
         oAuthMemberRepository.save(oAuthMember);
         return savedMember;
