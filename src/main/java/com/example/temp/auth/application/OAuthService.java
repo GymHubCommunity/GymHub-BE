@@ -1,10 +1,10 @@
 package com.example.temp.auth.application;
 
 import com.example.temp.auth.dto.response.LoginInfoResponse;
-import com.example.temp.auth.oauth.domain.OAuthMember;
 import com.example.temp.auth.oauth.OAuthProviderResolver;
 import com.example.temp.auth.oauth.OAuthProviderType;
 import com.example.temp.auth.oauth.OAuthResponse;
+import com.example.temp.auth.oauth.domain.OAuthMember;
 import com.example.temp.auth.oauth.domain.OAuthMemberRepository;
 import com.example.temp.member.domain.Member;
 import com.example.temp.member.domain.MemberRepository;
@@ -38,7 +38,7 @@ public class OAuthService {
             return oAuthMemberOpt.get().getMember();
         }
         Member savedMember = memberRepository.save(Member.of(oAuthResponse));
-        OAuthMember oAuthMember = OAuthMember.of(oAuthResponse, savedMember, oAuthProviderType);
+        OAuthMember oAuthMember = OAuthMember.of(oAuthResponse.idUsingResourceServer(), oAuthProviderType, savedMember);
         oAuthMemberRepository.save(oAuthMember);
         return savedMember;
     }

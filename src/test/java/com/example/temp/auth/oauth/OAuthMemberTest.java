@@ -13,18 +13,17 @@ class OAuthMemberTest {
     @DisplayName("OAuthResponse 인스턴스와 Member 인스턴스를 사용해 OAuthMember를 생성한다")
     void createOAuthMemberUsingOAuthResponse() throws Exception {
         // given
-        OAuthResponse oAuthResponse = new OAuthResponse(OAuthProviderType.GOOGLE, "이메일", "닉네임", "123", "프로필주소");
+        String idUsingResourceServer = "1234";
         Member member = Member.builder().build();
+        OAuthProviderType type = OAuthProviderType.GOOGLE;
 
         // when
-        OAuthMember oAuthMember = OAuthMember.of(oAuthResponse, member, OAuthProviderType.GOOGLE);
+        OAuthMember oAuthMember = OAuthMember.of(idUsingResourceServer, type, member);
 
         // then
         assertThat(oAuthMember).isNotNull();
-        assertThat(oAuthMember.getEmail()).isEqualTo(oAuthResponse.email());
-        assertThat(oAuthMember.getNickname()).isEqualTo(oAuthResponse.name());
-        assertThat(oAuthMember.getIdUsingResourceServer()).isEqualTo(oAuthResponse.idUsingResourceServer());
-        assertThat(oAuthMember.getProfileUrl()).isEqualTo(oAuthResponse.profileUrl());
+        assertThat(oAuthMember.getIdUsingResourceServer()).isEqualTo(idUsingResourceServer);
+        assertThat(oAuthMember.getType()).isEqualTo(type);
         assertThat(oAuthMember.getMember()).isEqualTo(member);
     }
 }

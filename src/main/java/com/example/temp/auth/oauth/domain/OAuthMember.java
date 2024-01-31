@@ -1,7 +1,6 @@
 package com.example.temp.auth.oauth.domain;
 
 import com.example.temp.auth.oauth.OAuthProviderType;
-import com.example.temp.auth.oauth.OAuthResponse;
 import com.example.temp.member.domain.Member;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -28,44 +27,27 @@ public class OAuthMember {
     private Long id;
 
     @Column(nullable = false)
-    private String email;
-
-    @Column(nullable = false)
-    private String nickname;
-
-    @Column(nullable = false)
     private String idUsingResourceServer;
 
     @Column(nullable = false)
     private OAuthProviderType type;
-
-    @Column(nullable = false)
-    private String profileUrl;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
     private Member member;
 
     @Builder
-    private OAuthMember(String email, String nickname, String idUsingResourceServer, OAuthProviderType type,
-        String profileUrl,
-        Member member) {
-        this.email = email;
-        this.nickname = nickname;
+    private OAuthMember(String idUsingResourceServer, OAuthProviderType type, Member member) {
         this.idUsingResourceServer = idUsingResourceServer;
         this.type = type;
-        this.profileUrl = profileUrl;
         this.member = member;
     }
 
-    public static OAuthMember of(OAuthResponse response, Member member, OAuthProviderType oAuthProviderType) {
+    public static OAuthMember of(String idUsingResourceServer, OAuthProviderType oAuthProviderType, Member member) {
         return OAuthMember.builder()
-            .email(response.email())
-            .nickname(response.name())
-            .idUsingResourceServer(response.idUsingResourceServer())
-            .profileUrl(response.profileUrl())
-            .member(member)
+            .idUsingResourceServer(idUsingResourceServer)
             .type(oAuthProviderType)
+            .member(member)
             .build();
     }
 }
