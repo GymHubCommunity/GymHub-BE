@@ -9,7 +9,7 @@ public record GoogleToken(
     String tokenType
 ) {
 
-    public String getAuthorizationValue() {
+    public String getValueUsingAuthorizationHeader() {
         return String.format("%s %s", tokenType, accessToken);
     }
 }
