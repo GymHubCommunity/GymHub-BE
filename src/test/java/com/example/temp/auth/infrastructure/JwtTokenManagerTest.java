@@ -49,8 +49,8 @@ class JwtTokenManagerTest {
         mockingClock(standardInstant, ZoneId.systemDefault());
         jwtTokenManager = new JwtTokenManager(clock, jwtProperties);
 
-        parser = Jwts.parserBuilder()
-            .setSigningKey(Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretKey)))
+        parser = Jwts.parser()
+            .verifyWith(Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretKey)))
             .build();
     }
 

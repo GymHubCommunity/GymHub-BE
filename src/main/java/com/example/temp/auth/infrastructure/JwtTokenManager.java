@@ -1,14 +1,14 @@
 package com.example.temp.auth.infrastructure;
 
 import com.example.temp.auth.dto.response.TokenInfo;
+import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-import java.security.Key;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.LocalDateTime;
+import javax.crypto.SecretKey;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -23,14 +23,17 @@ public class JwtTokenManager implements TokenManager {
 
     private final Clock clock;
     private final JwtProperties properties;
-    private final Key key;
+    private final SecretKey key;
+    private final JwtParser parser;
 
     @Autowired
     public JwtTokenManager(Clock clock, JwtProperties properties) {
         this.clock = clock;
         this.properties = properties;
-        byte[] keyBytes = Decoders.BASE64.decode(properties.secret());
-        this.key = Keys.hmacShaKeyFor(keyBytes);
+        this.key = Keys.hmacShaKeyFor(Decoders.BASE64.decode(properties.secret()));
+        this.parser = Jwts.parser()
+            .verifyWith(key)
+            .build();
     }
 
     @Override
@@ -47,9 +50,9 @@ public class JwtTokenManager implements TokenManager {
     String makeToken(String sub, long expires, LocalDateTime now) {
         LocalDateTime expiresDateTime = now.plusSeconds(expires);
         return Jwts.builder()
-            .setSubject(sub)
-            .setExpiration(Timestamp.valueOf(expiresDateTime))
-            .signWith(key, SignatureAlgorithm.HS256)
+            .subject(sub)
+            .expiration(Timestamp.valueOf(expiresDateTime))
+            .signWith(key)
             .compact();
     }
 
