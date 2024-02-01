@@ -1,13 +1,17 @@
 package com.example.temp.auth.infrastructure;
 
 import com.example.temp.auth.dto.response.TokenInfo;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import java.sql.Timestamp;
 import java.time.Clock;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.util.Date;
 import javax.crypto.SecretKey;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +37,12 @@ public class JwtTokenManager implements TokenManager {
         this.key = Keys.hmacShaKeyFor(Decoders.BASE64.decode(properties.secret()));
         this.parser = Jwts.parser()
             .verifyWith(key)
+            .clock(jwtClock())
             .build();
+    }
+
+    private io.jsonwebtoken.Clock jwtClock() {
+        return () -> Date.from(Instant.now(clock));
     }
 
     @Override
@@ -58,6 +67,9 @@ public class JwtTokenManager implements TokenManager {
 
     @Override
     public TokenInfo reIssue(String refreshToken) {
-        return null;
+        Jws<Claims> claimsJws = parser.parseSignedClaims(refreshToken);
+        Claims claims = claimsJws.getPayload();
+        long id = Long.parseLong(claims.getSubject());
+        return issue(id);
     }
 }

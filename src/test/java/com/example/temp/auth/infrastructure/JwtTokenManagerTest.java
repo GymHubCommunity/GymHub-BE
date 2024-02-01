@@ -1,11 +1,13 @@
 package com.example.temp.auth.infrastructure;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.when;
 
 import com.example.temp.auth.dto.response.TokenInfo;
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwt;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
@@ -14,6 +16,8 @@ import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
+import java.util.Date;
+import javax.crypto.SecretKey;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -32,37 +36,95 @@ class JwtTokenManagerTest {
     @Mock
     JwtProperties jwtProperties;
 
+    SecretKey key;
+
     JwtParser parser;
 
     Long memberId;
 
     Instant standardInstant;
 
+    String secretKey;
+
 
     @BeforeEach
     void setUp() {
         memberId = 1L;
         standardInstant = Instant.parse("3000-12-03T10:15:30Z");
-        String secretKey = "isTestSecretisTestSecretisTestSecretisTestSecretisTestSecret";
-
-        mockingJwtProperties(secretKey, 1800L, 10000L);
-        mockingClock(standardInstant, ZoneId.systemDefault());
-        jwtTokenManager = new JwtTokenManager(clock, jwtProperties);
-
-        parser = Jwts.parser()
-            .verifyWith(Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretKey)))
-            .build();
+        secretKey = "isTestSecretisTestSecretisTestSecretisTestSecretisTestSecret";
     }
 
     @Test
     @DisplayName("access Token과 refresh Token을 생성한다.")
     void createTokenInfo() throws Exception {
+        // given
+        mockingClock(standardInstant, ZoneId.systemDefault());
+        mockingJwtProperties(secretKey, 1800L, 10000L);
+        jwtTokenManager = new JwtTokenManager(clock, jwtProperties);
+        key = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretKey));
+        parser = Jwts.parser()
+            .verifyWith(key)
+            .build();
+
         // when
         TokenInfo tokenInfo = jwtTokenManager.issue(memberId);
 
         // then
         validateToken(tokenInfo.accessToken(), standardInstant.plusSeconds(jwtProperties.accessTokenExpires()));
         validateToken(tokenInfo.refreshToken(), standardInstant.plusSeconds(jwtProperties.refreshTokenExpires()));
+    }
+
+    @Test
+    @DisplayName("refresh Token을 사용해서 access Token과 refresh Token을 재발급받는다.")
+    void reIssueTokenInfo() throws Exception {
+        // given
+        mockingClock(standardInstant, ZoneId.systemDefault());
+        mockingJwtProperties(secretKey, 1800L, 10000L);
+
+        jwtTokenManager = new JwtTokenManager(clock, jwtProperties);
+        key = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretKey));
+        parser = Jwts.parser()
+            .verifyWith(key)
+            .build();
+
+        Date future = Date.from(standardInstant.plusSeconds(100000L));
+        String refreshToken = Jwts.builder()
+            .subject(String.valueOf(memberId))
+            .expiration(future)
+            .signWith(key)
+            .compact();
+
+        // when
+        TokenInfo tokenInfo = jwtTokenManager.reIssue(refreshToken);
+
+        // then
+        validateToken(tokenInfo.accessToken(), standardInstant.plusSeconds(jwtProperties.accessTokenExpires()));
+        validateToken(tokenInfo.refreshToken(), standardInstant.plusSeconds(jwtProperties.refreshTokenExpires()));
+    }
+
+    @Test
+    @DisplayName("만료된 Refresh Token으로는 TokenInfo를 재발급받을 수 없다")
+    void reIssueFailExpiredRefreshToken() throws Exception {
+        // given
+        when(clock.instant()).thenReturn(standardInstant);
+        when(jwtProperties.secret()).thenReturn(secretKey);
+
+        jwtTokenManager = new JwtTokenManager(clock, jwtProperties);
+        key = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretKey));
+        parser = Jwts.parser()
+            .verifyWith(key)
+            .build();
+
+        Date past = Date.from(standardInstant.minusSeconds(100000L));
+        String refreshToken = Jwts.builder()
+            .subject(String.valueOf(memberId))
+            .expiration(past)
+            .signWith(key)
+            .compact();
+
+        // when & then
+        assertThatThrownBy(() -> jwtTokenManager.reIssue(refreshToken))
+            .isInstanceOf(ExpiredJwtException.class);
     }
 
 
@@ -79,8 +141,8 @@ class JwtTokenManagerTest {
 
     private void validateToken(String token, Instant comparedInstant) {
         comparedInstant = comparedInstant.truncatedTo(ChronoUnit.SECONDS);
-        Jwt jwtToken = parser.parse(token);
-        Claims claims = (Claims) jwtToken.getBody();
+        Jws<Claims> claimsJws = parser.parseSignedClaims(token);
+        Claims claims = claimsJws.getPayload();
         Instant expiration = claims.getExpiration().toInstant();
         assertThat(expiration).isEqualTo(comparedInstant);
     }
