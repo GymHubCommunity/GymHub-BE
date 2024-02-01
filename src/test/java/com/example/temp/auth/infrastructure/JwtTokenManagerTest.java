@@ -12,9 +12,7 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import java.time.Clock;
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -34,19 +32,22 @@ class JwtTokenManagerTest {
     @Mock
     JwtProperties jwtProperties;
 
+    JwtParser parser;
+
     Long memberId;
 
     Instant standardInstant;
 
-    String secretKey;
-
-    JwtParser parser;
 
     @BeforeEach
     void setUp() {
         memberId = 1L;
-        standardInstant = LocalDateTime.now().toInstant(ZoneOffset.UTC);
-        secretKey = "isTestSecretisTestSecretisTestSecretisTestSecretisTestSecret";
+        standardInstant = Instant.parse("3000-12-03T10:15:30Z");
+        String secretKey = "isTestSecretisTestSecretisTestSecretisTestSecretisTestSecret";
+
+        mockingJwtProperties(secretKey, 1800L, 10000L);
+        mockingClock(standardInstant, ZoneId.systemDefault());
+        jwtTokenManager = new JwtTokenManager(clock, jwtProperties);
 
         parser = Jwts.parserBuilder()
             .setSigningKey(Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretKey)))
@@ -56,11 +57,6 @@ class JwtTokenManagerTest {
     @Test
     @DisplayName("access Token과 refresh Token을 생성한다.")
     void createTokenInfo() throws Exception {
-        // given
-        mockingJwtProperties(secretKey, 1800L, 10000L);
-        mockingClock(standardInstant, ZoneId.systemDefault());
-        jwtTokenManager = new JwtTokenManager(clock, jwtProperties);
-
         // when
         TokenInfo tokenInfo = jwtTokenManager.issue(memberId);
 
@@ -68,6 +64,7 @@ class JwtTokenManagerTest {
         validateToken(tokenInfo.accessToken(), standardInstant.plusSeconds(jwtProperties.accessTokenExpires()));
         validateToken(tokenInfo.refreshToken(), standardInstant.plusSeconds(jwtProperties.refreshTokenExpires()));
     }
+
 
     private void mockingClock(Instant instant, ZoneId zoneId) {
         when(clock.instant()).thenReturn(instant);
