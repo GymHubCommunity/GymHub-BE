@@ -1,12 +1,14 @@
 package com.example.temp.auth.infrastructure;
 
 import com.example.temp.auth.dto.response.TokenInfo;
+import com.example.temp.auth.exception.TokenInvalidException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.security.SignatureException;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
@@ -67,9 +69,17 @@ public class JwtTokenManager implements TokenManager {
 
     @Override
     public TokenInfo reIssue(String refreshToken) {
-        Jws<Claims> claimsJws = parser.parseSignedClaims(refreshToken);
+        Jws<Claims> claimsJws = parse(refreshToken);
         Claims claims = claimsJws.getPayload();
         long id = Long.parseLong(claims.getSubject());
         return issue(id);
+    }
+
+    private Jws<Claims> parse(String token) {
+        try {
+            return parser.parseSignedClaims(token);
+        } catch (SignatureException e) {
+            throw new TokenInvalidException(e);
+        }
     }
 }

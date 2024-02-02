@@ -6,6 +6,7 @@ import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
 import com.example.temp.auth.dto.response.TokenInfo;
+import com.example.temp.auth.exception.TokenInvalidException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jws;
@@ -106,7 +107,22 @@ class JwtTokenManagerTest {
             .isInstanceOf(ExpiredJwtException.class);
     }
 
-    // 내가 알지 못하는 키로 서명된 토큰이 들어왔을 때
+    @Test
+    @DisplayName("우리 서버에서 서명되지 않은 Refresh Token으로는 TokenInfo를 재발급받을 수 없다.")
+    void cantReIssueInvalidRefreshToken() throws Exception {
+        // given
+        long memberId = 1L;
+        Date future = Date.from(fixedMachineTime.plusSeconds(100000L));
+        String refreshToken = Jwts.builder()
+            .subject(String.valueOf(memberId))
+            .expiration(future)
+            .signWith(Keys.hmacShaKeyFor(Decoders.BASE64.decode("invalidServerKeyinvalidServerKeyinvalidServerKey")))
+            .compact();
+
+        // when & then
+        assertThatThrownBy(() -> jwtTokenManager.reIssue(refreshToken))
+            .isInstanceOf(TokenInvalidException.class);
+    }
 
     private String createToken(Date expired, long subject) {
         return Jwts.builder()
@@ -130,7 +146,7 @@ class JwtTokenManagerTest {
     }
 
     private void mockingClock(Instant instant, ZoneId zoneId) {
-        when(clock.instant()).thenReturn(instant);
+        lenient().when(clock.instant()).thenReturn(instant);
         lenient().when(clock.getZone()).thenReturn(zoneId);
     }
 
@@ -139,5 +155,4 @@ class JwtTokenManagerTest {
         lenient().when(jwtProperties.accessTokenExpires()).thenReturn(accessExpires);
         lenient().when(jwtProperties.refreshTokenExpires()).thenReturn(refreshExpires);
     }
-
 }
