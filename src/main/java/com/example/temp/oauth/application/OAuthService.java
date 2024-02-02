@@ -6,9 +6,8 @@ import com.example.temp.member.domain.Member;
 import com.example.temp.oauth.OAuthProviderResolver;
 import com.example.temp.oauth.OAuthProviderType;
 import com.example.temp.oauth.OAuthResponse;
-import com.example.temp.oauth.domain.OAuthMember;
-import com.example.temp.oauth.domain.OAuthMemberRepository;
-import java.util.Optional;
+import com.example.temp.oauth.domain.OAuthInfo;
+import com.example.temp.oauth.domain.OAuthInfoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,27 +18,28 @@ import org.springframework.transaction.annotation.Transactional;
 public class OAuthService {
 
     private final OAuthProviderResolver oAuthProviderResolver;
-    private final OAuthMemberRepository oAuthMemberRepository;
+    private final OAuthInfoRepository oAuthInfoRepository;
     private final MemberService memberService;
 
     @Transactional
     public LoginInfoResponse login(String provider, String authCode) {
         OAuthProviderType oAuthProviderType = OAuthProviderType.find(provider);
         OAuthResponse oAuthResponse = oAuthProviderResolver.fetch(oAuthProviderType, authCode);
-        Member member = findOrSaveMember(oAuthProviderType, oAuthResponse);
+        Member member = findMemberOrElseCreate(oAuthResponse);
         return LoginInfoResponse.of(member);
     }
 
-    private Member findOrSaveMember(OAuthProviderType oAuthProviderType, OAuthResponse oAuthResponse) {
-        Optional<OAuthMember> oAuthMemberOpt = oAuthMemberRepository.findByIdUsingResourceServerAndType(
-            oAuthResponse.idUsingResourceServer(),
-            oAuthProviderType);
-        if (oAuthMemberOpt.isPresent()) {
-            return oAuthMemberOpt.get().getMember();
-        }
+    private Member findMemberOrElseCreate(OAuthResponse oAuthResponse) {
+        return oAuthInfoRepository
+            .findByIdUsingResourceServerAndType(oAuthResponse.idUsingResourceServer(), oAuthResponse.type())
+            .map(OAuthInfo::getMember)
+            .orElseGet(() -> saveMemberAndOAuthInfo(oAuthResponse.type(), oAuthResponse));
+    }
+
+    private Member saveMemberAndOAuthInfo(OAuthProviderType oAuthProviderType, OAuthResponse oAuthResponse) {
         Member savedMember = memberService.register(oAuthResponse);
-        OAuthMember oAuthMember = OAuthMember.of(oAuthResponse.idUsingResourceServer(), oAuthProviderType, savedMember);
-        oAuthMemberRepository.save(oAuthMember);
+        OAuthInfo oAuthInfo = OAuthInfo.of(oAuthResponse.idUsingResourceServer(), oAuthProviderType, savedMember);
+        oAuthInfoRepository.save(oAuthInfo);
         return savedMember;
     }
 
