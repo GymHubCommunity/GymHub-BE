@@ -24,6 +24,7 @@ public class OAuthMember {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "oauth_member_id")
     private Long id;
 
     @Column(nullable = false)
