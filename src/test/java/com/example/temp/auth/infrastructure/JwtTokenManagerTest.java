@@ -44,6 +44,11 @@ class JwtTokenManagerTest {
 
     SecretKey key;
 
+    /**
+     * mockingClock 메서드를 통해 테스트의 시점을 fixedMachineTime으로 고정시켰습니다.
+     * mockingJwtProperties 메서드를 통해 accessToken의 수명을 1800초, refreshToken의 수명을 10000초로 고정시켰습니다.
+     * key, parser는 테스트 과정에서 만들어진 토큰을 검증하기 위해 사용합니다.
+     */
     @BeforeEach
     void setUp() {
         fixedMachineTime = Instant.parse("3000-12-03T10:15:30Z");
@@ -132,13 +137,18 @@ class JwtTokenManagerTest {
             .compact();
     }
 
-    private void validateToken(String token, long subject, Instant comparedInstant) {
-        comparedInstant = removeNanoSecond(comparedInstant);
+    /**
+     * token의 subject와 expiration이 일치하는지 검증하는 메서드입니다.
+     */
+    private void validateToken(String token, long subject, Instant comparedMachineTime) {
+        comparedMachineTime = removeNanoSecond(comparedMachineTime);
         Jws<Claims> claimsJws = parser.parseSignedClaims(token);
         Claims claims = claimsJws.getPayload();
+
         assertThat(claims.getSubject()).isEqualTo(String.valueOf(subject));
+
         Instant expiration = claims.getExpiration().toInstant();
-        assertThat(expiration).isEqualTo(comparedInstant);
+        assertThat(expiration).isEqualTo(comparedMachineTime);
     }
 
     private Instant removeNanoSecond(Instant comparedInstant) {
