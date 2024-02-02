@@ -39,15 +39,12 @@ class JwtTokenManagerTest {
 
     JwtParser parser;
 
-    Long memberId;
-
     Instant fixedMachineTime;
 
     SecretKey key;
 
     @BeforeEach
     void setUp() {
-        memberId = 1L;
         fixedMachineTime = Instant.parse("3000-12-03T10:15:30Z");
         String keyStr = "isTestSecretisTestSecretisTestSecretisTestSecretisTestSecret";
 
@@ -65,47 +62,44 @@ class JwtTokenManagerTest {
     @Test
     @DisplayName("access Token과 refresh Token을 생성한다.")
     void createTokenInfo() throws Exception {
+        // given
+        long memberId = 1L;
+
         // when
         TokenInfo tokenInfo = jwtTokenManager.issue(memberId);
 
         // then
-        validateToken(tokenInfo.accessToken(), memberId, fixedMachineTime.plusSeconds(jwtProperties.accessTokenExpires()));
-        validateToken(tokenInfo.refreshToken(), memberId, fixedMachineTime.plusSeconds(jwtProperties.refreshTokenExpires()));
+        validateToken(tokenInfo.accessToken(), memberId,
+            fixedMachineTime.plusSeconds(jwtProperties.accessTokenExpires()));
+        validateToken(tokenInfo.refreshToken(), memberId,
+            fixedMachineTime.plusSeconds(jwtProperties.refreshTokenExpires()));
     }
 
     @Test
-    @DisplayName("refresh Token을 사용해서 access Token과 refresh Token을 재발급받는다.")
+    @DisplayName("만료되지 않은 refresh Token을 사용해서 access Token과 refresh Token을 재발급받는다.")
     void reIssueTokenInfo() throws Exception {
         // given
+        long memberId = 1L;
         Date future = Date.from(fixedMachineTime.plusSeconds(100000L));
-
-        // 미래시점에 끝나는 refresh Token을 발급받는다.
-        String refreshToken = Jwts.builder()
-            .subject(String.valueOf(memberId))
-            .expiration(future)
-            .signWith(key)
-            .compact();
+        String refreshToken = createToken(future, memberId);
 
         // when
         TokenInfo tokenInfo = jwtTokenManager.reIssue(refreshToken);
 
         // then
-        validateToken(tokenInfo.accessToken(), memberId, fixedMachineTime.plusSeconds(jwtProperties.accessTokenExpires()));
-        validateToken(tokenInfo.refreshToken(), memberId, fixedMachineTime.plusSeconds(jwtProperties.refreshTokenExpires()));
+        validateToken(tokenInfo.accessToken(), memberId,
+            fixedMachineTime.plusSeconds(jwtProperties.accessTokenExpires()));
+        validateToken(tokenInfo.refreshToken(), memberId,
+            fixedMachineTime.plusSeconds(jwtProperties.refreshTokenExpires()));
     }
 
     @Test
     @DisplayName("만료된 Refresh Token으로는 TokenInfo를 재발급받을 수 없다")
     void reIssueFailExpiredRefreshToken() throws Exception {
         // given
+        long memberId = 1L;
         Date past = Date.from(fixedMachineTime.minusSeconds(100000L));
-
-        // 과거 시점에 만료된 토큰을 발급받는다.
-        String refreshToken = Jwts.builder()
-            .subject(String.valueOf(memberId))
-            .expiration(past)
-            .signWith(key)
-            .compact();
+        String refreshToken = createToken(past, memberId);
 
         // when & then
         assertThatThrownBy(() -> jwtTokenManager.reIssue(refreshToken))
@@ -114,16 +108,12 @@ class JwtTokenManagerTest {
 
     // 내가 알지 못하는 키로 서명된 토큰이 들어왔을 때
 
-
-    private void mockingClock(Instant instant, ZoneId zoneId) {
-        when(clock.instant()).thenReturn(instant);
-        lenient().when(clock.getZone()).thenReturn(zoneId);
-    }
-
-    private void mockingJwtProperties(String secretKey, long accessExpires, long refreshExpires) {
-        when(jwtProperties.secret()).thenReturn(secretKey);
-        lenient().when(jwtProperties.accessTokenExpires()).thenReturn(accessExpires);
-        lenient().when(jwtProperties.refreshTokenExpires()).thenReturn(refreshExpires);
+    private String createToken(Date expired, long subject) {
+        return Jwts.builder()
+            .subject(String.valueOf(subject))
+            .expiration(expired)
+            .signWith(key)
+            .compact();
     }
 
     private void validateToken(String token, long subject, Instant comparedInstant) {
@@ -138,4 +128,16 @@ class JwtTokenManagerTest {
     private Instant removeNanoSecond(Instant comparedInstant) {
         return comparedInstant.truncatedTo(ChronoUnit.SECONDS);
     }
+
+    private void mockingClock(Instant instant, ZoneId zoneId) {
+        when(clock.instant()).thenReturn(instant);
+        lenient().when(clock.getZone()).thenReturn(zoneId);
+    }
+
+    private void mockingJwtProperties(String secretKey, long accessExpires, long refreshExpires) {
+        when(jwtProperties.secret()).thenReturn(secretKey);
+        lenient().when(jwtProperties.accessTokenExpires()).thenReturn(accessExpires);
+        lenient().when(jwtProperties.refreshTokenExpires()).thenReturn(refreshExpires);
+    }
+
 }
