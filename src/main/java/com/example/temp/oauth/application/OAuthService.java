@@ -25,15 +25,15 @@ public class OAuthService {
     public LoginInfoResponse login(String provider, String authCode) {
         OAuthProviderType oAuthProviderType = OAuthProviderType.find(provider);
         OAuthResponse oAuthResponse = oAuthProviderResolver.fetch(oAuthProviderType, authCode);
-        Member member = findOrSaveMember(oAuthProviderType, oAuthResponse);
+        Member member = findOrSaveMember(oAuthResponse);
         return LoginInfoResponse.of(member);
     }
 
-    private Member findOrSaveMember(OAuthProviderType oAuthProviderType, OAuthResponse oAuthResponse) {
+    private Member findOrSaveMember(OAuthResponse oAuthResponse) {
         return oAuthInfoRepository
-            .findByIdUsingResourceServerAndType(oAuthResponse.idUsingResourceServer(), oAuthProviderType)
+            .findByIdUsingResourceServerAndType(oAuthResponse.idUsingResourceServer(), oAuthResponse.type())
             .map(OAuthInfo::getMember)
-            .orElseGet(() -> saveMemberAndOAuthInfo(oAuthProviderType, oAuthResponse));
+            .orElseGet(() -> saveMemberAndOAuthInfo(oAuthResponse.type(), oAuthResponse));
     }
 
     private Member saveMemberAndOAuthInfo(OAuthProviderType oAuthProviderType, OAuthResponse oAuthResponse) {
