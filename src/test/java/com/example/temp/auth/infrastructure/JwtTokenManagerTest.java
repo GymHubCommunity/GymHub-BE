@@ -42,7 +42,7 @@ class JwtTokenManagerTest {
 
     Long memberId;
 
-    Instant standardInstant;
+    Instant fixedMachineTime;
 
     String secretKey;
 
@@ -50,7 +50,7 @@ class JwtTokenManagerTest {
     @BeforeEach
     void setUp() {
         memberId = 1L;
-        standardInstant = Instant.parse("3000-12-03T10:15:30Z");
+        fixedMachineTime = Instant.parse("3000-12-03T10:15:30Z");
         secretKey = "isTestSecretisTestSecretisTestSecretisTestSecretisTestSecret";
     }
 
@@ -87,7 +87,9 @@ class JwtTokenManagerTest {
             .verifyWith(key)
             .build();
 
-        Date future = Date.from(standardInstant.plusSeconds(100000L));
+        Date future = Date.from(fixedMachineTime.plusSeconds(100000L));
+
+        // 미래시점에 끝나는 refresh Token을 발급받는다.
         String refreshToken = Jwts.builder()
             .subject(String.valueOf(memberId))
             .expiration(future)
@@ -106,7 +108,7 @@ class JwtTokenManagerTest {
     @DisplayName("만료된 Refresh Token으로는 TokenInfo를 재발급받을 수 없다")
     void reIssueFailExpiredRefreshToken() throws Exception {
         // given
-        when(clock.instant()).thenReturn(standardInstant);
+        when(clock.instant()).thenReturn(fixedMachineTime);
         when(jwtProperties.secret()).thenReturn(secretKey);
 
         jwtTokenManager = new JwtTokenManager(clock, jwtProperties);
@@ -115,7 +117,8 @@ class JwtTokenManagerTest {
             .verifyWith(key)
             .build();
 
-        Date past = Date.from(standardInstant.minusSeconds(100000L));
+        // 과거 시점에 만료된 토큰을 발급받는다.
+        Date past = Date.from(fixedMachineTime.minusSeconds(100000L));
         String refreshToken = Jwts.builder()
             .subject(String.valueOf(memberId))
             .expiration(past)
