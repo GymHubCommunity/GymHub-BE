@@ -2,6 +2,7 @@ package com.example.temp.auth.infrastructure;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
 import com.example.temp.auth.dto.response.TokenInfo;
@@ -36,36 +37,34 @@ class JwtTokenManagerTest {
     @Mock
     JwtProperties jwtProperties;
 
-    SecretKey key;
-
     JwtParser parser;
 
     Long memberId;
 
     Instant fixedMachineTime;
 
-    String secretKey;
-
+    SecretKey key;
 
     @BeforeEach
     void setUp() {
         memberId = 1L;
         fixedMachineTime = Instant.parse("3000-12-03T10:15:30Z");
-        secretKey = "isTestSecretisTestSecretisTestSecretisTestSecretisTestSecret";
+        String keyStr = "isTestSecretisTestSecretisTestSecretisTestSecretisTestSecret";
+
+        mockingClock(fixedMachineTime, ZoneId.systemDefault());
+        mockingJwtProperties(keyStr, 1800L, 10000L);
+
+        key = Keys.hmacShaKeyFor(Decoders.BASE64.decode(keyStr));
+        parser = Jwts.parser()
+            .verifyWith(key)
+            .build();
+
+        jwtTokenManager = new JwtTokenManager(clock, jwtProperties);
     }
 
     @Test
     @DisplayName("access Token과 refresh Token을 생성한다.")
     void createTokenInfo() throws Exception {
-        // given
-        mockingClock(standardInstant, ZoneId.systemDefault());
-        mockingJwtProperties(secretKey, 1800L, 10000L);
-        jwtTokenManager = new JwtTokenManager(clock, jwtProperties);
-        key = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretKey));
-        parser = Jwts.parser()
-            .verifyWith(key)
-            .build();
-
         // when
         TokenInfo tokenInfo = jwtTokenManager.issue(memberId);
 
@@ -78,15 +77,6 @@ class JwtTokenManagerTest {
     @DisplayName("refresh Token을 사용해서 access Token과 refresh Token을 재발급받는다.")
     void reIssueTokenInfo() throws Exception {
         // given
-        mockingClock(standardInstant, ZoneId.systemDefault());
-        mockingJwtProperties(secretKey, 1800L, 10000L);
-
-        jwtTokenManager = new JwtTokenManager(clock, jwtProperties);
-        key = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretKey));
-        parser = Jwts.parser()
-            .verifyWith(key)
-            .build();
-
         Date future = Date.from(fixedMachineTime.plusSeconds(100000L));
 
         // 미래시점에 끝나는 refresh Token을 발급받는다.
@@ -108,17 +98,9 @@ class JwtTokenManagerTest {
     @DisplayName("만료된 Refresh Token으로는 TokenInfo를 재발급받을 수 없다")
     void reIssueFailExpiredRefreshToken() throws Exception {
         // given
-        when(clock.instant()).thenReturn(fixedMachineTime);
-        when(jwtProperties.secret()).thenReturn(secretKey);
-
-        jwtTokenManager = new JwtTokenManager(clock, jwtProperties);
-        key = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretKey));
-        parser = Jwts.parser()
-            .verifyWith(key)
-            .build();
+        Date past = Date.from(fixedMachineTime.minusSeconds(100000L));
 
         // 과거 시점에 만료된 토큰을 발급받는다.
-        Date past = Date.from(fixedMachineTime.minusSeconds(100000L));
         String refreshToken = Jwts.builder()
             .subject(String.valueOf(memberId))
             .expiration(past)
@@ -130,16 +112,18 @@ class JwtTokenManagerTest {
             .isInstanceOf(ExpiredJwtException.class);
     }
 
+    // 내가 알지 못하는 키로 서명된 토큰이 들어왔을 때
+
 
     private void mockingClock(Instant instant, ZoneId zoneId) {
         when(clock.instant()).thenReturn(instant);
-        when(clock.getZone()).thenReturn(zoneId);
+        lenient().when(clock.getZone()).thenReturn(zoneId);
     }
 
     private void mockingJwtProperties(String secretKey, long accessExpires, long refreshExpires) {
         when(jwtProperties.secret()).thenReturn(secretKey);
-        when(jwtProperties.accessTokenExpires()).thenReturn(accessExpires);
-        when(jwtProperties.refreshTokenExpires()).thenReturn(refreshExpires);
+        lenient().when(jwtProperties.accessTokenExpires()).thenReturn(accessExpires);
+        lenient().when(jwtProperties.refreshTokenExpires()).thenReturn(refreshExpires);
     }
 
     private void validateToken(String token, long subject, Instant comparedInstant) {
