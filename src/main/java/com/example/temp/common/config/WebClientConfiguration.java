@@ -12,12 +12,12 @@ public class WebClientConfiguration {
 
     @Bean
     public GoogleOAuthClient googleOAuthClient() {
-        return createHttpInterface(GoogleOAuthClient.class);
+        return createHttpInterface(GoogleOAuthClient.class, "https://www.googleapis.com");
     }
 
-    private <T> T createHttpInterface(Class<T> clazz) {
+    private <T> T createHttpInterface(Class<T> clazz, String baseUrl) {
         WebClient webClient = WebClient.builder()
-            .baseUrl("https://www.googleapis.com")
+            .baseUrl(baseUrl)
             .build();
 
         HttpServiceProxyFactory factory = HttpServiceProxyFactory
