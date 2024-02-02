@@ -8,7 +8,6 @@ import com.example.temp.oauth.OAuthProviderType;
 import com.example.temp.oauth.OAuthResponse;
 import com.example.temp.oauth.domain.OAuthInfo;
 import com.example.temp.oauth.domain.OAuthInfoRepository;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,12 +30,13 @@ public class OAuthService {
     }
 
     private Member findOrSaveMember(OAuthProviderType oAuthProviderType, OAuthResponse oAuthResponse) {
-        Optional<OAuthInfo> oAuthInfoOpt = oAuthInfoRepository.findByIdUsingResourceServerAndType(
-            oAuthResponse.idUsingResourceServer(),
-            oAuthProviderType);
-        if (oAuthInfoOpt.isPresent()) {
-            return oAuthInfoOpt.get().getMember();
-        }
+        return oAuthInfoRepository
+            .findByIdUsingResourceServerAndType(oAuthResponse.idUsingResourceServer(), oAuthProviderType)
+            .map(OAuthInfo::getMember)
+            .orElseGet(() -> saveMemberAndOAuthInfo(oAuthProviderType, oAuthResponse));
+    }
+
+    private Member saveMemberAndOAuthInfo(OAuthProviderType oAuthProviderType, OAuthResponse oAuthResponse) {
         Member savedMember = memberRepository.save(Member.of(oAuthResponse));
         OAuthInfo oAuthInfo = OAuthInfo.of(oAuthResponse.idUsingResourceServer(), oAuthProviderType, savedMember);
         oAuthInfoRepository.save(oAuthInfo);
