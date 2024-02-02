@@ -25,11 +25,11 @@ public class OAuthService {
     public LoginInfoResponse login(String provider, String authCode) {
         OAuthProviderType oAuthProviderType = OAuthProviderType.find(provider);
         OAuthResponse oAuthResponse = oAuthProviderResolver.fetch(oAuthProviderType, authCode);
-        Member member = findOrSaveMember(oAuthResponse);
+        Member member = findMemberOrElseCreate(oAuthResponse);
         return LoginInfoResponse.of(member);
     }
 
-    private Member findOrSaveMember(OAuthResponse oAuthResponse) {
+    private Member findMemberOrElseCreate(OAuthResponse oAuthResponse) {
         return oAuthInfoRepository
             .findByIdUsingResourceServerAndType(oAuthResponse.idUsingResourceServer(), oAuthResponse.type())
             .map(OAuthInfo::getMember)
