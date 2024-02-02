@@ -70,8 +70,8 @@ class JwtTokenManagerTest {
         TokenInfo tokenInfo = jwtTokenManager.issue(memberId);
 
         // then
-        validateToken(tokenInfo.accessToken(), standardInstant.plusSeconds(jwtProperties.accessTokenExpires()));
-        validateToken(tokenInfo.refreshToken(), standardInstant.plusSeconds(jwtProperties.refreshTokenExpires()));
+        validateToken(tokenInfo.accessToken(), memberId, fixedMachineTime.plusSeconds(jwtProperties.accessTokenExpires()));
+        validateToken(tokenInfo.refreshToken(), memberId, fixedMachineTime.plusSeconds(jwtProperties.refreshTokenExpires()));
     }
 
     @Test
@@ -100,8 +100,8 @@ class JwtTokenManagerTest {
         TokenInfo tokenInfo = jwtTokenManager.reIssue(refreshToken);
 
         // then
-        validateToken(tokenInfo.accessToken(), standardInstant.plusSeconds(jwtProperties.accessTokenExpires()));
-        validateToken(tokenInfo.refreshToken(), standardInstant.plusSeconds(jwtProperties.refreshTokenExpires()));
+        validateToken(tokenInfo.accessToken(), memberId, fixedMachineTime.plusSeconds(jwtProperties.accessTokenExpires()));
+        validateToken(tokenInfo.refreshToken(), memberId, fixedMachineTime.plusSeconds(jwtProperties.refreshTokenExpires()));
     }
 
     @Test
@@ -142,11 +142,16 @@ class JwtTokenManagerTest {
         when(jwtProperties.refreshTokenExpires()).thenReturn(refreshExpires);
     }
 
-    private void validateToken(String token, Instant comparedInstant) {
-        comparedInstant = comparedInstant.truncatedTo(ChronoUnit.SECONDS);
+    private void validateToken(String token, long subject, Instant comparedInstant) {
+        comparedInstant = removeNanoSecond(comparedInstant);
         Jws<Claims> claimsJws = parser.parseSignedClaims(token);
         Claims claims = claimsJws.getPayload();
+        assertThat(claims.getSubject()).isEqualTo(String.valueOf(subject));
         Instant expiration = claims.getExpiration().toInstant();
         assertThat(expiration).isEqualTo(comparedInstant);
+    }
+
+    private Instant removeNanoSecond(Instant comparedInstant) {
+        return comparedInstant.truncatedTo(ChronoUnit.SECONDS);
     }
 }
