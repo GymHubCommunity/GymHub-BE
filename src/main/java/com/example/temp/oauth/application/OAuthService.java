@@ -1,13 +1,13 @@
 package com.example.temp.oauth.application;
 
 import com.example.temp.auth.dto.response.LoginInfoResponse;
+import com.example.temp.member.domain.Member;
+import com.example.temp.member.domain.MemberRepository;
 import com.example.temp.oauth.OAuthProviderResolver;
 import com.example.temp.oauth.OAuthProviderType;
 import com.example.temp.oauth.OAuthResponse;
-import com.example.temp.oauth.domain.OAuthMember;
-import com.example.temp.oauth.domain.OAuthMemberRepository;
-import com.example.temp.member.domain.Member;
-import com.example.temp.member.domain.MemberRepository;
+import com.example.temp.oauth.domain.OAuthInfo;
+import com.example.temp.oauth.domain.OAuthInfoRepository;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -19,7 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class OAuthService {
 
     private final OAuthProviderResolver oAuthProviderResolver;
-    private final OAuthMemberRepository oAuthMemberRepository;
+    private final OAuthInfoRepository oAuthInfoRepository;
     private final MemberRepository memberRepository;
 
     @Transactional
@@ -31,15 +31,15 @@ public class OAuthService {
     }
 
     private Member findOrSaveMember(OAuthProviderType oAuthProviderType, OAuthResponse oAuthResponse) {
-        Optional<OAuthMember> oAuthMemberOpt = oAuthMemberRepository.findByIdUsingResourceServerAndType(
+        Optional<OAuthInfo> oAuthInfoOpt = oAuthInfoRepository.findByIdUsingResourceServerAndType(
             oAuthResponse.idUsingResourceServer(),
             oAuthProviderType);
-        if (oAuthMemberOpt.isPresent()) {
-            return oAuthMemberOpt.get().getMember();
+        if (oAuthInfoOpt.isPresent()) {
+            return oAuthInfoOpt.get().getMember();
         }
         Member savedMember = memberRepository.save(Member.of(oAuthResponse));
-        OAuthMember oAuthMember = OAuthMember.of(oAuthResponse.idUsingResourceServer(), oAuthProviderType, savedMember);
-        oAuthMemberRepository.save(oAuthMember);
+        OAuthInfo oAuthInfo = OAuthInfo.of(oAuthResponse.idUsingResourceServer(), oAuthProviderType, savedMember);
+        oAuthInfoRepository.save(oAuthInfo);
         return savedMember;
     }
 
