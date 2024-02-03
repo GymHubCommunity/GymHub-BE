@@ -87,4 +87,40 @@ class FollowTest {
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("해당 상태로는 변경할 수 없습니다.");
     }
+
+    @ParameterizedTest
+    @DisplayName("언팔로우한다.")
+    @CsvSource({
+        "SUCCESS",
+        "PENDING"
+    })
+    void unfollowSuccess(String statusStr) throws Exception {
+        // given
+        Follow follow = Follow.builder()
+            .status(FollowStatus.valueOf(statusStr))
+            .build();
+
+        // when
+        follow.unfollow();
+        // then
+        assertThat(follow.getStatus()).isEqualTo(FollowStatus.CANCELED);
+    }
+
+    @ParameterizedTest
+    @DisplayName("이미 비활성화된 팔로우에 대해서는 언팔로우를 할 수 없다.")
+    @CsvSource({
+        "CANCELED",
+        "REJECTED"
+    })
+    void unfollowFailAlreadyInactivate(String statusStr) throws Exception {
+        // given
+        Follow follow = Follow.builder()
+            .status(FollowStatus.valueOf(statusStr))
+            .build();
+
+        // when & then
+        assertThatThrownBy(() -> follow.unfollow())
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("이미 비활성화된 관계입니다.");
+    }
 }
