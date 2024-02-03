@@ -34,12 +34,16 @@ public class Member {
 
     private FollowStrategy followStrategy;
 
+    private boolean publicAccount;
+
     @Builder
-    private Member(String email, String profileUrl, String nickname, FollowStrategy followStrategy) {
+    private Member(String email, String profileUrl, String nickname,
+        FollowStrategy followStrategy, boolean publicAccount) {
         this.email = email;
         this.profileUrl = profileUrl;
         this.nickname = nickname;
         this.followStrategy = followStrategy;
+        this.publicAccount = publicAccount;
     }
 
     public FollowStatus getStatusBasedOnStrategy() {

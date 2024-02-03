@@ -22,13 +22,30 @@ public class FollowService {
 
 
     public List<FollowInfo> getFollowings(long executorId, long targetId) {
+        Member target = memberRepository.findById(targetId)
+            .orElseThrow(() -> new IllegalArgumentException("찾을 수 없는 사용자"));
+        if (!target.isPublicAccount()) {
+            validateAuthorization(targetId, executorId);
+        }
         return followRepository.findAllByFromIdAndStatus(targetId, FollowStatus.SUCCESS).stream()
             .map(follow -> FollowInfo.of(follow.getFrom(), follow.getId()))
             .toList();
     }
 
-    public List<FollowInfo> getFollowers(long executorId, long targetId) {
+    private void validateAuthorization(long targetId, long executorId) {
+        if (targetId == executorId) {
+            return;
+        }
+        if (!isTargetsFollower(targetId, executorId)) {
+            throw new IllegalArgumentException("권한없음");
+        }
+    }
 
+    private boolean isTargetsFollower(long targetId, long executorId) {
+        return followRepository.checkExecutorFollowsTarget(executorId, targetId);
+    }
+
+    public List<FollowInfo> getFollowers(long executorId, long targetId) {
         return null;
     }
 

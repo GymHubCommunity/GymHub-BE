@@ -1,6 +1,7 @@
 package com.example.temp.follow.application;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.example.temp.follow.domain.Follow;
@@ -289,7 +290,7 @@ class FollowServiceTest {
     }
 
     @Test
-    @DisplayName("특정 사용자가 팔로우한 사람들을 전부 보여준다.")
+    @DisplayName("특정 사용자가 팔로잉한 사람들을 전부 보여준다.")
     void getFollowingsSuccess() throws Exception {
         // given
         Member target = saveMember();
@@ -302,7 +303,7 @@ class FollowServiceTest {
             .toList();
 
         // when
-        List<FollowInfo> infos = followService.getFollowings(1L, target.getId());
+        List<FollowInfo> infos = followService.getFollowings(target.getId(), target.getId());
 
         // then
         assertThat(infos).hasSize(successCnt)
@@ -331,10 +332,55 @@ class FollowServiceTest {
         saveFollows(FollowStatus.SUCCESS, target, members, idx, successCnt);
 
         // when
-        List<FollowInfo> infos = followService.getFollowings(1L, target.getId());
+        List<FollowInfo> infos = followService.getFollowings(target.getId(), target.getId());
 
         // then
         assertThat(infos).hasSize(successCnt);
+    }
+
+    @Test
+    @DisplayName("공개 계정은 누구나 팔로잉 목록을 볼 수 있다.")
+    void canSeeFollowingsEveryoneOnPublicAccount() throws Exception {
+        // given
+        Member publicAccountMember = Member.builder().publicAccount(true).build();
+        em.persist(publicAccountMember);
+
+        Member anotherMember = saveMember();
+
+        // when & then
+        assertThatCode(() -> followService.getFollowings(anotherMember.getId(), publicAccountMember.getId()))
+            .doesNotThrowAnyException();
+    }
+
+    @Test
+    @DisplayName("비공개 계정은 자신을 팔로우한 사람들만 팔로잉 목록을 볼 수 있다")
+    void canSeeFollowingsThatSpecifyMemberOnPrivateAccount() throws Exception {
+        // given
+        Member publicAccountMember = Member.builder().publicAccount(false).build();
+        em.persist(publicAccountMember);
+
+        Member anotherMember = saveMember();
+        saveFollow(anotherMember, publicAccountMember, FollowStatus.SUCCESS);
+
+        // when & then
+        assertThatCode(() -> followService.getFollowings(anotherMember.getId(), publicAccountMember.getId()))
+            .doesNotThrowAnyException();
+    }
+
+    @Test
+    @DisplayName("비공개 계정은 자신을 팔로우하지 않은 사용자에게 팔로잉 목록을 보여주지 않는다")
+    void cantSeeFollowingsThatDoesNotFollowOnPrivateAccount() throws Exception {
+        // given
+        Member publicAccountMember = Member.builder().publicAccount(false).build();
+        em.persist(publicAccountMember);
+
+        Member anotherMember = saveMember();
+        saveFollow(publicAccountMember, anotherMember, FollowStatus.PENDING);
+
+        // when & then
+        assertThatThrownBy(() -> followService.getFollowings(anotherMember.getId(), publicAccountMember.getId()))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("권한없음");
     }
 
     private List<Follow> saveFollows(FollowStatus followStatus, Member target, List<Member> members, int start,

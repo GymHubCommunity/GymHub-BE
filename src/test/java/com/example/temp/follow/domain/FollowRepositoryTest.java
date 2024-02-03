@@ -7,6 +7,8 @@ import jakarta.persistence.EntityManager;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
@@ -63,6 +65,70 @@ class FollowRepositoryTest {
         assertThat(resultOpt).isEmpty();
     }
 
+    @Test
+    @DisplayName("executor가 target을 팔로우하면 true를 반환한다")
+    void checkExecutorFollowTargetTrue() throws Exception {
+        // given
+        Member executor = createMember();
+        Member target = createMember();
+
+        Follow follow = Follow.builder()
+            .from(executor)
+            .to(target)
+            .status(FollowStatus.SUCCESS)
+            .build();
+        em.persist(follow);
+
+        // when
+        boolean result = followRepository.checkExecutorFollowsTarget(executor.getId(), target.getId());
+
+        // then
+        assertThat(result).isTrue();
+    }
+
+    @ParameterizedTest
+    @DisplayName("executor가 target에 대해 팔로우가 SUCCESS 이외의 상태라면 false를 반환한다")
+    @ValueSource(strings = {"PENDING", "REJECTED", "CANCELED"})
+    void checkExecutorFollowTargetFalse1(String statusStr) throws Exception {
+        // given
+        Member executor = createMember();
+        Member target = createMember();
+
+        Follow follow = Follow.builder()
+            .from(executor)
+            .to(target)
+            .status(FollowStatus.valueOf(statusStr))
+            .build();
+        em.persist(follow);
+
+        // when
+        boolean result = followRepository.checkExecutorFollowsTarget(executor.getId(), target.getId());
+
+        // then
+        assertThat(result).isFalse();
+    }
+
+    @Test
+    @DisplayName("executor가 target을 팔로우하고 있지 않으면 false를 반환한다")
+    void checkExecutorFollowTargetFalse2() throws Exception {
+        // given
+        Member executor = createMember();
+        Member target = createMember();
+        Member anotherMember = createMember();
+
+        Follow follow = Follow.builder()
+            .from(executor)
+            .to(anotherMember)
+            .status(FollowStatus.SUCCESS)
+            .build();
+        em.persist(follow);
+
+        // when
+        boolean result = followRepository.checkExecutorFollowsTarget(executor.getId(), target.getId());
+
+        // then
+        assertThat(result).isFalse();
+    }
 
     private Member createMember() {
         Member fromMember = Member.builder().build();
