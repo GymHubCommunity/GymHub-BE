@@ -123,4 +123,34 @@ class FollowTest {
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("이미 비활성화된 관계입니다.");
     }
+
+    @Test
+    @DisplayName("pending 상태의 follow를 수락한다")
+    void acceptSuccess() throws Exception {
+        // given
+        Follow follow = Follow.builder()
+            .status(FollowStatus.PENDING)
+            .build();
+
+        // when
+        follow.accept();
+
+        // then
+        assertThat(follow.getStatus()).isEqualTo(FollowStatus.SUCCESS);
+    }
+
+    @ParameterizedTest
+    @DisplayName("pending 상태의 follow에 대해서만 요청을 수락할 수 있다.")
+    @ValueSource(strings = {"SUCCESS", "REJECTED", "CANCELED"})
+    void acceptFailInvalidFollowType(String statusStr) throws Exception {
+        // given
+        Follow follow = Follow.builder()
+            .status(FollowStatus.valueOf(statusStr))
+            .build();
+
+        // when & then
+        assertThatThrownBy(() -> follow.accept())
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("잘못된 상태입니다.");
+    }
 }
