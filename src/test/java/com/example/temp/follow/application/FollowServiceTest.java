@@ -5,10 +5,13 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.example.temp.follow.domain.Follow;
 import com.example.temp.follow.domain.FollowStatus;
+import com.example.temp.follow.dto.response.FollowInfo;
 import com.example.temp.follow.response.FollowResponse;
 import com.example.temp.member.domain.FollowStrategy;
 import com.example.temp.member.domain.Member;
 import jakarta.persistence.EntityManager;
+import java.util.ArrayList;
+import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -283,6 +286,76 @@ class FollowServiceTest {
         assertThatThrownBy(() -> followService.rejectFollowRequest(anotherMember.getId(), follow.getId()))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("권한없음");
+    }
+
+    @Test
+    @DisplayName("특정 사용자가 팔로우한 사람들을 전부 보여준다.")
+    void getFollowingsSuccess() throws Exception {
+        // given
+        Member target = saveMember();
+        int successCnt = 10;
+        List<Member> members = saveMembers(successCnt);
+        List<Follow> targetFollows = saveFollows(FollowStatus.SUCCESS, target, members, 0, successCnt);
+
+        List<FollowInfo> targetFollowInfos = targetFollows.stream()
+            .map(follow -> FollowInfo.of(follow.getFrom(), follow.getId()))
+            .toList();
+
+        // when
+        List<FollowInfo> infos = followService.getFollowings(1L, target.getId());
+
+        // then
+        assertThat(infos).hasSize(successCnt)
+            .containsAnyElementsOf(targetFollowInfos);
+    }
+
+    @Test
+    @DisplayName("특정 사용자의 팔로잉 목록을 가져올 때, SUCCESS 상태인 것만 가져온다.")
+    void getFollowingsThatStatusIsSuccess() throws Exception {
+        // given
+        Member target = saveMember();
+        int pendingCnt = 1;
+        int rejectCnt = 1;
+        int canceledCnt = 1;
+        int successCnt = 10;
+
+        List<Member> members = saveMembers(pendingCnt + rejectCnt + canceledCnt + successCnt);
+
+        int idx = 0;
+        saveFollows(FollowStatus.PENDING, target, members, idx, pendingCnt);
+        idx += pendingCnt;
+        saveFollows(FollowStatus.REJECTED, target, members, idx, rejectCnt);
+        idx += rejectCnt;
+        saveFollows(FollowStatus.CANCELED, target, members, idx, canceledCnt);
+        idx += canceledCnt;
+        saveFollows(FollowStatus.SUCCESS, target, members, idx, successCnt);
+
+        // when
+        List<FollowInfo> infos = followService.getFollowings(1L, target.getId());
+
+        // then
+        assertThat(infos).hasSize(successCnt);
+    }
+
+    private List<Follow> saveFollows(FollowStatus followStatus, Member target, List<Member> members, int start,
+        int repeatCnt) {
+        List<Follow> follows = new ArrayList<>();
+        for (int i = start; i < start + repeatCnt; i++) {
+            follows.add(saveFollow(target, members.get(i), followStatus));
+        }
+        return follows;
+    }
+
+    private List<Member> saveMembers(int createdCnt) {
+        List<Member> members = new ArrayList<>();
+        for (int i = 0; i < createdCnt; i++) {
+            Member member = Member.builder()
+                .profileUrl("주소" + i)
+                .build();
+            em.persist(member);
+            members.add(member);
+        }
+        return members;
     }
 
     private void validateFollowResponse(FollowResponse response, Member fromMember, Member toMember) {

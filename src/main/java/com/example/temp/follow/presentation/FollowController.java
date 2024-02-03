@@ -1,8 +1,10 @@
 package com.example.temp.follow.presentation;
 
 import com.example.temp.follow.application.FollowService;
+import com.example.temp.follow.dto.response.FollowInfo;
 import com.example.temp.follow.dto.response.FollowInfos;
 import com.example.temp.follow.response.FollowResponse;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -24,14 +26,14 @@ public class FollowController {
 
     @GetMapping("/members/{memberId}/followings")
     public ResponseEntity<FollowInfos> getFollowings(@PathVariable Long memberId) {
-        FollowInfos followInfos = followService.getFollowings(AUTHENTICATED_MEMBER_ID, memberId);
-        return ResponseEntity.ok(followInfos);
+        List<FollowInfo> followInfos = followService.getFollowings(AUTHENTICATED_MEMBER_ID, memberId);
+        return ResponseEntity.ok(FollowInfos.from(followInfos));
     }
 
     @GetMapping("/members/{memberId}/followers")
     public ResponseEntity<FollowInfos> getFollowers(@PathVariable Long memberId) {
-        FollowInfos followInfos = followService.getFollowers(AUTHENTICATED_MEMBER_ID, memberId);
-        return ResponseEntity.ok(followInfos);
+        List<FollowInfo> followInfos = followService.getFollowers(AUTHENTICATED_MEMBER_ID, memberId);
+        return ResponseEntity.ok(FollowInfos.from(followInfos));
     }
 
     @PostMapping("/members/{memberId}/follow")

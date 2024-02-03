@@ -2,10 +2,12 @@ package com.example.temp.follow.application;
 
 import com.example.temp.follow.domain.Follow;
 import com.example.temp.follow.domain.FollowRepository;
-import com.example.temp.follow.dto.response.FollowInfos;
+import com.example.temp.follow.domain.FollowStatus;
+import com.example.temp.follow.dto.response.FollowInfo;
 import com.example.temp.follow.response.FollowResponse;
 import com.example.temp.member.domain.Member;
 import com.example.temp.member.domain.MemberRepository;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,11 +21,14 @@ public class FollowService {
     private final MemberRepository memberRepository;
 
 
-    public FollowInfos getFollowings(long authenticatedMemberId, long memberId) {
-        return null;
+    public List<FollowInfo> getFollowings(long executorId, long targetId) {
+        return followRepository.findAllByFromIdAndStatus(targetId, FollowStatus.SUCCESS).stream()
+            .map(follow -> FollowInfo.of(follow.getFrom(), follow.getId()))
+            .toList();
     }
 
-    public FollowInfos getFollowers(long authenticatedMemberId, long memberId) {
+    public List<FollowInfo> getFollowers(long executorId, long targetId) {
+
         return null;
     }
 
