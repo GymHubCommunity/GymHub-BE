@@ -25,4 +25,10 @@ public class FollowController {
         return ResponseEntity.ok(response);
     }
 
+    @PostMapping("/members/{memberId}/unfollow")
+    public ResponseEntity<Void> unfollow(@PathVariable Long memberId) {
+        followService.unfollow(AUTHENTICATED_MEMBER_ID, memberId);
+        return ResponseEntity.noContent().build();
+    }
+
 }

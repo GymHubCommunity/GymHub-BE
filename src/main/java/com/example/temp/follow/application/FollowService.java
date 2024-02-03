@@ -30,6 +30,11 @@ public class FollowService {
         return FollowResponse.from(savedFollow);
     }
 
+
+    public void unfollow(long fromId, Long toId) {
+
+    }
+
     private Follow saveFollow(Member fromMember, Member target) {
         Follow follow = Follow.builder()
             .from(fromMember)
