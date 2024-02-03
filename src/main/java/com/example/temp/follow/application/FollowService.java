@@ -30,15 +30,25 @@ public class FollowService {
         return FollowResponse.from(savedFollow);
     }
 
-
+    @Transactional
     public void unfollow(long fromId, Long toId) {
         if (!memberRepository.existsById(toId)) {
             throw new IllegalArgumentException("찾을 수 없는 사용자");
         }
-
         Follow follow = followRepository.findByFromIdAndToId(fromId, toId)
             .orElseThrow(() -> new IllegalArgumentException("찾을 수 없는 관계"));
         follow.unfollow();
+    }
+
+    @Transactional
+    public void acceptFollowRequest(long targetId, Long followId) {
+        Follow follow = followRepository.findById(followId)
+            .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 Follow"));
+        Member target = follow.getTo();
+        if (target.getId() != targetId) {
+            throw new IllegalArgumentException("권한없음");
+        }
+        follow.accept();
     }
 
     private Follow saveFollow(Member fromMember, Member target) {
@@ -49,5 +59,6 @@ public class FollowService {
             .build();
         return followRepository.save(follow);
     }
+
 }
 

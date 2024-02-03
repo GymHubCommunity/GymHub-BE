@@ -61,6 +61,13 @@ public class Follow {
         return this;
     }
 
+    public void accept() {
+        if (this.getStatus() != FollowStatus.PENDING) {
+            throw new IllegalArgumentException("잘못된 상태입니다.");
+        }
+        this.status = FollowStatus.SUCCESS;
+    }
+
     public void unfollow() {
         if (!isActive()) {
             throw new IllegalArgumentException("이미 비활성화된 관계입니다.");

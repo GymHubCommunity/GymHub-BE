@@ -31,4 +31,9 @@ public class FollowController {
         return ResponseEntity.noContent().build();
     }
 
+    @PostMapping("/follows/{followId}")
+    public ResponseEntity<Void> acceptFollowRequest(@PathVariable Long followId) {
+        followService.acceptFollowRequest(AUTHENTICATED_MEMBER_ID, followId);
+        return ResponseEntity.noContent().build();
+    }
 }

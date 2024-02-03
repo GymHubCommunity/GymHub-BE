@@ -11,6 +11,8 @@ import com.example.temp.member.domain.Member;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
@@ -193,6 +195,51 @@ class FollowServiceTest {
         assertThatThrownBy(() -> followService.unfollow(fromMember.getId(), notExistMemberId))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("찾을 수 없는 사용자");
+    }
+
+    @Test
+    @DisplayName("pending 상태의 팔로우 요청을 수락한다")
+    void acceptFollowRequestSuccess() throws Exception {
+        // given
+        Member fromMember = saveMember();
+        Member target = saveMember();
+        Follow follow = saveFollow(fromMember, target, FollowStatus.PENDING);
+
+        // when
+        followService.acceptFollowRequest(target.getId(), follow.getId());
+
+        // then
+        assertThat(follow.getStatus()).isEqualTo(FollowStatus.SUCCESS);
+    }
+
+    @Test
+    @DisplayName("팔로우를 받은 사용자만 팔로우 요청을 수락할 수 있다.")
+    void acceptFollowRequestFailInvalidFollowTarget() throws Exception {
+        // given
+        Member fromMember = saveMember();
+        Member target = saveMember();
+        Follow follow = saveFollow(fromMember, target, FollowStatus.PENDING);
+        Member anotherMember = saveMember();
+
+        // when & then
+        assertThatThrownBy(() -> followService.acceptFollowRequest(anotherMember.getId(), follow.getId()))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("권한없음");
+    }
+
+    @ParameterizedTest
+    @DisplayName("pending 상태의 follow에 대해서만 요청을 수락할 수 있다.")
+    @ValueSource(strings = {"SUCCESS", "REJECTED", "CANCELED"})
+    void acceptFollowRequestFailInvalidFollowTarget(String statusStr) throws Exception {
+        // given
+        Member fromMember = saveMember();
+        Member target = saveMember();
+        Follow follow = saveFollow(fromMember, target, FollowStatus.valueOf(statusStr));
+
+        // when & then
+        assertThatThrownBy(() -> followService.acceptFollowRequest(target.getId(), follow.getId()))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("잘못된 상태입니다.");
     }
 
     private void validateFollowResponse(FollowResponse response, Member fromMember, Member toMember) {
