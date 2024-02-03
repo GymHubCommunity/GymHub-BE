@@ -2,6 +2,7 @@ package com.example.temp.follow.application;
 
 import com.example.temp.follow.domain.Follow;
 import com.example.temp.follow.domain.FollowRepository;
+import com.example.temp.follow.dto.response.FollowInfos;
 import com.example.temp.follow.response.FollowResponse;
 import com.example.temp.member.domain.Member;
 import com.example.temp.member.domain.MemberRepository;
@@ -16,6 +17,15 @@ public class FollowService {
 
     private final FollowRepository followRepository;
     private final MemberRepository memberRepository;
+
+
+    public FollowInfos getFollowings(long authenticatedMemberId, long memberId) {
+        return null;
+    }
+
+    public FollowInfos getFollowers(long authenticatedMemberId, long memberId) {
+        return null;
+    }
 
     @Transactional
     public FollowResponse follow(long fromId, Long toId) {
@@ -73,5 +83,6 @@ public class FollowService {
             .build();
         return followRepository.save(follow);
     }
+
 }
 
