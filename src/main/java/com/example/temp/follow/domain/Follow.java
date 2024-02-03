@@ -51,4 +51,16 @@ public class Follow {
     public boolean isActive() {
         return getStatus().isActive();
     }
+
+    public Follow reactive(FollowStatus changedStatus) {
+        if (!changedStatus.isActive()) {
+            throw new IllegalArgumentException("해당 상태로는 변경할 수 없습니다.");
+        }
+        if (isActive()) {
+            throw new IllegalArgumentException("이미 둘 사이에 관계가 존재합니다.");
+        }
+        this.status = changedStatus;
+        return this;
+    }
+
 }
