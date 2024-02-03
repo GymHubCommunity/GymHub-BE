@@ -1,6 +1,7 @@
 package com.example.temp.follow.domain;
 
-import org.assertj.core.api.Assertions;
+import static org.assertj.core.api.Assertions.assertThat;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -17,7 +18,7 @@ class FollowTest {
             .build();
 
         // when & then
-        Assertions.assertThat(follow.isValid()).isTrue();
+        assertThat(follow.isActive()).isTrue();
     }
 
     @DisplayName("해당 Follow 엔티티가 유효한 상태가 아니라면 false를 반환한다")

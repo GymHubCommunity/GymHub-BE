@@ -14,7 +14,7 @@ public enum FollowStatus {
         this.text = text;
     }
 
-    public boolean isValid() {
+    public boolean isActive() {
         return List.of(SUCCESS, PENDING).contains(this);
     }
 }

@@ -1,8 +1,5 @@
 package com.example.temp.follow.domain;
 
-import static com.example.temp.follow.domain.FollowStatus.PENDING;
-import static com.example.temp.follow.domain.FollowStatus.SUCCESS;
-
 import com.example.temp.member.domain.Member;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -51,7 +48,7 @@ public class Follow {
         this.status = status;
     }
 
-    public boolean isValid() {
-        return getStatus().isValid();
+    public boolean isActive() {
+        return getStatus().isActive();
     }
 }
