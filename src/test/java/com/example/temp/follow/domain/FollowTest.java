@@ -124,6 +124,42 @@ class FollowTest {
             .hasMessageContaining("이미 비활성화된 관계입니다.");
     }
 
+    @ParameterizedTest
+    @DisplayName("팔로우를 거절한다.")
+    @CsvSource({
+        "SUCCESS",
+        "PENDING"
+    })
+    void rejectSuccess(String statusStr) throws Exception {
+        // given
+        Follow follow = Follow.builder()
+            .status(FollowStatus.valueOf(statusStr))
+            .build();
+
+        // when
+        follow.reject();
+        // then
+        assertThat(follow.getStatus()).isEqualTo(FollowStatus.REJECTED);
+    }
+
+    @ParameterizedTest
+    @DisplayName("이미 비활성화된 팔로우에 대해서는 거절을 할 수 없다.")
+    @CsvSource({
+        "CANCELED",
+        "REJECTED"
+    })
+    void rejectFailAlreadyInactivate(String statusStr) throws Exception {
+        // given
+        Follow follow = Follow.builder()
+            .status(FollowStatus.valueOf(statusStr))
+            .build();
+
+        // when & then
+        assertThatThrownBy(() -> follow.reject())
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("이미 비활성화된 관계입니다.");
+    }
+
     @Test
     @DisplayName("pending 상태의 follow를 수락한다")
     void acceptSuccess() throws Exception {
