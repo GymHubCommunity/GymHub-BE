@@ -2,7 +2,6 @@ package com.example.temp.follow.application;
 
 import com.example.temp.follow.domain.Follow;
 import com.example.temp.follow.domain.FollowRepository;
-import com.example.temp.follow.domain.FollowStatus;
 import com.example.temp.follow.response.FollowResponse;
 import com.example.temp.member.domain.Member;
 import com.example.temp.member.domain.MemberRepository;
@@ -23,7 +22,7 @@ public class FollowService {
     public FollowResponse follow(long fromId, Long toId) {
         Member fromMember = memberRepository.findById(fromId)
             .orElseThrow(() -> new IllegalArgumentException("찾을 수 없는 사용자"));
-        Member toMember = memberRepository.findById(toId)
+        Member target = memberRepository.findById(toId)
             .orElseThrow(() -> new IllegalArgumentException("찾을 수 없는 사용자"));
 
         Optional<Follow> followOpt = followRepository.findByFromIdAndToId(fromId, toId);
@@ -31,8 +30,8 @@ public class FollowService {
             // 새롭게 가입
             Follow follow = Follow.builder()
                 .from(fromMember)
-                .to(toMember)
-                .status(FollowStatus.SUCCESS)
+                .to(target)
+                .status(target.getStatusBasedOnStrategy())
                 .build();
             Follow savedFollow = followRepository.save(follow);
             return FollowResponse.from(savedFollow);
@@ -41,7 +40,7 @@ public class FollowService {
             if (follow.isValid()) {
                 throw new IllegalArgumentException("이미 둘 사이에 관계가 존재합니다.");
             }
-            follow.setStatus(FollowStatus.SUCCESS);
+            follow.setStatus(target.getStatusBasedOnStrategy());
             return FollowResponse.from(follow);
         }
     }

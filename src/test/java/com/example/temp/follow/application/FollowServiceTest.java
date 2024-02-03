@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import com.example.temp.follow.domain.Follow;
 import com.example.temp.follow.domain.FollowStatus;
 import com.example.temp.follow.response.FollowResponse;
+import com.example.temp.member.domain.FollowStrategy;
 import com.example.temp.member.domain.Member;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.DisplayName;
@@ -27,22 +28,50 @@ class FollowServiceTest {
     long notExistMemberId = 999_999_999L;
 
     @Test
-    @DisplayName("from 사용자가 to 사용자를 팔로우한다.")
+    @DisplayName("fromMember가 toMember를 팔로우한다.")
     void followSuccess() throws Exception {
         // given
         Member fromMember = saveMember();
-        Member toMember = saveMember();
+        Member toMember = saveMemberWithFollowStrategy(FollowStrategy.EAGER);
+
+        // when
+        FollowResponse response = followService.follow(fromMember.getId(), toMember.getId());
+
+        // then
+        assertThat(response.status()).isEqualTo(toMember.getFollowStrategy().getFollowStatus());
+        validateFollowResponse(response, fromMember, toMember);
+    }
+
+    @Test
+    @DisplayName("팔로우를 할 때, target의 전략이 EAGER면 SUCCESS 상태의 follow가 생성된다.")
+    void validateCreateSuccessFollowThatTargetStrategyIsEager() throws Exception {
+        // given
+        Member fromMember = saveMember();
+        Member toMember = saveMemberWithFollowStrategy(FollowStrategy.EAGER);
 
         // when
         FollowResponse response = followService.follow(fromMember.getId(), toMember.getId());
 
         // then
         assertThat(response.status()).isEqualTo(FollowStatus.SUCCESS);
-        validateFollowResponse(response, fromMember, toMember);
     }
 
     @Test
-    @DisplayName("이미 팔로우가 되어있는 사용자에게 팔로우 요청을 보낼 수 없다")
+    @DisplayName("팔로우를 할 때, target의 전략이 LAZY면 PENDING 상태의 follow가 생성된다.")
+    void validateCreatePendingFollowThatTargetStrategyIsLazy() throws Exception {
+        // given
+        Member fromMember = saveMember();
+        Member toMember = saveMemberWithFollowStrategy(FollowStrategy.LAZY);
+
+        // when
+        FollowResponse response = followService.follow(fromMember.getId(), toMember.getId());
+
+        // then
+        assertThat(response.status()).isEqualTo(FollowStatus.PENDING);
+    }
+
+    @Test
+    @DisplayName("이미 팔로우가 되어있는 상태에서 또 팔로우 요청을 보낼 수는 없다")
     void followFailAlreadyFollowSuccess() throws Exception {
         // given
         Member fromMember = saveMember();
@@ -70,7 +99,7 @@ class FollowServiceTest {
     }
 
     @Test
-    @DisplayName("기존에 fromMember가 toMember를 팔로우 취소한 상태에서, 새롭게 팔로우를 한다")
+    @DisplayName("이전에 팔로우 취소한 상태에서, 새롭게 팔로우를 한다")
     void followSuccessThatAlreadyUnfollow() throws Exception {
         // given
         Member fromMember = saveMember();
@@ -86,7 +115,7 @@ class FollowServiceTest {
     }
 
     @Test
-    @DisplayName("기존에 toMember가 fromMember의 팔로우를 거절한 상태에서, fromMember는 다시 팔로우를 한다")
+    @DisplayName("이전에 팔로우를 거절한 상태에서, fromMember는 다시 팔로우를 한다")
     void followSuccessThatAlreadyRejected() throws Exception {
         // given
         Member fromMember = saveMember();
@@ -102,7 +131,7 @@ class FollowServiceTest {
     }
 
     @Test
-    @DisplayName("존재하지 않는 toMember에게 팔로우 요청을 할 수 없다")
+    @DisplayName("존재하지 않는 대상에게 팔로우 요청을 할 수 없다")
     void followFailBecauseOfNotExistMember() throws Exception {
         // given
         Member fromMember = saveMember();
@@ -115,7 +144,7 @@ class FollowServiceTest {
 
 
     @Test
-    @DisplayName("존재하지 않는 fromMember로는 팔로우 요청을 보낼 수 없다")
+    @DisplayName("존재하지 않는 회원은 팔로우 요청을 보낼 수 없다")
     void followFailBecauseExecutorNotFound() throws Exception {
         // given
         Member toMember = saveMember();
@@ -144,7 +173,13 @@ class FollowServiceTest {
     }
 
     private Member saveMember() {
-        Member member = Member.builder().build();
+        return saveMemberWithFollowStrategy(FollowStrategy.EAGER);
+    }
+
+    private Member saveMemberWithFollowStrategy(FollowStrategy followStrategy) {
+        Member member = Member.builder()
+            .followStrategy(followStrategy)
+            .build();
         em.persist(member);
         return member;
     }
