@@ -1,5 +1,6 @@
 package com.example.temp.member.domain;
 
+import com.example.temp.follow.domain.FollowStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -31,10 +32,17 @@ public class Member {
     @Column(nullable = false, unique = true)
     private String nickname;
 
+    private FollowStrategy followStrategy;
+
     @Builder
-    private Member(String email, String profileUrl, String nickname) {
+    private Member(String email, String profileUrl, String nickname, FollowStrategy followStrategy) {
         this.email = email;
         this.profileUrl = profileUrl;
         this.nickname = nickname;
+        this.followStrategy = followStrategy;
+    }
+
+    public FollowStatus getStatusBasedOnStrategy() {
+        return followStrategy.getFollowStatus();
     }
 }
