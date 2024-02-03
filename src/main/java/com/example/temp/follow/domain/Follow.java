@@ -15,7 +15,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import java.util.List;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -53,6 +52,6 @@ public class Follow {
     }
 
     public boolean isValid() {
-        return List.of(SUCCESS, PENDING).contains(getStatus());
+        return getStatus().isValid();
     }
 }
