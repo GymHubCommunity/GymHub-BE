@@ -155,6 +155,46 @@ class FollowServiceTest {
             .hasMessageContaining("찾을 수 없는 사용자");
     }
 
+    @Test
+    @DisplayName("언팔로우한다.")
+    void unfollowSuccess() throws Exception {
+        // given
+        Member fromMember = saveMember();
+        Member target = saveMember();
+        Follow follow = saveFollow(fromMember, target, FollowStatus.SUCCESS);
+
+        // when
+        followService.unfollow(fromMember.getId(), target.getId());
+
+        // then
+        assertThat(follow.getStatus()).isEqualTo(FollowStatus.CANCELED);
+    }
+
+    @Test
+    @DisplayName("기존에 팔로우 관계가 존재하지 않으면 언팔로우를 할 수 없다.")
+    void unfollowFailFollowNotFound() throws Exception {
+        // given
+        Member fromMember = saveMember();
+        Member target = saveMember();
+
+        // when & then
+        assertThatThrownBy(() -> followService.unfollow(fromMember.getId(), target.getId()))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("찾을 수 없는 관계");
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 대상에게 언팔로우를 할 수 없다")
+    void unfollowFailTargetNotFound() throws Exception {
+        // given
+        Member fromMember = saveMember();
+
+        // when & then
+        assertThatThrownBy(() -> followService.unfollow(fromMember.getId(), notExistMemberId))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("찾을 수 없는 사용자");
+    }
+
     private void validateFollowResponse(FollowResponse response, Member fromMember, Member toMember) {
         Follow result = em.find(Follow.class, response.id());
         assertThat(result.getId()).isNotNull();

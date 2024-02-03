@@ -61,4 +61,10 @@ public class Follow {
         return this;
     }
 
+    public void unfollow() {
+        if (!isActive()) {
+            throw new IllegalArgumentException("이미 비활성화된 관계입니다.");
+        }
+        this.status = FollowStatus.CANCELED;
+    }
 }

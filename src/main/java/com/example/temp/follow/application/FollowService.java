@@ -32,7 +32,13 @@ public class FollowService {
 
 
     public void unfollow(long fromId, Long toId) {
+        if (!memberRepository.existsById(toId)) {
+            throw new IllegalArgumentException("찾을 수 없는 사용자");
+        }
 
+        Follow follow = followRepository.findByFromIdAndToId(fromId, toId)
+            .orElseThrow(() -> new IllegalArgumentException("찾을 수 없는 관계"));
+        follow.unfollow();
     }
 
     private Follow saveFollow(Member fromMember, Member target) {
