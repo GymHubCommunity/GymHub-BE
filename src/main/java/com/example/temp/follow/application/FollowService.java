@@ -19,6 +19,9 @@ public class FollowService {
 
     @Transactional
     public FollowResponse follow(long fromId, Long toId) {
+        if (fromId == toId) {
+            throw new IllegalArgumentException("자기 자신을 팔로우할 수 없습니다.");
+        }
         Member fromMember = memberRepository.findById(fromId)
             .orElseThrow(() -> new IllegalArgumentException("찾을 수 없는 사용자"));
         Member target = memberRepository.findById(toId)

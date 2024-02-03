@@ -45,6 +45,18 @@ class FollowServiceTest {
     }
 
     @Test
+    @DisplayName("자기 자신은 팔로우할 수 없다.")
+    void followFailBecauseOfFollowersAndFollowingsIsSame() throws Exception {
+        // given
+        Member sameMember = saveMember();
+
+        // when
+        assertThatThrownBy(() -> followService.follow(sameMember.getId(), sameMember.getId()))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("자기 자신을 팔로우할 수 없습니다.");
+    }
+
+    @Test
     @DisplayName("팔로우를 할 때, target의 전략이 EAGER면 SUCCESS 상태의 follow가 생성된다.")
     void validateCreateSuccessFollowThatTargetStrategyIsEager() throws Exception {
         // given
