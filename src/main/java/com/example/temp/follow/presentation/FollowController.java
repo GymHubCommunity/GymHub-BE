@@ -4,6 +4,7 @@ import com.example.temp.follow.application.FollowService;
 import com.example.temp.follow.response.FollowResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -34,6 +35,12 @@ public class FollowController {
     @PostMapping("/follows/{followId}")
     public ResponseEntity<Void> acceptFollowRequest(@PathVariable Long followId) {
         followService.acceptFollowRequest(AUTHENTICATED_MEMBER_ID, followId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/follows/{followId}")
+    public ResponseEntity<Void> rejectFollowRequest(@PathVariable Long followId) {
+        followService.rejectFollowRequest(AUTHENTICATED_MEMBER_ID, followId);
         return ResponseEntity.noContent().build();
     }
 }

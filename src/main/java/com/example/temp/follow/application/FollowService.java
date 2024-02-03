@@ -51,6 +51,17 @@ public class FollowService {
         follow.accept();
     }
 
+    @Transactional
+    public void rejectFollowRequest(long executorId, long followId) {
+        Follow follow = followRepository.findById(followId)
+            .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 Follow"));
+        Member target = follow.getTo();
+        if (target.getId() != executorId) {
+            throw new IllegalArgumentException("권한없음");
+        }
+        follow.reject();
+    }
+
     private Follow saveFollow(Member fromMember, Member target) {
         Follow follow = Follow.builder()
             .from(fromMember)
@@ -59,6 +70,5 @@ public class FollowService {
             .build();
         return followRepository.save(follow);
     }
-
 }
 

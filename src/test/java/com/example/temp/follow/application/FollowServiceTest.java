@@ -242,6 +242,37 @@ class FollowServiceTest {
             .hasMessageContaining("잘못된 상태입니다.");
     }
 
+    @ParameterizedTest
+    @DisplayName("상대의 팔로우를 거절한다")
+    @ValueSource(strings = {"SUCCESS", "PENDING"})
+    void rejectFollowRequest(String prevStatus) throws Exception {
+        // given
+        Member fromMember = saveMember();
+        Member target = saveMember();
+        Follow follow = saveFollow(fromMember, target, FollowStatus.valueOf(prevStatus));
+
+        // when
+        followService.rejectFollowRequest(target.getId(), follow.getId());
+
+        // then
+        assertThat(follow.getStatus()).isEqualTo(FollowStatus.REJECTED);
+    }
+
+    @Test
+    @DisplayName("팔로우를 받은 사용자만 상대의 팔로우를 거절할 수 있다")
+    void rejectFollowRequestFailNoAuthz() throws Exception {
+        // given
+        Member fromMember = saveMember();
+        Member target = saveMember();
+        Follow follow = saveFollow(fromMember, target, FollowStatus.PENDING);
+        Member anotherMember = saveMember();
+
+        // when & then
+        assertThatThrownBy(() -> followService.rejectFollowRequest(anotherMember.getId(), follow.getId()))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("권한없음");
+    }
+
     private void validateFollowResponse(FollowResponse response, Member fromMember, Member toMember) {
         Follow result = em.find(Follow.class, response.id());
         assertThat(result.getId()).isNotNull();
