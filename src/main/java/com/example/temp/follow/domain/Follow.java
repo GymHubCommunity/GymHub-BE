@@ -20,6 +20,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "follows")
@@ -41,6 +42,7 @@ public class Follow {
     private Member to;
 
     @Enumerated(value = EnumType.STRING)
+    @Setter
     private FollowStatus status;
 
     @Builder
