@@ -324,13 +324,13 @@ class FollowServiceTest {
         List<Member> members = saveMembers(pendingCnt + rejectCnt + canceledCnt + successCnt);
 
         int idx = 0;
-        saveFollows(FollowStatus.PENDING, target, members, idx, pendingCnt);
+        saveTargetFollowings(FollowStatus.PENDING, target, members, idx, pendingCnt);
         idx += pendingCnt;
-        saveFollows(FollowStatus.REJECTED, target, members, idx, rejectCnt);
+        saveTargetFollowings(FollowStatus.REJECTED, target, members, idx, rejectCnt);
         idx += rejectCnt;
-        saveFollows(FollowStatus.CANCELED, target, members, idx, canceledCnt);
+        saveTargetFollowings(FollowStatus.CANCELED, target, members, idx, canceledCnt);
         idx += canceledCnt;
-        saveFollows(FollowStatus.SUCCESS, target, members, idx, successCnt);
+        saveTargetFollowings(FollowStatus.SUCCESS, target, members, idx, successCnt);
 
         // when
         List<FollowInfo> infos = followService.getFollowings(target.getId(), target.getId());
@@ -384,11 +384,93 @@ class FollowServiceTest {
             .hasMessageContaining("권한없음");
     }
 
-    private List<Follow> saveFollows(FollowStatus followStatus, Member target, List<Member> members, int start,
+    @Test
+    @DisplayName("특정 사용자의 팔로워 목록을 가져올 때, SUCCESS 상태인 것만 가져온다.")
+    void getFollowersThatStatusIsSuccess() throws Exception {
+        // given
+        Member target = saveMember();
+        int pendingCnt = 1;
+        int rejectCnt = 1;
+        int canceledCnt = 1;
+        int successCnt = 10;
+
+        List<Member> members = saveMembers(pendingCnt + rejectCnt + canceledCnt + successCnt);
+
+        int idx = 0;
+        saveTargetFollowers(FollowStatus.PENDING, target, members, idx, pendingCnt);
+        idx += pendingCnt;
+        saveTargetFollowers(FollowStatus.REJECTED, target, members, idx, rejectCnt);
+        idx += rejectCnt;
+        saveTargetFollowers(FollowStatus.CANCELED, target, members, idx, canceledCnt);
+        idx += canceledCnt;
+        saveTargetFollowers(FollowStatus.SUCCESS, target, members, idx, successCnt);
+
+        // when
+        List<FollowInfo> infos = followService.getFollowers(target.getId(), target.getId());
+
+        // then
+        assertThat(infos).hasSize(successCnt);
+    }
+
+    @Test
+    @DisplayName("공개 계정은 누구나 팔로워 목록을 볼 수 있다.")
+    void canSeeFollowersEveryoneOnPublicAccount() throws Exception {
+        // given
+        Member publicAccountMember = Member.builder().publicAccount(true).build();
+        em.persist(publicAccountMember);
+
+        Member anotherMember = saveMember();
+
+        // when & then
+        assertThatCode(() -> followService.getFollowers(anotherMember.getId(), publicAccountMember.getId()))
+            .doesNotThrowAnyException();
+    }
+
+    @Test
+    @DisplayName("비공개 계정은 자신을 팔로우한 사람들만 팔로워 목록을 볼 수 있다")
+    void canSeeFollowersThatSpecifyMemberOnPrivateAccount() throws Exception {
+        // given
+        Member publicAccountMember = Member.builder().publicAccount(false).build();
+        em.persist(publicAccountMember);
+
+        Member anotherMember = saveMember();
+        saveFollow(anotherMember, publicAccountMember, FollowStatus.SUCCESS);
+
+        // when & then
+        assertThatCode(() -> followService.getFollowers(anotherMember.getId(), publicAccountMember.getId()))
+            .doesNotThrowAnyException();
+    }
+
+    @Test
+    @DisplayName("비공개 계정은 자신을 팔로우하지 않은 사용자에게 팔로워 목록을 보여주지 않는다")
+    void cantSeeFollowersThatDoesNotFollowOnPrivateAccount() throws Exception {
+        // given
+        Member publicAccountMember = Member.builder().publicAccount(false).build();
+        em.persist(publicAccountMember);
+
+        Member anotherMember = saveMember();
+        saveFollow(publicAccountMember, anotherMember, FollowStatus.PENDING);
+
+        // when & then
+        assertThatThrownBy(() -> followService.getFollowers(anotherMember.getId(), publicAccountMember.getId()))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("권한없음");
+    }
+
+    private List<Follow> saveTargetFollowings(FollowStatus followStatus, Member target, List<Member> members, int start,
         int repeatCnt) {
         List<Follow> follows = new ArrayList<>();
         for (int i = start; i < start + repeatCnt; i++) {
             follows.add(saveFollow(target, members.get(i), followStatus));
+        }
+        return follows;
+    }
+
+    private List<Follow> saveTargetFollowers(FollowStatus followStatus, Member target, List<Member> members, int start,
+        int repeatCnt) {
+        List<Follow> follows = new ArrayList<>();
+        for (int i = start; i < start + repeatCnt; i++) {
+            follows.add(saveFollow(members.get(i), target, followStatus));
         }
         return follows;
     }

@@ -33,7 +33,14 @@ public class FollowService {
     }
 
     public List<FollowInfo> getFollowers(long executorId, long targetId) {
-        return null;
+        Member target = memberRepository.findById(targetId)
+            .orElseThrow(() -> new IllegalArgumentException("찾을 수 없는 사용자"));
+        if (!target.isPublicAccount()) {
+            validateViewAuthorization(targetId, executorId);
+        }
+        return followRepository.findAllByToIdAndStatus(targetId, FollowStatus.SUCCESS).stream()
+            .map(follow -> FollowInfo.of(follow.getFrom(), follow.getId()))
+            .toList();
     }
 
     private void validateViewAuthorization(long targetId, long executorId) {
