@@ -1,7 +1,7 @@
 package com.example.temp.common.config;
 
 import com.example.temp.oauth.impl.google.GoogleOAuthClient;
-import com.example.temp.oauth.impl.kakao.KakaoOauthClient;
+import com.example.temp.oauth.impl.kakao.KakaoOAuthClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -17,8 +17,8 @@ public class WebClientConfiguration {
     }
 
     @Bean
-    public KakaoOauthClient kakaoOauthClient() {
-        return createHttpInterface(KakaoOauthClient.class, "https://kauth.kakao.com");
+    public KakaoOAuthClient kakaoOauthClient() {
+        return createHttpInterface(KakaoOAuthClient.class, "https://kauth.kakao.com");
     }
 
     private <T> T createHttpInterface(Class<T> clazz, String baseUrl) {
