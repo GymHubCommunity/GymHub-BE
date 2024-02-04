@@ -27,7 +27,14 @@ public class FollowService {
     private final FollowRepository followRepository;
     private final MemberRepository memberRepository;
 
-
+    /**
+     * targetId를 팔로우하고 있는 사람들의 목록을 보여줍니다. Target이 비공개 계정일 때는 자기 자신과 Target을 팔로우하고 있는 사람들만이 실행할 수 있습니다.
+     *
+     * @param executorId 로그인한 사용자의 ID
+     * @param targetId   팔로잉 목록을 보려고 하는 대상의 ID
+     * @return FollowInfo 객체 리스트를 반환합니다. 각 FollowInfo 객체는 팔로잉 대상의 정보와 팔로우 ID를 포함하고 있습니다.
+     * @throws ApiException AUTHORIZED_FAIL: 팔로잉 목록을 볼 권한이 없을 때 발생합니다.
+     */
     public List<FollowInfo> getFollowings(long executorId, long targetId) {
         Member target = memberRepository.findById(targetId)
             .orElseThrow(() -> new ApiException(MEMBER_NOT_FOUND));
@@ -39,6 +46,14 @@ public class FollowService {
             .toList();
     }
 
+    /**
+     * Target이 팔로우하고 있는 사람들의 목록을 보여줍니다. Target이 비공개 계정일 때는 자기 자신과 Target을 팔로우하고 있는 사람들만이 실행할 수 있습니다.
+     *
+     * @param executorId 로그인한 사용자의 ID
+     * @param targetId   팔로워 목록을 보려고 하는 대상의 ID
+     * @return FollowInfo 객체 리스트를 반환합니다. 각 FollowInfo 객체는 팔로워 대상의 정보와 팔로우 ID를 포함하고 있습니다.
+     * @throws ApiException AUTHORIZED_FAIL: 팔로워 목록을 볼 권한이 없을 때 발생합니다.
+     */
     public List<FollowInfo> getFollowers(long executorId, long targetId) {
         Member target = memberRepository.findById(targetId)
             .orElseThrow(() -> new ApiException(MEMBER_NOT_FOUND));
@@ -67,6 +82,16 @@ public class FollowService {
         return followRepository.checkExecutorFollowsTarget(executorId, targetId);
     }
 
+    /**
+     * Target을 팔로우합니다. Target의 팔로우 전략에 따라 팔로우가 성공하거나, 또는 팔로우가 대기 상태가 될 수 있습니다.
+     *
+     * @param executorId 로그인한 사용자의 ID
+     * @param targetId   팔로우를 신청하는 대상의 ID
+     * @return 팔로우 요청의 결과를 보여주는 FollowResponse 객체를 반환합니다. FollowResponse 객체는 팔로우의 상태(성공, 대기 등)를 포함하고 있습니다.
+     * @throws ApiException FOLLOW_SELF_FAIL: 자기 자신을 팔로우하려고 할 때 발생합니다.
+     * @throws ApiException MEMBER_NOT_FOUND: 팔로우를 신청하는 대상을 찾을 수 없을 때 발생합니다.
+     * @throws ApiException FOLLOW_ALREADY_RELATED: 로그인한 사용자가 이미 Target을 팔로우하고 있을 때 발생합니다.
+     */
     @Transactional
     public FollowResponse follow(long executorId, Long targetId) {
         if (isMyAccount(executorId, targetId)) {
@@ -92,6 +117,15 @@ public class FollowService {
         return followRepository.save(follow);
     }
 
+    /**
+     * Executor는 Target과의 관계를 끊습니다. Follow 레코드의 상태는 CANCELED 상태가 됩니다.
+     *
+     * @param executorId 로그인한 사용자의 ID
+     * @param targetId   언팔로우 하려는 대상의 ID
+     * @throws ApiException MEMBER_NOT_FOUND: 언팔로우를 하려는 대상을 찾을 수 없을 때 발생합니다.
+     * @throws ApiException FOLLOW_INACTIVE: 팔로우가 이미 비활성화되어있을 때 발생합니다.
+
+     */
     @Transactional
     public void unfollow(long executorId, Long targetId) {
         if (!memberRepository.existsById(targetId)) {
@@ -102,17 +136,35 @@ public class FollowService {
         follow.unfollow();
     }
 
+    /**
+     * 대기 상태의 Follow를 수락합니다.
+     *
+     * @param executorId 로그인한 사용자의 ID
+     * @param followId   팔로우 레코드의 ID
+     * @throws ApiException FOLLOW_NOT_FOUND: 팔로우 관계를 찾을 수 없을 때 발생합니다.
+     * @throws ApiException FOLLOW_NOT_PENDING: 변경하려 하는 팔로우가 PENDING 상태가 아닐 때 발생합니다.
+     * @throws ApiException FOLLOW_INACTIVE: 팔로우가 이미 비활성화되어있을 때 발생합니다.
+     */
     @Transactional
-    public void acceptFollowRequest(long targetId, Long followId) {
+    public void acceptFollowRequest(long executorId, Long followId) {
         Follow follow = followRepository.findById(followId)
             .orElseThrow(() -> new ApiException(FOLLOW_NOT_FOUND));
-        Member target = follow.getTo();
-        if (target.getId() != targetId) {
+        Member toMember = follow.getTo();
+        if (toMember.getId() != executorId) {
             throw new ApiException(AUTHORIZED_FAIL);
         }
         follow.accept();
     }
 
+    /**
+     * Executor는 자신을 팔로우하고 있는 관계 중 하나를 끊습니다. Follow 레코드의 상태는 REJECTED 상태가 됩니다.
+     *
+     * @param executorId 로그인한 사용자의 ID
+     * @param followId   끊으려는 Follow 레코드의 ID
+     * @throws ApiException FOLLOW_NOT_FOUND: 팔로우 관계를 찾을 수 없을 때 발생합니다.
+     * @throws ApiException AUTHORIZED_FAIL: 팔로우가 로그인한 사용자를 가리키고 있지 않을 때 발생합니다.
+     * @throws ApiException FOLLOW_INACTIVE: 팔로우가 이미 비활성화되어있을 때 발생합니다.
+     */
     @Transactional
     public void rejectFollowRequest(long executorId, long followId) {
         Follow follow = followRepository.findById(followId)
