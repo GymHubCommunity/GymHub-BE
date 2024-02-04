@@ -11,10 +11,10 @@ import org.springframework.web.service.annotation.PostExchange;
 
 public interface GoogleOAuthClient {
 
-    @PostExchange(url = "/oauth2/v4/token", contentType = APPLICATION_FORM_URLENCODED_VALUE)
+    @PostExchange(url = "https://www.googleapis.com/oauth2/v4/token", contentType = APPLICATION_FORM_URLENCODED_VALUE)
     GoogleToken fetchToken(@RequestBody MultiValueMap<String, String> params);
 
-    @GetExchange(url = "/oauth2/v3/userinfo")
+    @GetExchange(url = "https://www.googleapis.com/oauth2/v3/userinfo")
     GoogleUserInfo fetchUserInfo(@RequestHeader(name = HttpHeaders.AUTHORIZATION) String authorizationValue);
 
 }

@@ -13,17 +13,16 @@ public class WebClientConfiguration {
 
     @Bean
     public GoogleOAuthClient googleOAuthClient() {
-        return createHttpInterface(GoogleOAuthClient.class, "https://www.googleapis.com");
+        return createHttpInterface(GoogleOAuthClient.class);
     }
 
     @Bean
     public KakaoOAuthClient kakaoOauthClient() {
-        return createHttpInterface(KakaoOAuthClient.class, "https://kauth.kakao.com");
+        return createHttpInterface(KakaoOAuthClient.class);
     }
 
-    private <T> T createHttpInterface(Class<T> clazz, String baseUrl) {
+    private <T> T createHttpInterface(Class<T> clazz) {
         WebClient webClient = WebClient.builder()
-            .baseUrl(baseUrl)
             .build();
 
         HttpServiceProxyFactory factory = HttpServiceProxyFactory
