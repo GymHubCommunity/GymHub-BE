@@ -296,10 +296,10 @@ class FollowServiceTest {
         Member target = saveMember();
         int successCnt = 10;
         List<Member> members = saveMembers(successCnt);
-        List<Follow> targetFollows = saveFollows(FollowStatus.SUCCESS, target, members, 0, successCnt);
+        List<Follow> targetFollows = saveTargetFollowings(FollowStatus.SUCCESS, target, members, 0, successCnt);
 
         List<FollowInfo> targetFollowInfos = targetFollows.stream()
-            .map(follow -> FollowInfo.of(follow.getFrom(), follow.getId()))
+            .map(follow -> FollowInfo.of(follow.getTo(), follow.getId()))
             .toList();
 
         // when
@@ -308,6 +308,7 @@ class FollowServiceTest {
         // then
         assertThat(infos).hasSize(successCnt)
             .containsAnyElementsOf(targetFollowInfos);
+        assertThat(infos.get(0).id()).isNotEqualTo(target.getId());
     }
 
     @Test

@@ -28,7 +28,7 @@ public class FollowService {
             validateViewAuthorization(targetId, executorId);
         }
         return followRepository.findAllByFromIdAndStatus(targetId, FollowStatus.SUCCESS).stream()
-            .map(follow -> FollowInfo.of(follow.getFrom(), follow.getId()))
+            .map(follow -> FollowInfo.of(follow.getTo(), follow.getId()))
             .toList();
     }
 
