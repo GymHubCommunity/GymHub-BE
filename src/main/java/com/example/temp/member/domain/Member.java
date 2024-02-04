@@ -1,6 +1,5 @@
 package com.example.temp.member.domain;
 
-import com.example.temp.oauth.OAuthResponse;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -23,20 +22,19 @@ public class Member {
     @Column(name = "member_id")
     private Long id;
 
+    @Column(nullable = false)
     private String email;
 
+    @Column(nullable = false)
     private String profileUrl;
 
+    @Column(nullable = false, unique = true)
+    private String nickname;
+
     @Builder
-    private Member(String email, String profileUrl) {
+    private Member(String email, String profileUrl, String nickname) {
         this.email = email;
         this.profileUrl = profileUrl;
-    }
-
-    public static Member of(OAuthResponse oAuthResponse) {
-        return Member.builder()
-            .email(oAuthResponse.email())
-            .profileUrl(oAuthResponse.profileUrl())
-            .build();
+        this.nickname = nickname;
     }
 }

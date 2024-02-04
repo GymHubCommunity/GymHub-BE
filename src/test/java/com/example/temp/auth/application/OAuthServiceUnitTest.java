@@ -9,8 +9,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.example.temp.auth.dto.response.LoginInfoResponse;
+import com.example.temp.member.application.MemberService;
 import com.example.temp.member.domain.Member;
-import com.example.temp.member.domain.MemberRepository;
 import com.example.temp.oauth.OAuthProviderResolver;
 import com.example.temp.oauth.OAuthProviderType;
 import com.example.temp.oauth.OAuthResponse;
@@ -37,20 +37,20 @@ class OAuthServiceUnitTest {
     OAuthInfoRepository oAuthInfoRepository;
 
     @Mock
-    MemberRepository memberRepository;
+    MemberService memberService;
 
     OAuthResponse oAuthResponse;
 
-    OAuthInfo oAUthInfo;
+    OAuthInfo oAuthInfo;
 
     Member member;
 
     @BeforeEach
     void setUp() {
-        oAuthService = new OAuthService(oAuthProviderResolver, oAuthInfoRepository, memberRepository);
+        oAuthService = new OAuthService(oAuthProviderResolver, oAuthInfoRepository, memberService);
         oAuthResponse = new OAuthResponse(OAuthProviderType.GOOGLE, "이메일", "닉네임", "123", "프로필주소");
         member = Member.builder().build();
-        oAUthInfo = OAuthInfo.builder()
+        oAuthInfo = OAuthInfo.builder()
             .member(member)
             .build();
     }
@@ -63,7 +63,7 @@ class OAuthServiceUnitTest {
             .thenReturn(oAuthResponse);
         when(oAuthInfoRepository.findByIdUsingResourceServerAndType(anyString(), any(OAuthProviderType.class)))
             .thenReturn(Optional.empty());
-        when(memberRepository.save(any(Member.class)))
+        when(memberService.register(any(OAuthResponse.class)))
             .thenReturn(member);
 
         // when
@@ -82,7 +82,7 @@ class OAuthServiceUnitTest {
         when(oAuthProviderResolver.fetch(any(OAuthProviderType.class), anyString()))
             .thenReturn(oAuthResponse);
         when(oAuthInfoRepository.findByIdUsingResourceServerAndType(anyString(), any(OAuthProviderType.class)))
-            .thenReturn(Optional.of(oAUthInfo));
+            .thenReturn(Optional.of(oAuthInfo));
 
         // when
         LoginInfoResponse response = oAuthService.login("google", "1234");
@@ -101,15 +101,15 @@ class OAuthServiceUnitTest {
             .thenReturn(oAuthResponse);
         when(oAuthInfoRepository.findByIdUsingResourceServerAndType(anyString(), any(OAuthProviderType.class)))
             .thenReturn(Optional.empty());
-        when(memberRepository.save(any(Member.class)))
+        when(memberService.register(any(OAuthResponse.class)))
             .thenReturn(member);
 
         // when
         oAuthService.login("google", "1234");
 
         // then
-        verify(memberRepository, times(1))
-            .save(any(Member.class));
+        verify(memberService, times(1))
+            .register(any(OAuthResponse.class));
         verify(oAuthInfoRepository, times(1))
             .save(any(OAuthInfo.class));
     }
@@ -121,14 +121,14 @@ class OAuthServiceUnitTest {
         when(oAuthProviderResolver.fetch(any(OAuthProviderType.class), anyString()))
             .thenReturn(oAuthResponse);
         when(oAuthInfoRepository.findByIdUsingResourceServerAndType(anyString(), any(OAuthProviderType.class)))
-            .thenReturn(Optional.of(oAUthInfo));
+            .thenReturn(Optional.of(oAuthInfo));
 
         // when
         oAuthService.login("google", "1234");
 
         // then
-        verify(memberRepository, never())
-            .save(any(Member.class));
+        verify(memberService, never())
+            .register(any(OAuthResponse.class));
     }
 
 }

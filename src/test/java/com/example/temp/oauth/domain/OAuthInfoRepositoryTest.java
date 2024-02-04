@@ -54,4 +54,5 @@ class OAuthInfoRepositoryTest {
         // then
         assertThat(resultOpt).isEmpty();
     }
+
 }

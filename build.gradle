@@ -22,6 +22,14 @@ repositories {
 }
 
 dependencies {
+    // Retry 의존성
+    // https://www.baeldung.com/spring-retry
+    implementation 'org.springframework.retry:spring-retry'
+
+    // Faker 의존성
+    // https://github.com/DiUS/java-faker
+    implementation 'com.github.javafaker:javafaker:1.0.2'
+
     // WebClient 관련 의존성
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
 
