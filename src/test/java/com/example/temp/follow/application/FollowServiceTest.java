@@ -308,7 +308,7 @@ class FollowServiceTest {
         // then
         assertThat(infos).hasSize(successCnt)
             .containsAnyElementsOf(targetFollowInfos);
-        assertThat(infos.get(0).id()).isNotEqualTo(target.getId());
+        assertThat(infos.get(0).memberId()).isNotEqualTo(target.getId());
     }
 
     @Test
@@ -382,6 +382,28 @@ class FollowServiceTest {
         assertThatThrownBy(() -> followService.getFollowings(anotherMember.getId(), publicAccountMember.getId()))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("권한없음");
+    }
+
+    @Test
+    @DisplayName("특정 사용자가 팔로우한 사람들을 전부 보여준다.")
+    void getFollowersSuccess() throws Exception {
+        // given
+        Member target = saveMember();
+        int successCnt = 10;
+        List<Member> members = saveMembers(successCnt);
+        List<Follow> targetFollows = saveTargetFollowers(FollowStatus.SUCCESS, target, members, 0, successCnt);
+
+        List<FollowInfo> targetFollowInfos = targetFollows.stream()
+            .map(follow -> FollowInfo.of(follow.getFrom(), follow.getId()))
+            .toList();
+
+        // when
+        List<FollowInfo> infos = followService.getFollowers(target.getId(), target.getId());
+
+        // then
+        assertThat(infos).hasSize(successCnt)
+            .containsAnyElementsOf(targetFollowInfos);
+        assertThat(infos.get(0).memberId()).isNotEqualTo(target.getId());
     }
 
     @Test
