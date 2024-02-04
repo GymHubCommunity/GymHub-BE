@@ -33,6 +33,13 @@ class FollowServiceTest {
 
     long notExistMemberId = 999_999_999L;
 
+
+    /**
+     * 닉네임을 만들 때 중복을 제거하기 위해 사용합니다.
+     * ex. 닉네임0, 닉네임1 .... 과 같은 방식으로 닉네임을 순차적으로 생성하도록 돕습니다.
+     */
+    int globalIdx = 0;
+
     @Test
     @DisplayName("fromMember가 toMember를 팔로우한다.")
     void followSuccess() throws Exception {
@@ -343,7 +350,7 @@ class FollowServiceTest {
     @DisplayName("공개 계정은 누구나 팔로잉 목록을 볼 수 있다.")
     void canSeeFollowingsEveryoneOnPublicAccount() throws Exception {
         // given
-        Member publicAccountMember = Member.builder().publicAccount(true).build();
+        Member publicAccountMember = saveMemberWithAccountPolicy(true);
         em.persist(publicAccountMember);
 
         Member anotherMember = saveMember();
@@ -357,14 +364,14 @@ class FollowServiceTest {
     @DisplayName("비공개 계정은 자신을 팔로우한 사람들만 팔로잉 목록을 볼 수 있다")
     void canSeeFollowingsThatSpecifyMemberOnPrivateAccount() throws Exception {
         // given
-        Member publicAccountMember = Member.builder().publicAccount(false).build();
-        em.persist(publicAccountMember);
+        Member privateMember = saveMemberWithAccountPolicy(true);
+        em.persist(privateMember);
 
         Member anotherMember = saveMember();
-        saveFollow(anotherMember, publicAccountMember, FollowStatus.SUCCESS);
+        saveFollow(anotherMember, privateMember, FollowStatus.SUCCESS);
 
         // when & then
-        assertThatCode(() -> followService.getFollowings(anotherMember.getId(), publicAccountMember.getId()))
+        assertThatCode(() -> followService.getFollowings(anotherMember.getId(), privateMember.getId()))
             .doesNotThrowAnyException();
     }
 
@@ -372,17 +379,18 @@ class FollowServiceTest {
     @DisplayName("비공개 계정은 자신을 팔로우하지 않은 사용자에게 팔로잉 목록을 보여주지 않는다")
     void cantSeeFollowingsThatDoesNotFollowOnPrivateAccount() throws Exception {
         // given
-        Member publicAccountMember = Member.builder().publicAccount(false).build();
-        em.persist(publicAccountMember);
+        Member privateMember = saveMemberWithAccountPolicy(false);
+        em.persist(privateMember);
 
         Member anotherMember = saveMember();
-        saveFollow(publicAccountMember, anotherMember, FollowStatus.PENDING);
+        saveFollow(anotherMember, privateMember, FollowStatus.PENDING);
 
         // when & then
-        assertThatThrownBy(() -> followService.getFollowings(anotherMember.getId(), publicAccountMember.getId()))
+        assertThatThrownBy(() -> followService.getFollowings(anotherMember.getId(), privateMember.getId()))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("권한없음");
     }
+
 
     @Test
     @DisplayName("특정 사용자가 팔로우한 사람들을 전부 보여준다.")
@@ -438,7 +446,7 @@ class FollowServiceTest {
     @DisplayName("공개 계정은 누구나 팔로워 목록을 볼 수 있다.")
     void canSeeFollowersEveryoneOnPublicAccount() throws Exception {
         // given
-        Member publicAccountMember = Member.builder().publicAccount(true).build();
+        Member publicAccountMember = saveMemberWithAccountPolicy(true);
         em.persist(publicAccountMember);
 
         Member anotherMember = saveMember();
@@ -452,14 +460,14 @@ class FollowServiceTest {
     @DisplayName("비공개 계정은 자신을 팔로우한 사람들만 팔로워 목록을 볼 수 있다")
     void canSeeFollowersThatSpecifyMemberOnPrivateAccount() throws Exception {
         // given
-        Member publicAccountMember = Member.builder().publicAccount(false).build();
-        em.persist(publicAccountMember);
+        Member privateMember = saveMemberWithAccountPolicy(false);
+        em.persist(privateMember);
 
         Member anotherMember = saveMember();
-        saveFollow(anotherMember, publicAccountMember, FollowStatus.SUCCESS);
+        saveFollow(anotherMember, privateMember, FollowStatus.SUCCESS);
 
         // when & then
-        assertThatCode(() -> followService.getFollowers(anotherMember.getId(), publicAccountMember.getId()))
+        assertThatCode(() -> followService.getFollowers(anotherMember.getId(), privateMember.getId()))
             .doesNotThrowAnyException();
     }
 
@@ -467,14 +475,14 @@ class FollowServiceTest {
     @DisplayName("비공개 계정은 자신을 팔로우하지 않은 사용자에게 팔로워 목록을 보여주지 않는다")
     void cantSeeFollowersThatDoesNotFollowOnPrivateAccount() throws Exception {
         // given
-        Member publicAccountMember = Member.builder().publicAccount(false).build();
-        em.persist(publicAccountMember);
+        Member privateMember = saveMemberWithAccountPolicy(false);
+        em.persist(privateMember);
 
         Member anotherMember = saveMember();
-        saveFollow(publicAccountMember, anotherMember, FollowStatus.PENDING);
+        saveFollow(privateMember, anotherMember, FollowStatus.PENDING);
 
         // when & then
-        assertThatThrownBy(() -> followService.getFollowers(anotherMember.getId(), publicAccountMember.getId()))
+        assertThatThrownBy(() -> followService.getFollowers(anotherMember.getId(), privateMember.getId()))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("권한없음");
     }
@@ -500,10 +508,7 @@ class FollowServiceTest {
     private List<Member> saveMembers(int createdCnt) {
         List<Member> members = new ArrayList<>();
         for (int i = 0; i < createdCnt; i++) {
-            Member member = Member.builder()
-                .profileUrl("주소" + i)
-                .build();
-            em.persist(member);
+            Member member = saveMember();
             members.add(member);
         }
         return members;
@@ -530,12 +535,27 @@ class FollowServiceTest {
         return saveMemberWithFollowStrategy(FollowStrategy.EAGER);
     }
 
-    private Member saveMemberWithFollowStrategy(FollowStrategy followStrategy) {
+    private Member saveMemberWithAccountPolicy(boolean isPublic) {
         Member member = Member.builder()
-            .followStrategy(followStrategy)
+            .email("이메일")
+            .profileUrl("프로필")
+            .nickname("nickname" + globalIdx++)
+            .followStrategy(FollowStrategy.EAGER)
+            .publicAccount(isPublic)
             .build();
         em.persist(member);
         return member;
     }
 
+    private Member saveMemberWithFollowStrategy(FollowStrategy followStrategy) {
+        Member member = Member.builder()
+            .email("이메일")
+            .profileUrl("프로필")
+            .nickname("nickname" + globalIdx++)
+            .followStrategy(followStrategy)
+            .publicAccount(true)
+            .build();
+        em.persist(member);
+        return member;
+    }
 }

@@ -2,6 +2,7 @@ package com.example.temp.follow.domain;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.example.temp.member.domain.FollowStrategy;
 import com.example.temp.member.domain.Member;
 import jakarta.persistence.EntityManager;
 import java.util.List;
@@ -25,6 +26,8 @@ class FollowRepositoryTest {
     EntityManager em;
 
     long notExistId = 999_999_999L;
+
+    int globalIdx = 0;
 
     @Test
     @DisplayName("fromId와 toId가 일치하는 Follow를 찾는다.")
@@ -202,8 +205,15 @@ class FollowRepositoryTest {
     }
 
     private Member saveMember() {
-        Member fromMember = Member.builder().build();
-        em.persist(fromMember);
-        return fromMember;
+        Member member = Member.builder()
+            .email("이메일")
+            .profileUrl("프로필")
+            .nickname("nickname" + globalIdx++)
+            .followStrategy(FollowStrategy.EAGER)
+            .publicAccount(true)
+            .build();
+            em.persist(member);
+        return member;
     }
+
 }

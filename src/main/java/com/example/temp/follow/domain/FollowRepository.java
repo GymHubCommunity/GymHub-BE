@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface FollowRepository extends JpaRepository<Follow, Long> {
 
@@ -15,6 +16,6 @@ public interface FollowRepository extends JpaRepository<Follow, Long> {
 
     @Query("SELECT CASE WHEN COUNT(f) > 0 THEN true ELSE false END FROM Follow f"
         + " WHERE f.from.id = :executorId AND f.to.id = :targetId and f.status = 'SUCCESS'")
-    boolean checkExecutorFollowsTarget(long executorId, long targetId);
+    boolean checkExecutorFollowsTarget(@Param("executorId") long executorId, @Param("targetId") long targetId);
 
 }
