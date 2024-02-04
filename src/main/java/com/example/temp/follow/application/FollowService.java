@@ -1,5 +1,12 @@
 package com.example.temp.follow.application;
 
+import static com.example.temp.exception.ErrorCode.AUTHENTICATED_FAIL;
+import static com.example.temp.exception.ErrorCode.AUTHORIZED_FAIL;
+import static com.example.temp.exception.ErrorCode.FOLLOW_NOT_FOUND;
+import static com.example.temp.exception.ErrorCode.FOLLOW_SELF_FAIL;
+import static com.example.temp.exception.ErrorCode.MEMBER_NOT_FOUND;
+
+import com.example.temp.exception.ApiException;
 import com.example.temp.follow.domain.Follow;
 import com.example.temp.follow.domain.FollowRepository;
 import com.example.temp.follow.domain.FollowStatus;
@@ -23,7 +30,7 @@ public class FollowService {
 
     public List<FollowInfo> getFollowings(long executorId, long targetId) {
         Member target = memberRepository.findById(targetId)
-            .orElseThrow(() -> new IllegalArgumentException("찾을 수 없는 사용자"));
+            .orElseThrow(() -> new ApiException(MEMBER_NOT_FOUND));
         if (!target.isPublicAccount()) {
             validateViewAuthorization(targetId, executorId);
         }
@@ -34,7 +41,7 @@ public class FollowService {
 
     public List<FollowInfo> getFollowers(long executorId, long targetId) {
         Member target = memberRepository.findById(targetId)
-            .orElseThrow(() -> new IllegalArgumentException("찾을 수 없는 사용자"));
+            .orElseThrow(() -> new ApiException(MEMBER_NOT_FOUND));
         if (!target.isPublicAccount()) {
             validateViewAuthorization(targetId, executorId);
         }
@@ -48,7 +55,7 @@ public class FollowService {
             return;
         }
         if (!isTargetsFollower(targetId, executorId)) {
-            throw new IllegalArgumentException("권한없음");
+            throw new ApiException(AUTHORIZED_FAIL);
         }
     }
 
@@ -63,12 +70,12 @@ public class FollowService {
     @Transactional
     public FollowResponse follow(long executorId, Long targetId) {
         if (isMyAccount(executorId, targetId)) {
-            throw new IllegalArgumentException("자기 자신을 팔로우할 수 없습니다.");
+            throw new ApiException(FOLLOW_SELF_FAIL);
         }
         Member fromMember = memberRepository.findById(executorId)
-            .orElseThrow(() -> new IllegalArgumentException("찾을 수 없는 사용자"));
+            .orElseThrow(() -> new ApiException(AUTHENTICATED_FAIL));
         Member target = memberRepository.findById(targetId)
-            .orElseThrow(() -> new IllegalArgumentException("찾을 수 없는 사용자"));
+            .orElseThrow(() -> new ApiException(MEMBER_NOT_FOUND));
 
         Follow savedFollow = followRepository.findByFromIdAndToId(executorId, targetId)
             .map(follow -> follow.reactive(target.getStatusBasedOnStrategy()))
@@ -88,20 +95,20 @@ public class FollowService {
     @Transactional
     public void unfollow(long executorId, Long targetId) {
         if (!memberRepository.existsById(targetId)) {
-            throw new IllegalArgumentException("찾을 수 없는 사용자");
+            throw new ApiException(MEMBER_NOT_FOUND);
         }
         Follow follow = followRepository.findByFromIdAndToId(executorId, targetId)
-            .orElseThrow(() -> new IllegalArgumentException("찾을 수 없는 관계"));
+            .orElseThrow(() -> new ApiException(FOLLOW_NOT_FOUND));
         follow.unfollow();
     }
 
     @Transactional
     public void acceptFollowRequest(long targetId, Long followId) {
         Follow follow = followRepository.findById(followId)
-            .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 Follow"));
+            .orElseThrow(() -> new ApiException(FOLLOW_NOT_FOUND));
         Member target = follow.getTo();
         if (target.getId() != targetId) {
-            throw new IllegalArgumentException("권한없음");
+            throw new ApiException(AUTHORIZED_FAIL);
         }
         follow.accept();
     }
@@ -109,10 +116,10 @@ public class FollowService {
     @Transactional
     public void rejectFollowRequest(long executorId, long followId) {
         Follow follow = followRepository.findById(followId)
-            .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 Follow"));
+            .orElseThrow(() -> new ApiException(FOLLOW_NOT_FOUND));
         Member target = follow.getTo();
         if (!isMyAccount(target.getId(), executorId)) {
-            throw new IllegalArgumentException("권한없음");
+            throw new ApiException(AUTHORIZED_FAIL);
         }
         follow.reject();
     }

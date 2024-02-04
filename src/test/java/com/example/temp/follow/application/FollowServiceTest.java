@@ -1,9 +1,17 @@
 package com.example.temp.follow.application;
 
+import static com.example.temp.exception.ErrorCode.AUTHENTICATED_FAIL;
+import static com.example.temp.exception.ErrorCode.AUTHORIZED_FAIL;
+import static com.example.temp.exception.ErrorCode.FOLLOW_ALREADY_RELATED;
+import static com.example.temp.exception.ErrorCode.FOLLOW_NOT_FOUND;
+import static com.example.temp.exception.ErrorCode.FOLLOW_NOT_PENDING;
+import static com.example.temp.exception.ErrorCode.FOLLOW_SELF_FAIL;
+import static com.example.temp.exception.ErrorCode.MEMBER_NOT_FOUND;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.example.temp.exception.ApiException;
 import com.example.temp.follow.domain.Follow;
 import com.example.temp.follow.domain.FollowStatus;
 import com.example.temp.follow.dto.response.FollowInfo;
@@ -35,8 +43,7 @@ class FollowServiceTest {
 
 
     /**
-     * 닉네임을 만들 때 중복을 제거하기 위해 사용합니다.
-     * ex. 닉네임0, 닉네임1 .... 과 같은 방식으로 닉네임을 순차적으로 생성하도록 돕습니다.
+     * 닉네임을 만들 때 중복을 제거하기 위해 사용합니다. ex. 닉네임0, 닉네임1 .... 과 같은 방식으로 닉네임을 순차적으로 생성하도록 돕습니다.
      */
     int globalIdx = 0;
 
@@ -63,8 +70,8 @@ class FollowServiceTest {
 
         // when
         assertThatThrownBy(() -> followService.follow(sameMember.getId(), sameMember.getId()))
-            .isInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("자기 자신을 팔로우할 수 없습니다.");
+            .isInstanceOf(ApiException.class)
+            .hasMessageContaining(FOLLOW_SELF_FAIL.getMessage());
     }
 
     @Test
@@ -105,8 +112,8 @@ class FollowServiceTest {
 
         // when & then
         assertThatThrownBy(() -> followService.follow(fromMember.getId(), toMember.getId()))
-            .isInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("이미 둘 사이에 관계가 존재합니다.");
+            .isInstanceOf(ApiException.class)
+            .hasMessageContaining(FOLLOW_ALREADY_RELATED.getMessage());
     }
 
     @Test
@@ -119,8 +126,8 @@ class FollowServiceTest {
 
         // when
         assertThatThrownBy(() -> followService.follow(fromMember.getId(), toMember.getId()))
-            .isInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("이미 둘 사이에 관계가 존재합니다.");
+            .isInstanceOf(ApiException.class)
+            .hasMessageContaining(FOLLOW_ALREADY_RELATED.getMessage());
     }
 
     @Test
@@ -163,21 +170,21 @@ class FollowServiceTest {
 
         // when & then
         assertThatThrownBy(() -> followService.follow(fromMember.getId(), notExistMemberId))
-            .isInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("찾을 수 없는 사용자");
+            .isInstanceOf(ApiException.class)
+            .hasMessageContaining(MEMBER_NOT_FOUND.getMessage());
     }
 
 
     @Test
-    @DisplayName("존재하지 않는 회원은 팔로우 요청을 보낼 수 없다")
+    @DisplayName("로그인이 제대로 되지 않은 회원은 팔로우 요청을 보낼 수 없다")
     void followFailBecauseExecutorNotFound() throws Exception {
         // given
         Member toMember = saveMember();
 
         // when & then
         assertThatThrownBy(() -> followService.follow(notExistMemberId, toMember.getId()))
-            .isInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("찾을 수 없는 사용자");
+            .isInstanceOf(ApiException.class)
+            .hasMessageContaining(AUTHENTICATED_FAIL.getMessage());
     }
 
     @Test
@@ -204,8 +211,8 @@ class FollowServiceTest {
 
         // when & then
         assertThatThrownBy(() -> followService.unfollow(fromMember.getId(), target.getId()))
-            .isInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("찾을 수 없는 관계");
+            .isInstanceOf(ApiException.class)
+            .hasMessageContaining(FOLLOW_NOT_FOUND.getMessage());
     }
 
     @Test
@@ -216,8 +223,8 @@ class FollowServiceTest {
 
         // when & then
         assertThatThrownBy(() -> followService.unfollow(fromMember.getId(), notExistMemberId))
-            .isInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("찾을 수 없는 사용자");
+            .isInstanceOf(ApiException.class)
+            .hasMessageContaining(MEMBER_NOT_FOUND.getMessage());
     }
 
     @Test
@@ -246,8 +253,8 @@ class FollowServiceTest {
 
         // when & then
         assertThatThrownBy(() -> followService.acceptFollowRequest(anotherMember.getId(), follow.getId()))
-            .isInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("권한없음");
+            .isInstanceOf(ApiException.class)
+            .hasMessageContaining(AUTHORIZED_FAIL.getMessage());
     }
 
     @ParameterizedTest
@@ -261,8 +268,8 @@ class FollowServiceTest {
 
         // when & then
         assertThatThrownBy(() -> followService.acceptFollowRequest(target.getId(), follow.getId()))
-            .isInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("잘못된 상태입니다.");
+            .isInstanceOf(ApiException.class)
+            .hasMessageContaining(FOLLOW_NOT_PENDING.getMessage());
     }
 
     @ParameterizedTest
@@ -292,8 +299,8 @@ class FollowServiceTest {
 
         // when & then
         assertThatThrownBy(() -> followService.rejectFollowRequest(anotherMember.getId(), follow.getId()))
-            .isInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("권한없음");
+            .isInstanceOf(ApiException.class)
+            .hasMessageContaining(AUTHORIZED_FAIL.getMessage());
     }
 
     @Test
@@ -387,8 +394,8 @@ class FollowServiceTest {
 
         // when & then
         assertThatThrownBy(() -> followService.getFollowings(anotherMember.getId(), privateMember.getId()))
-            .isInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("권한없음");
+            .isInstanceOf(ApiException.class)
+            .hasMessageContaining(AUTHORIZED_FAIL.getMessage());
     }
 
 
@@ -483,8 +490,8 @@ class FollowServiceTest {
 
         // when & then
         assertThatThrownBy(() -> followService.getFollowers(anotherMember.getId(), privateMember.getId()))
-            .isInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("권한없음");
+            .isInstanceOf(ApiException.class)
+            .hasMessageContaining(AUTHORIZED_FAIL.getMessage());
     }
 
     private List<Follow> saveTargetFollowings(FollowStatus followStatus, Member target, List<Member> members, int start,

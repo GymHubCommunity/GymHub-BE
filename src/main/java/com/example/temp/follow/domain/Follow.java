@@ -1,5 +1,11 @@
 package com.example.temp.follow.domain;
 
+import static com.example.temp.exception.ErrorCode.FOLLOW_ALREADY_RELATED;
+import static com.example.temp.exception.ErrorCode.FOLLOW_INACTIVE;
+import static com.example.temp.exception.ErrorCode.FOLLOW_NOT_PENDING;
+import static com.example.temp.exception.ErrorCode.FOLLOW_STATUS_CHANGE_NOT_ALLOWED;
+
+import com.example.temp.exception.ApiException;
 import com.example.temp.member.domain.Member;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -52,10 +58,10 @@ public class Follow {
 
     public Follow reactive(FollowStatus changedStatus) {
         if (!changedStatus.isActive()) {
-            throw new IllegalArgumentException("해당 상태로는 변경할 수 없습니다.");
+            throw new ApiException(FOLLOW_STATUS_CHANGE_NOT_ALLOWED);
         }
         if (isActive()) {
-            throw new IllegalArgumentException("이미 둘 사이에 관계가 존재합니다.");
+            throw new ApiException(FOLLOW_ALREADY_RELATED);
         }
         this.status = changedStatus;
         return this;
@@ -63,7 +69,7 @@ public class Follow {
 
     public void accept() {
         if (this.getStatus() != FollowStatus.PENDING) {
-            throw new IllegalArgumentException("잘못된 상태입니다.");
+            throw new ApiException(FOLLOW_NOT_PENDING);
         }
         changeStatus(FollowStatus.SUCCESS);
     }
@@ -78,7 +84,7 @@ public class Follow {
 
     private void changeStatus(FollowStatus status) {
         if (!isActive()) {
-            throw new IllegalArgumentException("이미 비활성화된 관계입니다.");
+            throw new ApiException(FOLLOW_INACTIVE);
         }
         this.status = status;
     }

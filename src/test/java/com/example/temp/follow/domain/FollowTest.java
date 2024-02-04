@@ -1,8 +1,13 @@
 package com.example.temp.follow.domain;
 
+import static com.example.temp.exception.ErrorCode.FOLLOW_ALREADY_RELATED;
+import static com.example.temp.exception.ErrorCode.FOLLOW_INACTIVE;
+import static com.example.temp.exception.ErrorCode.FOLLOW_NOT_PENDING;
+import static com.example.temp.exception.ErrorCode.FOLLOW_STATUS_CHANGE_NOT_ALLOWED;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.example.temp.exception.ApiException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -68,8 +73,8 @@ class FollowTest {
 
         // when & then
         assertThatThrownBy(() -> follow.reactive(FollowStatus.SUCCESS))
-            .isInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("이미 둘 사이에 관계가 존재합니다.");
+            .isInstanceOf(ApiException.class)
+            .hasMessageContaining(FOLLOW_ALREADY_RELATED.getMessage());
     }
 
     @ParameterizedTest
@@ -84,8 +89,8 @@ class FollowTest {
 
         // when & then
         assertThatThrownBy(() -> follow.reactive(FollowStatus.valueOf(changed)))
-            .isInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("해당 상태로는 변경할 수 없습니다.");
+            .isInstanceOf(ApiException.class)
+            .hasMessageContaining(FOLLOW_STATUS_CHANGE_NOT_ALLOWED.getMessage());
     }
 
     @ParameterizedTest
@@ -120,8 +125,8 @@ class FollowTest {
 
         // when & then
         assertThatThrownBy(() -> follow.unfollow())
-            .isInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("이미 비활성화된 관계입니다.");
+            .isInstanceOf(ApiException.class)
+            .hasMessageContaining(FOLLOW_INACTIVE.getMessage());
     }
 
     @ParameterizedTest
@@ -156,8 +161,8 @@ class FollowTest {
 
         // when & then
         assertThatThrownBy(() -> follow.reject())
-            .isInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("이미 비활성화된 관계입니다.");
+            .isInstanceOf(ApiException.class)
+            .hasMessageContaining(FOLLOW_INACTIVE.getMessage());
     }
 
     @Test
@@ -186,7 +191,7 @@ class FollowTest {
 
         // when & then
         assertThatThrownBy(() -> follow.accept())
-            .isInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("잘못된 상태입니다.");
+            .isInstanceOf(ApiException.class)
+            .hasMessageContaining(FOLLOW_NOT_PENDING.getMessage());
     }
 }
