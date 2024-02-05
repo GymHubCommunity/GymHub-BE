@@ -1,5 +1,6 @@
 package com.example.temp.oauth;
 
+import com.example.temp.member.domain.FollowStrategy;
 import com.example.temp.member.domain.Member;
 
 public record OAuthResponse(
@@ -20,6 +21,8 @@ public record OAuthResponse(
             .email(this.email())
             .profileUrl(this.profileUrl())
             .nickname(nickname)
+            .followStrategy(FollowStrategy.EAGER)
+            .publicAccount(true)
             .build();
     }
 }
