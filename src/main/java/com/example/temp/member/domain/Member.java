@@ -35,6 +35,7 @@ public class Member {
     private String nickname;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private FollowStrategy followStrategy;
 
     private boolean publicAccount;

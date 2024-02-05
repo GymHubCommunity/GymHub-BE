@@ -6,6 +6,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.example.temp.member.domain.FollowStrategy;
 import com.example.temp.member.domain.Member;
 import com.example.temp.member.exception.NicknameDuplicatedException;
 import com.example.temp.member.infrastructure.nickname.NicknameGenerator;
@@ -115,6 +116,8 @@ class MemberServiceTest {
             .nickname(nickname)
             .email("이메일")
             .profileUrl("프로필주소")
+            .followStrategy(FollowStrategy.EAGER)
+            .publicAccount(true)
             .build();
         em.persist(member);
         return member;
