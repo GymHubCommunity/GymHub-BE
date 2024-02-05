@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.example.temp.member.domain.Member;
 import jakarta.persistence.EntityManager;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
 @Transactional
-class LoginInfoResponseTest {
+class LoginMemberResponseTest {
 
     @Autowired
     EntityManager em;
@@ -30,7 +29,7 @@ class LoginInfoResponseTest {
         em.persist(member);
 
         // when
-        LoginInfoResponse response = LoginInfoResponse.of(member);
+        LoginMemberResponse response = LoginMemberResponse.of(member);
 
         // then
         assertThat(response.id()).isNotNull();

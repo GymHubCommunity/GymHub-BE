@@ -1,9 +1,10 @@
 package com.example.temp.auth.presentation;
 
-import com.example.temp.oauth.application.OAuthService;
 import com.example.temp.auth.dto.request.OAuthLoginRequest;
 import com.example.temp.auth.dto.response.AccessToken;
-import com.example.temp.auth.dto.response.LoginInfoResponse;
+import com.example.temp.auth.dto.response.LoginMemberResponse;
+import com.example.temp.auth.infrastructure.TokenManager;
+import com.example.temp.oauth.application.OAuthService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -20,10 +21,10 @@ public class AuthController {
     private final OAuthService oAuthService;
 
     @PostMapping("/oauth/{provider}/login")
-    public ResponseEntity<LoginInfoResponse> oauthLogin(@PathVariable String provider,
+    public ResponseEntity<Void> oauthLogin(@PathVariable String provider,
         @RequestBody OAuthLoginRequest request) {
-        LoginInfoResponse response = oAuthService.login(provider, request.authCode());
-        return ResponseEntity.ok(response);
+        LoginMemberResponse response = oAuthService.login(provider, request.authCode());
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/auth/refresh")
