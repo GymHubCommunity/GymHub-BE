@@ -65,7 +65,7 @@ class FollowRepositoryTest {
         em.persist(follow);
 
         // when
-        Optional<Follow> resultOpt = followRepository.findByFromIdAndToId(toMember.getId(), fromMember.getId());
+        Optional<Follow> resultOpt = followRepository.findByFromIdAndToId(fromMember.getId(), notExistId);
 
         // then
         assertThat(resultOpt).isEmpty();
