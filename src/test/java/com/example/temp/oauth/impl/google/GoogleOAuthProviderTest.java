@@ -4,6 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.example.temp.oauth.OAuthProviderType;
@@ -18,9 +20,11 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
+import org.springframework.web.util.UriComponentsBuilder;
 
 @ExtendWith(MockitoExtension.class)
 class GoogleOAuthProviderTest {
@@ -122,4 +126,38 @@ class GoogleOAuthProviderTest {
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("Google 서버에서 문제가 발생했습니다.");
     }
+
+    @Test
+    @DisplayName("인증 URL을 받아온다.")
+    void getAuthorizedUrl() throws Exception {
+        // given
+        String fromUri = "fromUri";
+        String clientId = "clientId";
+        String redirectUri = "redirectUri";
+        String[] scope = new String[]{"first", "second"};
+        when(properties.fromUri()).thenReturn(fromUri);
+        when(properties.clientId()).thenReturn(clientId);
+        when(properties.redirectUri()).thenReturn(redirectUri);
+        when(properties.scope()).thenReturn(scope);
+        String expectedUrl = createUrl(fromUri, clientId, redirectUri, scope);
+
+        // when
+        String authorizedUrl = provider.getAuthorizedUrl();
+
+        // then
+        assertThat(authorizedUrl).isEqualTo(expectedUrl);
+        verify(properties, never()).clientSecret();
+    }
+
+    private static String createUrl(String fromUri, String clientId, String redirectUri, String[] scope) {
+        String googleScopeDelimiter = " ";
+        return UriComponentsBuilder
+            .fromUriString(fromUri)
+            .queryParam("client_id", clientId)
+            .queryParam("redirect_uri", redirectUri)
+            .queryParam("response_type", "code")
+            .queryParam("scope", String.join(googleScopeDelimiter, scope))
+            .toUriString();
+    }
+
 }
