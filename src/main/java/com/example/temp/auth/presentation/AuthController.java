@@ -20,16 +20,29 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 public class AuthController {
 
+    private final RefreshCookieProperties refreshCookieProperties;
     private final OAuthService oAuthService;
     private final TokenManager tokenManager;
 
     @PostMapping("/oauth/{provider}/login")
     public ResponseEntity<LoginResponse> oauthLogin(@PathVariable String provider,
-        @RequestBody OAuthLoginRequest request) {
+        @RequestBody OAuthLoginRequest request, HttpServletResponse response) {
         LoginMemberResponse memberResponse = oAuthService.login(provider, request.authCode());
         TokenInfo tokenInfo = tokenManager.issue(memberResponse.id());
-        // TODO refresh로 쿠키를 만든다
+
+        ResponseCookie refreshCookie = createRefreshCookie(tokenInfo.refreshToken());
+        response.addHeader(SET_COOKIE, refreshCookie.toString());
         return ResponseEntity.ok(LoginResponse.of(tokenInfo, memberResponse));
+    }
+
+    private ResponseCookie createRefreshCookie(String value) {
+        return ResponseCookie.from("refresh", value)
+            .path("/")
+            .httpOnly(true)
+            .secure(refreshCookieProperties.secure())
+            .maxAge(refreshCookieProperties.maxAge())
+            .sameSite(refreshCookieProperties.sameSite())
+            .build();
     }
 
     @PostMapping("/auth/refresh")
