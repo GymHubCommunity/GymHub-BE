@@ -3,6 +3,9 @@ package com.example.temp.auth.presentation;
 import static org.springframework.http.HttpHeaders.SET_COOKIE;
 
 import com.example.temp.auth.dto.request.OAuthLoginRequest;
+import com.example.temp.auth.dto.response.AccessToken;
+import com.example.temp.auth.dto.response.AuthorizedUrl;
+import com.example.temp.auth.dto.response.LoginInfoResponse;
 import com.example.temp.auth.dto.response.LoginMemberResponse;
 import com.example.temp.auth.dto.response.LoginResponse;
 import com.example.temp.auth.dto.response.TokenInfo;
@@ -42,9 +45,9 @@ public class AuthController {
     }
 
     @GetMapping("/oauth/{provider}/authorized_url")
-    public ResponseEntity<Void> getAuthorizedUrl(@PathVariable String provider) {
+    public ResponseEntity<AuthorizedUrl> getAuthorizedUrl(@PathVariable String provider) {
         String authorizedUrl = oAuthService.getAuthorizedUrl(provider);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(AuthorizedUrl.createInstance(authorizedUrl));
     }
 
     @PostMapping("/auth/refresh")
