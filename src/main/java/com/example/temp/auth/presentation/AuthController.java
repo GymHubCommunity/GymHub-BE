@@ -1,15 +1,19 @@
 package com.example.temp.auth.presentation;
 
+import static org.springframework.http.HttpHeaders.SET_COOKIE;
+
 import com.example.temp.auth.dto.request.OAuthLoginRequest;
-import com.example.temp.auth.dto.response.AccessToken;
 import com.example.temp.auth.dto.response.LoginMemberResponse;
 import com.example.temp.auth.dto.response.LoginResponse;
 import com.example.temp.auth.dto.response.TokenInfo;
 import com.example.temp.auth.infrastructure.TokenManager;
 import com.example.temp.oauth.application.OAuthService;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -19,6 +23,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @Slf4j
 public class AuthController {
+
+    public static final String REFRESH = "refresh";
 
     private final RefreshCookieProperties refreshCookieProperties;
     private final OAuthService oAuthService;
@@ -36,7 +42,7 @@ public class AuthController {
     }
 
     private ResponseCookie createRefreshCookie(String value) {
-        return ResponseCookie.from("refresh", value)
+        return ResponseCookie.from(REFRESH, value)
             .path("/")
             .httpOnly(true)
             .secure(refreshCookieProperties.secure())
@@ -46,8 +52,12 @@ public class AuthController {
     }
 
     @PostMapping("/auth/refresh")
-    public ResponseEntity<AccessToken> reissueToken() {
-        return ResponseEntity.ok().build();
+    public ResponseEntity<TokenInfo> reissueToken(@CookieValue(REFRESH) String refreshToken,
+        HttpServletResponse response) {
+        TokenInfo tokenInfo = tokenManager.reIssue(refreshToken);
+        ResponseCookie refreshCookie = createRefreshCookie(tokenInfo.refreshToken());
+        response.addHeader(SET_COOKIE, refreshCookie.toString());
+        return ResponseEntity.ok(tokenInfo);
     }
 
     @PostMapping("/auth/logout")
