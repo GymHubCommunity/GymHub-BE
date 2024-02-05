@@ -29,6 +29,11 @@ public class GoogleOAuthProvider implements OAuthProvider {
         return OAuthResponse.of(OAuthProviderType.GOOGLE, googleUserInfo);
     }
 
+    @Override
+    public String getAuthorizedUrl() {
+        return null;
+    }
+
     private GoogleUserInfo fetchUserInfo(GoogleToken googleToken) {
         try {
             return googleOAuthClient.fetchUserInfo(googleToken.getValueUsingAuthorizationHeader());

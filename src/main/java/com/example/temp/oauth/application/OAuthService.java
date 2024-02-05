@@ -44,6 +44,7 @@ public class OAuthService {
     }
 
     public String getAuthorizedUrl(String provider) {
-        return null;
+        OAuthProviderType oAuthProviderType = OAuthProviderType.find(provider);
+        return oAuthProviderResolver.getAuthorizedUrl(oAuthProviderType);
     }
 }

@@ -29,6 +29,11 @@ public class KakaoOAuthProvider implements OAuthProvider {
         return OAuthResponse.of(OAuthProviderType.KAKAO, kakaoUserInfo);
     }
 
+    @Override
+    public String getAuthorizedUrl() {
+        return null;
+    }
+
     private KakaoUserInfo fetchUserInfo(KakaoToken kakaoToken) {
         try {
             return kakaoOAuthClient.fetchUserInfo(kakaoToken.getValueUsingAuthorizationHeader());

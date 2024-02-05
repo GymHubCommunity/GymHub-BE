@@ -11,11 +11,20 @@ public class OAuthProviderResolver {
     private final Set<OAuthProvider> providers;
 
     public OAuthResponse fetch(OAuthProviderType providerType, String authCode) {
-        OAuthProvider oAuthProvider = providers.stream()
+        OAuthProvider oAuthProvider = findProvider(providerType);
+        return oAuthProvider.fetch(authCode);
+    }
+
+    private OAuthProvider findProvider(OAuthProviderType providerType) {
+        return providers.stream()
             .filter(provider -> provider.support(providerType))
             .findAny()
             .orElseThrow(() -> new IllegalArgumentException("지원하지 않는 OAuth 타입입니다."));
-        return oAuthProvider.fetch(authCode);
+    }
+
+    public String getAuthorizedUrl(OAuthProviderType providerType) {
+        OAuthProvider oAuthProvider = findProvider(providerType);
+        return oAuthProvider.getAuthorizedUrl();
     }
 }
 
