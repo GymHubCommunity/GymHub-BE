@@ -18,6 +18,7 @@ public class WebConfig implements WebMvcConfigurer {
             .allowedOrigins(corsProperties.allowedOrigins())
             .allowedMethods(corsProperties.allowedMethods())
             .allowedHeaders(corsProperties.allowedHeaders())
+            .exposedHeaders(corsProperties.exposedHeaders())
             .allowCredentials(true);
     }
 }

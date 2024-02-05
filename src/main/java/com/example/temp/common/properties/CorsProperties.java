@@ -7,7 +7,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public record CorsProperties(
     String[] allowedOrigins,
     String[] allowedMethods,
-    String[] allowedHeaders
+    String[] allowedHeaders,
+    String[] exposedHeaders
 ) {
 
     @Override
