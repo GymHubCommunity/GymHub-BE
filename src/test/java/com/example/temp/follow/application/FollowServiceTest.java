@@ -130,29 +130,14 @@ class FollowServiceTest {
             .hasMessageContaining(FOLLOW_ALREADY_RELATED.getMessage());
     }
 
-    @Test
-    @DisplayName("이전에 팔로우 취소한 상태에서, 새롭게 팔로우를 한다")
-    void followSuccessThatAlreadyUnfollow() throws Exception {
+    @ParameterizedTest
+    @DisplayName("이전에 팔로우가 비활성화(CANCELED, REJECTED)된 상태에서, 새롭게 팔로우를 한다")
+    @ValueSource(strings = {"CANCELED", "REJECTED"})
+    void followSuccessThatAlreadyUnfollow(String statusStr) throws Exception {
         // given
         Member fromMember = saveMember();
         Member toMember = saveMember();
-        saveFollow(fromMember, toMember, FollowStatus.CANCELED);
-
-        // when
-        FollowResponse response = followService.follow(fromMember.getId(), toMember.getId());
-
-        // then
-        assertThat(response.status()).isEqualTo(FollowStatus.SUCCESS);
-        validateFollowResponse(response, fromMember, toMember);
-    }
-
-    @Test
-    @DisplayName("이전에 팔로우를 거절한 상태에서, fromMember는 다시 팔로우를 한다")
-    void followSuccessThatAlreadyRejected() throws Exception {
-        // given
-        Member fromMember = saveMember();
-        Member toMember = saveMember();
-        saveFollow(fromMember, toMember, FollowStatus.REJECTED);
+        saveFollow(fromMember, toMember, FollowStatus.valueOf(statusStr));
 
         // when
         FollowResponse response = followService.follow(fromMember.getId(), toMember.getId());
@@ -308,9 +293,9 @@ class FollowServiceTest {
     void getFollowingsSuccess() throws Exception {
         // given
         Member target = saveMember();
-        int successCnt = 10;
-        List<Member> members = saveMembers(successCnt);
-        List<Follow> targetFollows = saveTargetFollowings(FollowStatus.SUCCESS, target, members, 0, successCnt);
+        int followingCnt = 10;
+        List<Member> members = saveMembers(followingCnt);
+        List<Follow> targetFollows = saveTargetFollowings(FollowStatus.SUCCESS, target, members, 0, followingCnt);
 
         List<FollowInfo> targetFollowInfos = targetFollows.stream()
             .map(follow -> FollowInfo.of(follow.getTo(), follow.getId()))
@@ -320,7 +305,7 @@ class FollowServiceTest {
         List<FollowInfo> infos = followService.getFollowings(target.getId(), target.getId());
 
         // then
-        assertThat(infos).hasSize(successCnt)
+        assertThat(infos).hasSize(followingCnt)
             .containsAnyElementsOf(targetFollowInfos);
         assertThat(infos.get(0).memberId()).isNotEqualTo(target.getId());
     }
@@ -411,6 +396,8 @@ class FollowServiceTest {
         List<FollowInfo> targetFollowInfos = targetFollows.stream()
             .map(follow -> FollowInfo.of(follow.getFrom(), follow.getId()))
             .toList();
+        em.flush();
+        em.clear();
 
         // when
         List<FollowInfo> infos = followService.getFollowers(target.getId(), target.getId());
