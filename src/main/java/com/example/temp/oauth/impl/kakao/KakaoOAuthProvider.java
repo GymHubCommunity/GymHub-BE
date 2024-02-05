@@ -34,7 +34,7 @@ public class KakaoOAuthProvider implements OAuthProvider {
             return kakaoOAuthClient.fetchUserInfo(kakaoToken.getValueUsingAuthorizationHeader());
         } catch (WebClientResponseException e) {
             if (e.getStatusCode().is5xxServerError()) {
-                throw new IllegalArgumentException("Google 서버에서 문제가 발생했습니다.");
+                throw new IllegalArgumentException("Kakao 서버에서 문제가 발생했습니다.");
             }
             throw e;
         }
