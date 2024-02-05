@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 
 public class KakaoUserInfo implements OAuthUserInfo {
+
     @JsonProperty("id")
     private String idUsingResourceServer;
 
@@ -16,21 +17,23 @@ public class KakaoUserInfo implements OAuthUserInfo {
 
     @Getter
     static class Properties {
+
         @JsonProperty("nickname")
         private String name;
-
     }
 
+    @Getter
     static class KakaoAccount {
+
         @JsonProperty("profile")
         private Profile profile;
 
-        @Getter
         @JsonProperty("email")
         private String email;
 
         @Getter
         static class Profile {
+
             @JsonProperty("profile_image_url")
             private String profileUrl;
         }
@@ -38,7 +41,7 @@ public class KakaoUserInfo implements OAuthUserInfo {
 
     @Override
     public String getProfileUrl() {
-        return kakaoAccount.profile.getProfileUrl();
+        return kakaoAccount.getProfile().getProfileUrl();
     }
 
     @Override
@@ -56,4 +59,3 @@ public class KakaoUserInfo implements OAuthUserInfo {
         return properties.getName();
     }
 }
-
