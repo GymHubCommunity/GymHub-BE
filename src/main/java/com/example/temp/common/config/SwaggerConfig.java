@@ -14,7 +14,7 @@ public class SwaggerConfig {
     public OpenAPI customOpenAPI() {
         Info info = new Info()
             .title("GymHub")
-            .version("v0.0.0");
+            .version("v1.0.0");
         return new OpenAPI()
             .info(info);
     }
