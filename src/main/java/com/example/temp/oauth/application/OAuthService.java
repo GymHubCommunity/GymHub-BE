@@ -43,4 +43,7 @@ public class OAuthService {
         return savedMember;
     }
 
+    public String getAuthorizedUrl(String provider) {
+        return null;
+    }
 }
