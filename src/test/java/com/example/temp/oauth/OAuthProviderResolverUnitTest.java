@@ -69,4 +69,36 @@ class OAuthProviderResolverUnitTest {
         verify(oAuthProvider1, never()).fetch(anyString());
         verify(oAuthProvider2, never()).fetch(anyString());
     }
+
+    @Test
+    @DisplayName("입력된 OAuthProviderType에 해당되는 Provider의 Authorized URL을 받아온다.")
+    void getAuthorizedUrlSuccess() throws Exception {
+        // given
+        when(oAuthProvider1.support(any(OAuthProviderType.class)))
+            .thenReturn(true);
+
+        // when
+        resolver.getAuthorizedUrl(OAuthProviderType.KAKAO);
+
+        // then
+        verify(oAuthProvider1, times(1)).getAuthorizedUrl();
+        verify(oAuthProvider2, never()).getAuthorizedUrl();
+    }
+
+    @Test
+    @DisplayName("지원하지 않는 OAuthProviderType을 입력받으면 예외를 반환한다")
+    void getAuthorizedUrlFailNotSupported() throws Exception {
+        // given
+        when(oAuthProvider1.support(any(OAuthProviderType.class)))
+            .thenReturn(false);
+        when(oAuthProvider2.support(any(OAuthProviderType.class)))
+            .thenReturn(false);
+
+        // when & then
+        assertThatThrownBy(() -> resolver.getAuthorizedUrl(OAuthProviderType.KAKAO))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("지원하지 않는 OAuth 타입입니다.");
+        verify(oAuthProvider1, never()).fetch(anyString());
+        verify(oAuthProvider2, never()).fetch(anyString());
+    }
 }

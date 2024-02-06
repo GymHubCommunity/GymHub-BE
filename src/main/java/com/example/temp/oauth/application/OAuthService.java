@@ -43,4 +43,8 @@ public class OAuthService {
         return savedMember;
     }
 
+    public String getAuthorizedUrl(String provider) {
+        OAuthProviderType oAuthProviderType = OAuthProviderType.find(provider);
+        return oAuthProviderResolver.getAuthorizedUrl(oAuthProviderType);
+    }
 }

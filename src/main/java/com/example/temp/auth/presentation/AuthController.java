@@ -3,6 +3,9 @@ package com.example.temp.auth.presentation;
 import static org.springframework.http.HttpHeaders.SET_COOKIE;
 
 import com.example.temp.auth.dto.request.OAuthLoginRequest;
+import com.example.temp.auth.dto.response.AccessToken;
+import com.example.temp.auth.dto.response.AuthorizedUrl;
+import com.example.temp.auth.dto.response.LoginInfoResponse;
 import com.example.temp.auth.dto.response.LoginMemberResponse;
 import com.example.temp.auth.dto.response.LoginResponse;
 import com.example.temp.auth.dto.response.TokenInfo;
@@ -14,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CookieValue;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -38,6 +42,12 @@ public class AuthController {
 
         createRefreshCookie(tokenInfo.refreshToken(), response);
         return ResponseEntity.ok(LoginResponse.of(tokenInfo, memberResponse));
+    }
+
+    @GetMapping("/oauth/{provider}/authorized_url")
+    public ResponseEntity<AuthorizedUrl> getAuthorizedUrl(@PathVariable String provider) {
+        String authorizedUrl = oAuthService.getAuthorizedUrl(provider);
+        return ResponseEntity.ok(AuthorizedUrl.createInstance(authorizedUrl));
     }
 
     @PostMapping("/auth/refresh")

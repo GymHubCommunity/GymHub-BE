@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
+import org.springframework.web.util.UriComponentsBuilder;
 
 @Component
 @RequiredArgsConstructor
@@ -27,6 +28,17 @@ public class GoogleOAuthProvider implements OAuthProvider {
         GoogleToken googleToken = fetchToken(authCode);
         GoogleUserInfo googleUserInfo = fetchUserInfo(googleToken);
         return OAuthResponse.of(OAuthProviderType.GOOGLE, googleUserInfo);
+    }
+
+    @Override
+    public String getAuthorizedUrl() {
+        return UriComponentsBuilder
+            .fromUriString(properties.fromUri())
+            .queryParam("client_id", properties.clientId())
+            .queryParam("redirect_uri", properties.redirectUri())
+            .queryParam("response_type", "code")
+            .queryParam("scope", String.join(" ", properties.scope()))
+            .toUriString();
     }
 
     private GoogleUserInfo fetchUserInfo(GoogleToken googleToken) {
