@@ -1,5 +1,7 @@
 package com.example.temp.member.domain;
 
+import com.example.temp.exception.ApiException;
+import com.example.temp.exception.ErrorCode;
 import com.example.temp.follow.domain.FollowStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -55,5 +57,14 @@ public class Member {
 
     public FollowStatus getStatusBasedOnStrategy() {
         return followStrategy.getFollowStatus();
+    }
+
+    public void init(String nickname, String profileUrl) {
+        if (init) {
+            throw new ApiException(ErrorCode.MEMBER_ALREADY_REGISTER);
+        }
+        this.init = true;
+        this.nickname = nickname;
+        this.profileUrl = profileUrl;
     }
 }

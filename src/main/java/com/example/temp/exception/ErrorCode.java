@@ -15,6 +15,7 @@ public enum ErrorCode {
 
     // 회원
     MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "해당되는 회원을 찾을 수 없습니다."),
+    MEMBER_ALREADY_REGISTER(HttpStatus.BAD_REQUEST, "이미 가입이 완료된 회원입니다."),
 
     // 팔로우
     FOLLOW_NOT_FOUND(HttpStatus.NOT_FOUND, "두 회원 간에 팔로우 관계를 찾을 수 없습니다."),
