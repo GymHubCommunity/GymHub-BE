@@ -81,7 +81,7 @@ class FollowRepositoryTest {
         Follow follow = Follow.builder()
             .from(executor)
             .to(target)
-            .status(FollowStatus.SUCCESS)
+            .status(FollowStatus.APPROVED)
             .build();
         em.persist(follow);
 
@@ -125,7 +125,7 @@ class FollowRepositoryTest {
         Follow follow = Follow.builder()
             .from(executor)
             .to(anotherMember)
-            .status(FollowStatus.SUCCESS)
+            .status(FollowStatus.APPROVED)
             .build();
         em.persist(follow);
 
@@ -159,7 +159,7 @@ class FollowRepositoryTest {
     @DisplayName("fromId와 status가 일치하는 Follow가 없을 때 비어있는 리스트를 반환한다")
     void findAllByFromIdAndStatusEmptyResult() throws Exception {
         // when
-        List<Follow> result = followRepository.findAllByFromIdAndStatus(notExistId, FollowStatus.SUCCESS);
+        List<Follow> result = followRepository.findAllByFromIdAndStatus(notExistId, FollowStatus.APPROVED);
 
         // then
         assertThat(result).isEmpty();
@@ -188,7 +188,7 @@ class FollowRepositoryTest {
     @DisplayName("toId와 status가 일치하는 Follow가 없을 때 비어있는 리스트를 반환한다")
     void findAllByToIdAndStatusEmptyResult() throws Exception {
         // when
-        List<Follow> result = followRepository.findAllByToIdAndStatus(notExistId, FollowStatus.SUCCESS);
+        List<Follow> result = followRepository.findAllByToIdAndStatus(notExistId, FollowStatus.APPROVED);
 
         // then
         assertThat(result).isEmpty();
@@ -212,7 +212,7 @@ class FollowRepositoryTest {
             .followStrategy(FollowStrategy.EAGER)
             .publicAccount(true)
             .build();
-            em.persist(member);
+        em.persist(member);
         return member;
     }
 

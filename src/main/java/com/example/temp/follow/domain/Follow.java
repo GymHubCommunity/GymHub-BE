@@ -71,7 +71,7 @@ public class Follow {
         if (this.getStatus() != FollowStatus.PENDING) {
             throw new ApiException(FOLLOW_NOT_PENDING);
         }
-        changeStatus(FollowStatus.SUCCESS);
+        changeStatus(FollowStatus.APPROVED);
     }
 
     public void unfollow() {

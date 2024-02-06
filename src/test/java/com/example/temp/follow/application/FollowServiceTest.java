@@ -75,7 +75,7 @@ class FollowServiceTest {
     }
 
     @Test
-    @DisplayName("팔로우를 할 때, target의 전략이 EAGER면 SUCCESS 상태의 follow가 생성된다.")
+    @DisplayName("팔로우를 할 때, target의 전략이 EAGER면 APPROVED 상태의 follow가 생성된다.")
     void validateCreateSuccessFollowThatTargetStrategyIsEager() throws Exception {
         // given
         Member fromMember = saveMember();
@@ -85,7 +85,7 @@ class FollowServiceTest {
         FollowResponse response = followService.follow(fromMember.getId(), toMember.getId());
 
         // then
-        assertThat(response.status()).isEqualTo(FollowStatus.SUCCESS);
+        assertThat(response.status()).isEqualTo(FollowStatus.APPROVED);
     }
 
     @Test
@@ -108,7 +108,7 @@ class FollowServiceTest {
         // given
         Member fromMember = saveMember();
         Member toMember = saveMember();
-        saveFollow(fromMember, toMember, FollowStatus.SUCCESS);
+        saveFollow(fromMember, toMember, FollowStatus.APPROVED);
 
         // when & then
         assertThatThrownBy(() -> followService.follow(fromMember.getId(), toMember.getId()))
@@ -143,7 +143,7 @@ class FollowServiceTest {
         FollowResponse response = followService.follow(fromMember.getId(), toMember.getId());
 
         // then
-        assertThat(response.status()).isEqualTo(FollowStatus.SUCCESS);
+        assertThat(response.status()).isEqualTo(FollowStatus.APPROVED);
         validateFollowResponse(response, fromMember, toMember);
     }
 
@@ -178,7 +178,7 @@ class FollowServiceTest {
         // given
         Member fromMember = saveMember();
         Member target = saveMember();
-        Follow follow = saveFollow(fromMember, target, FollowStatus.SUCCESS);
+        Follow follow = saveFollow(fromMember, target, FollowStatus.APPROVED);
 
         // when
         followService.unfollow(fromMember.getId(), target.getId());
@@ -224,7 +224,7 @@ class FollowServiceTest {
         followService.acceptFollowRequest(target.getId(), follow.getId());
 
         // then
-        assertThat(follow.getStatus()).isEqualTo(FollowStatus.SUCCESS);
+        assertThat(follow.getStatus()).isEqualTo(FollowStatus.APPROVED);
     }
 
     @Test
@@ -244,7 +244,7 @@ class FollowServiceTest {
 
     @ParameterizedTest
     @DisplayName("pending 상태의 follow에 대해서만 요청을 수락할 수 있다.")
-    @ValueSource(strings = {"SUCCESS", "REJECTED", "CANCELED"})
+    @ValueSource(strings = {"APPROVED", "REJECTED", "CANCELED"})
     void acceptFollowRequestFailInvalidFollowTarget(String statusStr) throws Exception {
         // given
         Member fromMember = saveMember();
@@ -259,7 +259,7 @@ class FollowServiceTest {
 
     @ParameterizedTest
     @DisplayName("상대의 팔로우를 거절한다")
-    @ValueSource(strings = {"SUCCESS", "PENDING"})
+    @ValueSource(strings = {"APPROVED", "PENDING"})
     void rejectFollowRequest(String prevStatus) throws Exception {
         // given
         Member fromMember = saveMember();
@@ -295,7 +295,7 @@ class FollowServiceTest {
         Member target = saveMember();
         int followingCnt = 10;
         List<Member> members = saveMembers(followingCnt);
-        List<Follow> targetFollows = saveTargetFollowings(FollowStatus.SUCCESS, target, members, 0, followingCnt);
+        List<Follow> targetFollows = saveTargetFollowings(FollowStatus.APPROVED, target, members, 0, followingCnt);
 
         List<FollowInfo> targetFollowInfos = targetFollows.stream()
             .map(follow -> FollowInfo.of(follow.getTo(), follow.getId()))
@@ -311,16 +311,16 @@ class FollowServiceTest {
     }
 
     @Test
-    @DisplayName("특정 사용자의 팔로잉 목록을 가져올 때, SUCCESS 상태인 것만 가져온다.")
+    @DisplayName("특정 사용자의 팔로잉 목록을 가져올 때, APPROVED 상태인 것만 가져온다.")
     void getFollowingsThatStatusIsSuccess() throws Exception {
         // given
         Member target = saveMember();
         int pendingCnt = 1;
         int rejectCnt = 1;
         int canceledCnt = 1;
-        int successCnt = 10;
+        int approvedCnt = 10;
 
-        List<Member> members = saveMembers(pendingCnt + rejectCnt + canceledCnt + successCnt);
+        List<Member> members = saveMembers(pendingCnt + rejectCnt + canceledCnt + approvedCnt);
 
         int idx = 0;
         saveTargetFollowings(FollowStatus.PENDING, target, members, idx, pendingCnt);
@@ -329,13 +329,13 @@ class FollowServiceTest {
         idx += rejectCnt;
         saveTargetFollowings(FollowStatus.CANCELED, target, members, idx, canceledCnt);
         idx += canceledCnt;
-        saveTargetFollowings(FollowStatus.SUCCESS, target, members, idx, successCnt);
+        saveTargetFollowings(FollowStatus.APPROVED, target, members, idx, approvedCnt);
 
         // when
         List<FollowInfo> infos = followService.getFollowings(target.getId(), target.getId());
 
         // then
-        assertThat(infos).hasSize(successCnt);
+        assertThat(infos).hasSize(approvedCnt);
     }
 
     @Test
@@ -360,7 +360,7 @@ class FollowServiceTest {
         em.persist(privateMember);
 
         Member anotherMember = saveMember();
-        saveFollow(anotherMember, privateMember, FollowStatus.SUCCESS);
+        saveFollow(anotherMember, privateMember, FollowStatus.APPROVED);
 
         // when & then
         assertThatCode(() -> followService.getFollowings(anotherMember.getId(), privateMember.getId()))
@@ -389,9 +389,9 @@ class FollowServiceTest {
     void getFollowersSuccess() throws Exception {
         // given
         Member target = saveMember();
-        int successCnt = 10;
-        List<Member> members = saveMembers(successCnt);
-        List<Follow> targetFollows = saveTargetFollowers(FollowStatus.SUCCESS, target, members, 0, successCnt);
+        int approvedCnt = 10;
+        List<Member> members = saveMembers(approvedCnt);
+        List<Follow> targetFollows = saveTargetFollowers(FollowStatus.APPROVED, target, members, 0, approvedCnt);
 
         List<FollowInfo> targetFollowInfos = targetFollows.stream()
             .map(follow -> FollowInfo.of(follow.getFrom(), follow.getId()))
@@ -403,22 +403,22 @@ class FollowServiceTest {
         List<FollowInfo> infos = followService.getFollowers(target.getId(), target.getId());
 
         // then
-        assertThat(infos).hasSize(successCnt)
+        assertThat(infos).hasSize(approvedCnt)
             .containsAnyElementsOf(targetFollowInfos);
         assertThat(infos.get(0).memberId()).isNotEqualTo(target.getId());
     }
 
     @Test
-    @DisplayName("특정 사용자의 팔로워 목록을 가져올 때, SUCCESS 상태인 것만 가져온다.")
+    @DisplayName("특정 사용자의 팔로워 목록을 가져올 때, APPROVED 상태인 것만 가져온다.")
     void getFollowersThatStatusIsSuccess() throws Exception {
         // given
         Member target = saveMember();
         int pendingCnt = 1;
         int rejectCnt = 1;
         int canceledCnt = 1;
-        int successCnt = 10;
+        int approvedCnt = 10;
 
-        List<Member> members = saveMembers(pendingCnt + rejectCnt + canceledCnt + successCnt);
+        List<Member> members = saveMembers(pendingCnt + rejectCnt + canceledCnt + approvedCnt);
 
         int idx = 0;
         saveTargetFollowers(FollowStatus.PENDING, target, members, idx, pendingCnt);
@@ -427,13 +427,13 @@ class FollowServiceTest {
         idx += rejectCnt;
         saveTargetFollowers(FollowStatus.CANCELED, target, members, idx, canceledCnt);
         idx += canceledCnt;
-        saveTargetFollowers(FollowStatus.SUCCESS, target, members, idx, successCnt);
+        saveTargetFollowers(FollowStatus.APPROVED, target, members, idx, approvedCnt);
 
         // when
         List<FollowInfo> infos = followService.getFollowers(target.getId(), target.getId());
 
         // then
-        assertThat(infos).hasSize(successCnt);
+        assertThat(infos).hasSize(approvedCnt);
     }
 
     @Test
@@ -458,7 +458,7 @@ class FollowServiceTest {
         em.persist(privateMember);
 
         Member anotherMember = saveMember();
-        saveFollow(anotherMember, privateMember, FollowStatus.SUCCESS);
+        saveFollow(anotherMember, privateMember, FollowStatus.APPROVED);
 
         // when & then
         assertThatCode(() -> followService.getFollowers(anotherMember.getId(), privateMember.getId()))

@@ -17,7 +17,7 @@ public interface FollowRepository extends JpaRepository<Follow, Long> {
     List<Follow> findAllByToIdAndStatus(@Param("toId") long toId, @Param("status") FollowStatus status);
 
     @Query("SELECT CASE WHEN COUNT(f) > 0 THEN true ELSE false END FROM Follow f"
-        + " WHERE f.from.id = :executorId AND f.to.id = :targetId and f.status = 'SUCCESS'")
+        + " WHERE f.from.id = :executorId AND f.to.id = :targetId and f.status = 'APPROVED'")
     boolean checkExecutorFollowsTarget(@Param("executorId") long executorId, @Param("targetId") long targetId);
 
 }

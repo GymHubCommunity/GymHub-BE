@@ -18,7 +18,7 @@ class FollowTest {
 
     @DisplayName("해당 Follow 엔티티가 유효한 상태라면 true를 반환한다")
     @ParameterizedTest
-    @ValueSource(strings = {"SUCCESS", "PENDING"})
+    @ValueSource(strings = {"APPROVED", "PENDING"})
     void isValidSuccess(String statusStr) throws Exception {
         // given
         Follow follow = Follow.builder()
@@ -45,7 +45,7 @@ class FollowTest {
     @ParameterizedTest
     @DisplayName("비활성 상태의 Follow를 활성화한다.")
     @CsvSource({
-        "REJECTED, SUCCESS",
+        "REJECTED, APPROVED",
         "CANCELED, PENDING"
     })
     void reactiveSuccess(String prevStatusStr, String changedStatusStr) throws Exception {
@@ -64,7 +64,7 @@ class FollowTest {
     @ParameterizedTest
     @DisplayName("활성 상태의 Follow는 활성화시킬 수 없다.")
     @CsvSource({
-        "SUCCESS",
+        "APPROVED",
         "PENDING"
     })
     void reactiveFailAlreadyActivate(String prevStatusStr) throws Exception {
@@ -72,7 +72,7 @@ class FollowTest {
         Follow follow = Follow.builder().status(FollowStatus.valueOf(prevStatusStr)).build();
 
         // when & then
-        assertThatThrownBy(() -> follow.reactive(FollowStatus.SUCCESS))
+        assertThatThrownBy(() -> follow.reactive(FollowStatus.APPROVED))
             .isInstanceOf(ApiException.class)
             .hasMessageContaining(FOLLOW_ALREADY_RELATED.getMessage());
     }
@@ -96,7 +96,7 @@ class FollowTest {
     @ParameterizedTest
     @DisplayName("언팔로우한다.")
     @CsvSource({
-        "SUCCESS",
+        "APPROVED",
         "PENDING"
     })
     void unfollowSuccess(String statusStr) throws Exception {
@@ -132,7 +132,7 @@ class FollowTest {
     @ParameterizedTest
     @DisplayName("팔로우를 거절한다.")
     @CsvSource({
-        "SUCCESS",
+        "APPROVED",
         "PENDING"
     })
     void rejectSuccess(String statusStr) throws Exception {
@@ -177,12 +177,12 @@ class FollowTest {
         follow.accept();
 
         // then
-        assertThat(follow.getStatus()).isEqualTo(FollowStatus.SUCCESS);
+        assertThat(follow.getStatus()).isEqualTo(FollowStatus.APPROVED);
     }
 
     @ParameterizedTest
     @DisplayName("pending 상태의 follow에 대해서만 요청을 수락할 수 있다.")
-    @ValueSource(strings = {"SUCCESS", "REJECTED", "CANCELED"})
+    @ValueSource(strings = {"APPROVED", "REJECTED", "CANCELED"})
     void acceptFailInvalidFollowType(String statusStr) throws Exception {
         // given
         Follow follow = Follow.builder()

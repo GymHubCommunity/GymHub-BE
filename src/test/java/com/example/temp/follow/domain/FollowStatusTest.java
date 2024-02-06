@@ -9,7 +9,7 @@ class FollowStatusTest {
 
     @DisplayName("해당 FollowStatus가 활성화 상태라면 true를 반환한다")
     @ParameterizedTest
-    @ValueSource(strings = {"SUCCESS", "PENDING"})
+    @ValueSource(strings = {"APPROVED", "PENDING"})
     void isValidSuccess(String statusStr) throws Exception {
         // given
         FollowStatus status = FollowStatus.valueOf(statusStr);

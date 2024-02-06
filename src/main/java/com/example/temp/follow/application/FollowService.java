@@ -41,7 +41,7 @@ public class FollowService {
         if (!target.isPublicAccount()) {
             validateViewAuthorization(targetId, executorId);
         }
-        return followRepository.findAllByFromIdAndStatus(targetId, FollowStatus.SUCCESS).stream()
+        return followRepository.findAllByFromIdAndStatus(targetId, FollowStatus.APPROVED).stream()
             .map(follow -> FollowInfo.of(follow.getTo(), follow.getId()))
             .toList();
     }
@@ -60,7 +60,7 @@ public class FollowService {
         if (!target.isPublicAccount()) {
             validateViewAuthorization(targetId, executorId);
         }
-        return followRepository.findAllByToIdAndStatus(targetId, FollowStatus.SUCCESS).stream()
+        return followRepository.findAllByToIdAndStatus(targetId, FollowStatus.APPROVED).stream()
             .map(follow -> FollowInfo.of(follow.getFrom(), follow.getId()))
             .toList();
     }
@@ -124,7 +124,6 @@ public class FollowService {
      * @param targetId   언팔로우 하려는 대상의 ID
      * @throws ApiException MEMBER_NOT_FOUND: 언팔로우를 하려는 대상을 찾을 수 없을 때 발생합니다.
      * @throws ApiException FOLLOW_INACTIVE: 팔로우가 이미 비활성화되어있을 때 발생합니다.
-
      */
     @Transactional
     public void unfollow(long executorId, Long targetId) {
