@@ -25,6 +25,8 @@ public class Member {
     @Column(name = "member_id")
     private Long id;
 
+    private boolean init;
+
     @Column(nullable = false)
     private String email;
 
@@ -41,8 +43,9 @@ public class Member {
     private boolean publicAccount;
 
     @Builder
-    private Member(String email, String profileUrl, String nickname,
+    private Member(boolean init, String email, String profileUrl, String nickname,
         FollowStrategy followStrategy, boolean publicAccount) {
+        this.init = init;
         this.email = email;
         this.profileUrl = profileUrl;
         this.nickname = nickname;

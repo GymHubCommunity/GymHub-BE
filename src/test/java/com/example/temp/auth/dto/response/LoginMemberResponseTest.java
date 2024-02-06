@@ -27,6 +27,7 @@ class LoginMemberResponseTest {
             .profileUrl("프로필주소")
             .nickname("생성된 닉네임")
             .followStrategy(FollowStrategy.EAGER)
+            .init(true)
             .build();
         em.persist(member);
 
@@ -38,5 +39,6 @@ class LoginMemberResponseTest {
         assertThat(response.profileUrl()).isEqualTo(member.getProfileUrl());
         assertThat(response.email()).isEqualTo(member.getEmail());
         assertThat(response.nickname()).isEqualTo(member.getNickname());
+        assertThat(response.init()).isEqualTo(member.isInit());
     }
 }
