@@ -37,7 +37,7 @@ public class OAuthService {
     }
 
     private Member saveMemberAndOAuthInfo(OAuthProviderType oAuthProviderType, OAuthResponse oAuthResponse) {
-        Member savedMember = memberService.register(oAuthResponse);
+        Member savedMember = memberService.saveInitStatusMember(oAuthResponse);
         OAuthInfo oAuthInfo = OAuthInfo.of(oAuthResponse.idUsingResourceServer(), oAuthProviderType, savedMember);
         oAuthInfoRepository.save(oAuthInfo);
         return savedMember;

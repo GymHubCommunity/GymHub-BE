@@ -63,7 +63,7 @@ class OAuthServiceUnitTest {
             .thenReturn(oAuthResponse);
         when(oAuthInfoRepository.findByIdUsingResourceServerAndType(anyString(), any(OAuthProviderType.class)))
             .thenReturn(Optional.empty());
-        when(memberService.register(any(OAuthResponse.class)))
+        when(memberService.saveInitStatusMember(any(OAuthResponse.class)))
             .thenReturn(member);
 
         // when
@@ -101,7 +101,7 @@ class OAuthServiceUnitTest {
             .thenReturn(oAuthResponse);
         when(oAuthInfoRepository.findByIdUsingResourceServerAndType(anyString(), any(OAuthProviderType.class)))
             .thenReturn(Optional.empty());
-        when(memberService.register(any(OAuthResponse.class)))
+        when(memberService.saveInitStatusMember(any(OAuthResponse.class)))
             .thenReturn(member);
 
         // when
@@ -109,7 +109,7 @@ class OAuthServiceUnitTest {
 
         // then
         verify(memberService, times(1))
-            .register(any(OAuthResponse.class));
+            .saveInitStatusMember(any(OAuthResponse.class));
         verify(oAuthInfoRepository, times(1))
             .save(any(OAuthInfo.class));
     }
@@ -128,7 +128,7 @@ class OAuthServiceUnitTest {
 
         // then
         verify(memberService, never())
-            .register(any(OAuthResponse.class));
+            .saveInitStatusMember(any(OAuthResponse.class));
     }
 
 }

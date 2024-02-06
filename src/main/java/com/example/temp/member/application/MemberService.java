@@ -32,7 +32,7 @@ public class MemberService {
      */
     @Transactional
     @Retryable(retryFor = NicknameDuplicatedException.class, maxAttempts = LOOP_MAX_CNT, backoff = @Backoff(delay = 0))
-    public Member register(OAuthResponse oAuthResponse) {
+    public Member saveInitStatusMember(OAuthResponse oAuthResponse) {
         try {
             String nickname = nicknameGenerator.generate();
             if (memberRepository.existsByNickname(nickname)) {

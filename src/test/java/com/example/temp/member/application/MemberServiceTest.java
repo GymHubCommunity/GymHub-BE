@@ -55,7 +55,7 @@ class MemberServiceTest {
             .thenReturn(createdNickname);
 
         // when
-        Member result = memberService.register(oAuthResponse);
+        Member result = memberService.saveInitStatusMember(oAuthResponse);
 
         // then
         assertThat(result.getNickname()).isEqualTo(createdNickname);
@@ -72,7 +72,7 @@ class MemberServiceTest {
             .thenReturn(createdNickname);
 
         // when & then
-        assertThatThrownBy(() -> memberService.register(oAuthResponse))
+        assertThatThrownBy(() -> memberService.saveInitStatusMember(oAuthResponse))
             .isInstanceOf(NicknameDuplicatedException.class);
     }
 
@@ -86,7 +86,7 @@ class MemberServiceTest {
             .thenReturn(createdNickname);
 
         // when & then
-        assertThatThrownBy(() -> memberService.register(oAuthResponse))
+        assertThatThrownBy(() -> memberService.saveInitStatusMember(oAuthResponse))
             .isInstanceOf(NicknameDuplicatedException.class);
         verify(nicknameGenerator, times(5))
             .generate();
@@ -104,7 +104,7 @@ class MemberServiceTest {
                 duplicatedNickname, createdNickname);
 
         // when
-        Member result = memberService.register(oAuthResponse);
+        Member result = memberService.saveInitStatusMember(oAuthResponse);
 
         // then
         assertThat(result.getNickname()).isEqualTo(createdNickname);
