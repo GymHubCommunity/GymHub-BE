@@ -1,7 +1,9 @@
 package com.example.temp.member.application;
 
+import com.example.temp.auth.dto.response.MemberInfo;
 import com.example.temp.member.domain.Member;
 import com.example.temp.member.domain.MemberRepository;
+import com.example.temp.member.dto.request.MemberRegisterRequest;
 import com.example.temp.member.exception.NicknameDuplicatedException;
 import com.example.temp.member.infrastructure.nickname.NicknameGenerator;
 import com.example.temp.oauth.OAuthResponse;
@@ -46,4 +48,7 @@ public class MemberService {
         }
     }
 
+    public MemberInfo register(MemberRegisterRequest request) {
+        return null;
+    }
 }
