@@ -21,6 +21,7 @@ public record OAuthResponse(
             .email(this.email())
             .profileUrl(this.profileUrl())
             .nickname(nickname)
+            .init(false)
             .followStrategy(FollowStrategy.EAGER)
             .publicAccount(true)
             .build();

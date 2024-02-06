@@ -1,6 +1,8 @@
 package com.example.temp.member.application;
 
 import com.example.temp.auth.dto.response.MemberInfo;
+import com.example.temp.exception.ApiException;
+import com.example.temp.exception.ErrorCode;
 import com.example.temp.member.domain.Member;
 import com.example.temp.member.domain.MemberRepository;
 import com.example.temp.member.dto.request.MemberRegisterRequest;
@@ -48,7 +50,11 @@ public class MemberService {
         }
     }
 
+    @Transactional
     public MemberInfo register(long executorId, MemberRegisterRequest request) {
-        return null;
+        Member member = memberRepository.findById(executorId)
+            .orElseThrow(() -> new ApiException(ErrorCode.AUTHENTICATED_FAIL));
+        member.init(request.nickname(), request.profileUrl());
+        return MemberInfo.of(member);
     }
 }

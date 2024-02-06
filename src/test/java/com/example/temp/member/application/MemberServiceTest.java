@@ -6,8 +6,12 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.example.temp.auth.dto.response.MemberInfo;
+import com.example.temp.exception.ApiException;
+import com.example.temp.exception.ErrorCode;
 import com.example.temp.member.domain.FollowStrategy;
 import com.example.temp.member.domain.Member;
+import com.example.temp.member.dto.request.MemberRegisterRequest;
 import com.example.temp.member.exception.NicknameDuplicatedException;
 import com.example.temp.member.infrastructure.nickname.NicknameGenerator;
 import com.example.temp.oauth.OAuthProviderType;
@@ -111,6 +115,65 @@ class MemberServiceTest {
         validateMemberIsSame(result, oAuthResponse);
     }
 
+    @Test
+    @DisplayName("회원을 저장한다")
+    void registerSuccess() throws Exception {
+        // given
+        Member member = saveMember("닉넴");
+        String changedProfileUrl = "변경하는 프로필 주소";
+        String changedNickname = "변경할 닉네임";
+
+        // when
+        MemberInfo result = memberService.register(member.getId(),
+            new MemberRegisterRequest(changedProfileUrl, changedNickname));
+
+        // then
+        assertThat(result.init()).isTrue();
+        assertThat(result.id()).isEqualTo(member.getId());
+        assertThat(result.profileUrl()).isEqualTo(changedProfileUrl);
+        assertThat(result.nickname()).isEqualTo(changedNickname);
+    }
+
+    @Test
+    @DisplayName("이미 회원가입된 사용자 계정으로 회원가입을 할 수 없다.")
+    void registerFailAlreadyRegistered() throws Exception {
+        // given
+        Member member = saveRegisterMember("닉넴");
+        String changedProfileUrl = "변경하는 프로필 주소";
+        String changedNickname = "변경할 닉네임";
+
+        // when & then
+        assertThatThrownBy(() -> memberService.register(member.getId(),
+            new MemberRegisterRequest(changedProfileUrl, changedNickname)))
+            .isInstanceOf(ApiException.class)
+            .hasMessageContaining(ErrorCode.MEMBER_ALREADY_REGISTER.getMessage());
+    }
+
+    @Test
+    @DisplayName("DB에 존재하지 않는 회원은 회원가입 요청이 불가능하다.")
+    void registerFailNotAuthn() throws Exception {
+        // given
+        long notExistMemberId = 999_999_999L;
+
+        // when & then
+        assertThatThrownBy(() -> memberService.register(notExistMemberId,
+            new MemberRegisterRequest("이미지url", "닉넴")))
+            .isInstanceOf(ApiException.class)
+            .hasMessageContaining(ErrorCode.AUTHENTICATED_FAIL.getMessage());
+    }
+
+    private Member saveRegisterMember(String nickname) {
+        Member member = Member.builder()
+            .nickname(nickname)
+            .email("이메일")
+            .profileUrl("프로필주소")
+            .init(true)
+            .followStrategy(FollowStrategy.EAGER)
+            .build();
+        em.persist(member);
+        return member;
+    }
+
     private Member saveMember(String nickname) {
         Member member = Member.builder()
             .nickname(nickname)
@@ -118,6 +181,7 @@ class MemberServiceTest {
             .profileUrl("프로필주소")
             .followStrategy(FollowStrategy.EAGER)
             .publicAccount(true)
+            .init(false)
             .build();
         em.persist(member);
         return member;

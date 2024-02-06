@@ -13,6 +13,7 @@ public enum ErrorCode {
     AUTHENTICATED_FAIL(HttpStatus.UNAUTHORIZED, "인증되지 않은 사용자입니다."),
     AUTHORIZED_FAIL(HttpStatus.FORBIDDEN, "인가 권한이 없는 사용자입니다."),
 
+
     // 회원
     MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "해당되는 회원을 찾을 수 없습니다."),
     MEMBER_ALREADY_REGISTER(HttpStatus.BAD_REQUEST, "이미 가입이 완료된 회원입니다."),
