@@ -1,9 +1,11 @@
 package com.example.temp.common.config;
 
+import com.example.temp.common.interceptor.AuthenticationInterceptor;
 import com.example.temp.common.properties.CorsProperties;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
@@ -11,6 +13,8 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 public class WebConfig implements WebMvcConfigurer {
 
     private final CorsProperties corsProperties;
+
+    private final AuthenticationInterceptor authenticationInterceptor;
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
@@ -20,5 +24,12 @@ public class WebConfig implements WebMvcConfigurer {
             .allowedHeaders(corsProperties.allowedHeaders())
             .exposedHeaders(corsProperties.exposedHeaders())
             .allowCredentials(true);
+    }
+
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(authenticationInterceptor)
+            .excludePathPatterns("/oauth/**")
+            .excludePathPatterns("/auth/refresh");
     }
 }
