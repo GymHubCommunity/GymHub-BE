@@ -54,7 +54,7 @@ class OAuthResponseTest {
     }
 
     @Test
-    @DisplayName("OAuthResponse와 nickname을 사용해 Member 객체를 만든다.")
+    @DisplayName("OAuthResponse와 nickname을 사용해 초기화되지 않은 멤버를 만든다.")
     void createMemberUsingOAuthResponse() throws Exception {
         // given
         String nickname = "닉네임";
@@ -64,6 +64,7 @@ class OAuthResponseTest {
         Member result = oAuthResponse.toMemberWithNickname(nickname);
 
         // then
+        assertThat(result.isInit()).isFalse();
         assertThat(result.getNickname()).isEqualTo(nickname);
         assertThat(result.getEmail()).isEqualTo(oAuthResponse.email());
         assertThat(result.getProfileUrl()).isEqualTo(oAuthResponse.profileUrl());
