@@ -3,7 +3,7 @@ package com.example.temp.auth.dto.response;
 import com.example.temp.member.domain.Member;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-public record LoginMemberResponse(
+public record MemberInfo(
     Long id,
     String email,
     String profileUrl,
@@ -13,8 +13,8 @@ public record LoginMemberResponse(
     boolean init
 ) {
 
-    public static LoginMemberResponse of(Member member) {
-        return new LoginMemberResponse(member.getId(), member.getEmail(), member.getProfileUrl(),
+    public static MemberInfo of(Member member) {
+        return new MemberInfo(member.getId(), member.getEmail(), member.getProfileUrl(),
             member.getNickname(), member.isInit());
     }
 }

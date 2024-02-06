@@ -13,7 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
 @Transactional
-class LoginMemberResponseTest {
+class MemberInfoTest {
 
     @Autowired
     EntityManager em;
@@ -32,7 +32,7 @@ class LoginMemberResponseTest {
         em.persist(member);
 
         // when
-        LoginMemberResponse response = LoginMemberResponse.of(member);
+        MemberInfo response = MemberInfo.of(member);
 
         // then
         assertThat(response.id()).isNotNull();

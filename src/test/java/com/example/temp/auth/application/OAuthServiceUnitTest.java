@@ -8,7 +8,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.example.temp.auth.dto.response.LoginMemberResponse;
+import com.example.temp.auth.dto.response.MemberInfo;
 import com.example.temp.member.application.MemberService;
 import com.example.temp.member.domain.Member;
 import com.example.temp.oauth.OAuthProviderResolver;
@@ -67,7 +67,7 @@ class OAuthServiceUnitTest {
             .thenReturn(member);
 
         // when
-        LoginMemberResponse response = oAuthService.login("google", "1234");
+        MemberInfo response = oAuthService.login("google", "1234");
 
         // then
         assertThat(response.id()).isEqualTo(member.getId());
@@ -85,7 +85,7 @@ class OAuthServiceUnitTest {
             .thenReturn(Optional.of(oAuthInfo));
 
         // when
-        LoginMemberResponse response = oAuthService.login("google", "1234");
+        MemberInfo response = oAuthService.login("google", "1234");
 
         // then
         assertThat(response.id()).isEqualTo(member.getId());
