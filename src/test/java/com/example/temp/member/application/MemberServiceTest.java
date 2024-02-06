@@ -47,8 +47,8 @@ class MemberServiceTest {
 
 
     @Test
-    @DisplayName("회원을 가입시킨다")
-    void registerSuccess() throws Exception {
+    @DisplayName("임시 멤버를 생성한다")
+    void registerTempSuccess() throws Exception {
         // given
         String createdNickname = "중복되지않은_닉네임";
         when(nicknameGenerator.generate())
@@ -63,8 +63,8 @@ class MemberServiceTest {
     }
 
     @Test
-    @DisplayName("중복된 닉네임으로는 회원가입이 불가능하다")
-    void registerFailDuplicatedNickname() throws Exception {
+    @DisplayName("중복된 닉네임으로는 임시 멤버를 생성할 수 없다.")
+    void registerTempFailDuplicatedNickname() throws Exception {
         // given
         String createdNickname = "중복된_닉네임";
         saveMember(createdNickname);
@@ -77,8 +77,8 @@ class MemberServiceTest {
     }
 
     @Test
-    @DisplayName("중복된 닉네임으로 회원가입 요청 시, 다섯 번까지 재시도한다.")
-    void trySeveralTimeIfDuplicatedNickname() throws Exception {
+    @DisplayName("중복된 닉네임으로 임시 회원을 저장하려 할 때, 다섯 번까지 재시도한다.")
+    void tryRegisterTempSeveralTimeIfDuplicatedNickname() throws Exception {
         // given
         String createdNickname = "중복된_닉네임";
         saveMember(createdNickname);
@@ -93,8 +93,8 @@ class MemberServiceTest {
     }
 
     @Test
-    @DisplayName("닉네임 중복으로 회원가입 실패 후 다시 시도했을 때, 다섯 번 안에 중복되지 않은 닉네임이 만들어지면 회원가입이 가능하다")
-    void trySuccessRecovery() throws Exception {
+    @DisplayName("닉네임 중복으로 임시 회원 저장을 실패한 뒤 다시 시도했을 때, 다섯 번 안에 중복되지 않은 닉네임이 만들어지면 임시 회원을 저장할 수 있다.")
+    void tryRegisterTempSuccessRecovery() throws Exception {
         // given
         String duplicatedNickname = "중복된_닉네임";
         String createdNickname = "중복되지_않은_닉네임";
