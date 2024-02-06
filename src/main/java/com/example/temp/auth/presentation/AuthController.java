@@ -3,9 +3,7 @@ package com.example.temp.auth.presentation;
 import static org.springframework.http.HttpHeaders.SET_COOKIE;
 
 import com.example.temp.auth.dto.request.OAuthLoginRequest;
-import com.example.temp.auth.dto.response.AccessToken;
 import com.example.temp.auth.dto.response.AuthorizedUrl;
-import com.example.temp.auth.dto.response.LoginInfoResponse;
 import com.example.temp.auth.dto.response.LoginMemberResponse;
 import com.example.temp.auth.dto.response.LoginResponse;
 import com.example.temp.auth.dto.response.TokenInfo;
