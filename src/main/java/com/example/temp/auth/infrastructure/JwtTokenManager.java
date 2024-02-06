@@ -24,7 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Component
 @Transactional
 @RequiredArgsConstructor
-public class JwtTokenManager implements TokenManager {
+public class JwtTokenManager implements TokenManager, TokenParser {
 
     private static final String BEARER = "Bearer";
 
@@ -93,17 +93,24 @@ public class JwtTokenManager implements TokenManager {
      */
     @Override
     public TokenInfo reIssue(String refreshToken) {
-        Jws<Claims> claimsJws = parse(refreshToken);
+        Jws<Claims> claimsJws = parseToJwsClaims(refreshToken);
         Claims claims = claimsJws.getPayload();
         long id = Long.parseLong(claims.getSubject());
         return issue(id);
     }
 
-    private Jws<Claims> parse(String token) {
+    private Jws<Claims> parseToJwsClaims(String token) {
         try {
             return parser.parseSignedClaims(token);
         } catch (SignatureException e) {
             throw new TokenInvalidException(e);
         }
+    }
+
+    @Override
+    public long parse(String token) {
+        Jws<Claims> claimsJws = parseToJwsClaims(token);
+        Claims claims = claimsJws.getPayload();
+        return Long.parseLong(claims.getSubject());
     }
 }
