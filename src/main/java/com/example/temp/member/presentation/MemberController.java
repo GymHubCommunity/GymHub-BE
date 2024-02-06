@@ -21,7 +21,7 @@ public class MemberController {
     @PostMapping("/register")
     public ResponseEntity<MemberInfo> register(@RequestAttribute(name = "executor") long executorId,
         @RequestBody MemberRegisterRequest memberRegisterRequest) {
-        MemberInfo response = memberService.register(memberRegisterRequest);
+        MemberInfo response = memberService.register(executorId, memberRegisterRequest);
         return ResponseEntity.ok(response);
     }
 

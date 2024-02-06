@@ -48,7 +48,7 @@ public class MemberService {
         }
     }
 
-    public MemberInfo register(MemberRegisterRequest request) {
+    public MemberInfo register(long executorId, MemberRegisterRequest request) {
         return null;
     }
 }
