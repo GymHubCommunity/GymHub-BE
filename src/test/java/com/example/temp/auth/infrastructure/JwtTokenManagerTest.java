@@ -129,6 +129,21 @@ class JwtTokenManagerTest {
             .isInstanceOf(TokenInvalidException.class);
     }
 
+    @Test
+    @DisplayName("토큰을 파싱해서 id를 얻는다")
+    void parse() throws Exception {
+        // given
+        long memberId = 1L;
+        Date future = Date.from(fixedMachineTime.plusSeconds(100000L));
+        String token = createToken(future, memberId);
+
+        // when
+        long result = jwtTokenManager.parse(token);
+
+        // then
+        assertThat(result).isEqualTo(memberId);
+    }
+
     private String createToken(Date expired, long subject) {
         return Jwts.builder()
             .subject(String.valueOf(subject))
