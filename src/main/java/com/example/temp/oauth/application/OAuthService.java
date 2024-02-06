@@ -1,6 +1,6 @@
 package com.example.temp.oauth.application;
 
-import com.example.temp.auth.dto.response.LoginInfoResponse;
+import com.example.temp.auth.dto.response.LoginMemberResponse;
 import com.example.temp.member.application.MemberService;
 import com.example.temp.member.domain.Member;
 import com.example.temp.oauth.OAuthProviderResolver;
@@ -22,11 +22,11 @@ public class OAuthService {
     private final MemberService memberService;
 
     @Transactional
-    public LoginInfoResponse login(String provider, String authCode) {
+    public LoginMemberResponse login(String provider, String authCode) {
         OAuthProviderType oAuthProviderType = OAuthProviderType.find(provider);
         OAuthResponse oAuthResponse = oAuthProviderResolver.fetch(oAuthProviderType, authCode);
         Member member = findMemberOrElseCreate(oAuthResponse);
-        return LoginInfoResponse.of(member);
+        return LoginMemberResponse.of(member);
     }
 
     private Member findMemberOrElseCreate(OAuthResponse oAuthResponse) {
