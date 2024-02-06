@@ -1,0 +1,18 @@
+# Jwt 커스텀
+jwt:
+  secret: ThisIsSecretThisIsSecretThisIsSecretThisIsSecretThisIsSecretThisIsSecretThisIsSecretThisIsSecret
+  access-token-expires: 10000
+  refresh-token-expires: 1000000
+
+# CORS 커스텀
+cors:
+  allowed-origins: []
+  allowed-headers: []
+  allowed-methods: []
+  exposed-headers: []
+
+# RefreshCookie 전략 커스텀
+refresh-cookie:
+  secure: false
+  max-age: 1000000
+  same-site: None
