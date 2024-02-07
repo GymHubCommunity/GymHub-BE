@@ -1,5 +1,6 @@
 package com.example.temp.common.interceptor;
 
+import com.example.temp.auth.dto.MemberInfo;
 import com.example.temp.auth.infrastructure.TokenParser;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -14,7 +15,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
 public class AuthenticationInterceptor implements HandlerInterceptor {
 
     public static final String BEARER = "Bearer ";
-    public static final String MEMBER_ID = "memberId";
+    public static final String MEMBER_INFO = "memberInfo";
 
     private final TokenParser tokenParser;
 
@@ -27,8 +28,8 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
             return false;
         }
         String accessToken = accessTokenBeforeProcessing.substring(BEARER.length());
-        long memberId = tokenParser.parse(accessToken);
-        request.setAttribute(MEMBER_ID, memberId);
+        MemberInfo memberInfo = tokenParser.parsedClaims(accessToken);
+        request.setAttribute(MEMBER_INFO, memberInfo);
         return true;
     }
 
