@@ -2,6 +2,7 @@ package com.example.temp.follow.domain;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.example.temp.common.entity.Email;
 import com.example.temp.member.domain.FollowStrategy;
 import com.example.temp.member.domain.Member;
 import com.example.temp.member.infrastructure.nickname.Nickname;
@@ -207,7 +208,7 @@ class FollowRepositoryTest {
 
     private Member saveMember() {
         Member member = Member.builder()
-            .email("이메일")
+            .email(Email.create("이메일"))
             .profileUrl("프로필")
             .nickname(Nickname.create("nick" + (globalIdx++)))
             .followStrategy(FollowStrategy.EAGER)

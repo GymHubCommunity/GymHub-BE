@@ -3,6 +3,7 @@ package com.example.temp.member.domain;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.example.temp.common.entity.Email;
 import com.example.temp.exception.ApiException;
 import com.example.temp.exception.ErrorCode;
 import com.example.temp.member.infrastructure.nickname.Nickname;
@@ -50,7 +51,7 @@ class MemberTest {
     @DisplayName("초기화가 되지 않은 멤버를 생성한다.")
     void buildInitStatus() throws Exception {
         // given
-        String email = "email";
+        Email email = Email.create("email");
         String profileUrl = "profileUrl";
         Nickname nickname = Nickname.create("nickname");
 

@@ -2,6 +2,7 @@ package com.example.temp.auth.dto.response;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.example.temp.common.entity.Email;
 import com.example.temp.member.domain.FollowStrategy;
 import com.example.temp.member.domain.Member;
 import com.example.temp.member.infrastructure.nickname.Nickname;
@@ -45,7 +46,7 @@ class MemberInfoTest {
     void ofSuccess() throws Exception {
         // given
         Member member = Member.builder()
-            .email("이멜")
+            .email(Email.create("이멜"))
             .profileUrl("프로필주소")
             .nickname(Nickname.create("생성된 닉네임"))
             .registered(true)
@@ -59,7 +60,7 @@ class MemberInfoTest {
         // then
         assertThat(response.id()).isNotNull();
         assertThat(response.profileUrl()).isEqualTo(member.getProfileUrl());
-        assertThat(response.email()).isEqualTo(member.getEmail());
+        assertThat(response.email()).isEqualTo(member.getEmailStr());
         assertThat(response.nickname()).isEqualTo(member.getNicknameStr());
         assertThat(response.registered()).isEqualTo(member.isRegistered());
     }

@@ -1,18 +1,19 @@
 package com.example.temp.oauth;
 
+import com.example.temp.common.entity.Email;
 import com.example.temp.member.domain.Member;
 import com.example.temp.member.infrastructure.nickname.Nickname;
 
 public record OAuthResponse(
     OAuthProviderType type,
-    String email,
+    Email email,
     String name,
     String idUsingResourceServer,
     String profileUrl
 ) {
 
     public static OAuthResponse of(OAuthProviderType type, OAuthUserInfo oAuthUserInfo) {
-        return new OAuthResponse(type, oAuthUserInfo.getEmail(), oAuthUserInfo.getName(),
+        return new OAuthResponse(type, Email.create(oAuthUserInfo.getEmail()), oAuthUserInfo.getName(),
             oAuthUserInfo.getIdUsingResourceServer(), oAuthUserInfo.getProfileUrl());
     }
 

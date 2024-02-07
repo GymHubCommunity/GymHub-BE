@@ -9,6 +9,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.example.temp.auth.dto.response.MemberInfo;
+import com.example.temp.common.entity.Email;
 import com.example.temp.member.application.MemberService;
 import com.example.temp.member.domain.Member;
 import com.example.temp.member.infrastructure.nickname.Nickname;
@@ -49,9 +50,10 @@ class OAuthServiceUnitTest {
     @BeforeEach
     void setUp() {
         oAuthService = new OAuthService(oAuthProviderResolver, oAuthInfoRepository, memberService);
-        oAuthResponse = new OAuthResponse(OAuthProviderType.GOOGLE, "이메일", "닉네임", "123", "프로필주소");
+        oAuthResponse = new OAuthResponse(OAuthProviderType.GOOGLE, Email.create("이메일"), "닉네임", "123", "프로필주소");
         member = Member.builder()
             .nickname(Nickname.create("defaultNick"))
+            .email(Email.create("default@email.com"))
             .build();
         oAuthInfo = OAuthInfo.builder()
             .member(member)
@@ -74,7 +76,7 @@ class OAuthServiceUnitTest {
 
         // then
         assertThat(response.id()).isEqualTo(member.getId());
-        assertThat(response.email()).isEqualTo(member.getEmail());
+        assertThat(response.email()).isEqualTo(member.getEmailStr());
         assertThat(response.profileUrl()).isEqualTo(member.getProfileUrl());
     }
 
@@ -92,7 +94,7 @@ class OAuthServiceUnitTest {
 
         // then
         assertThat(response.id()).isEqualTo(member.getId());
-        assertThat(response.email()).isEqualTo(member.getEmail());
+        assertThat(response.email()).isEqualTo(member.getEmailStr());
         assertThat(response.profileUrl()).isEqualTo(member.getProfileUrl());
     }
 

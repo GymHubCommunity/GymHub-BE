@@ -2,6 +2,7 @@ package com.example.temp.auth.dto.response;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.example.temp.common.entity.Email;
 import com.example.temp.member.domain.Member;
 import com.example.temp.member.infrastructure.nickname.Nickname;
 import org.junit.jupiter.api.DisplayName;
@@ -15,9 +16,7 @@ class LoginResponseTest {
         // given
         String accessToken = "엑세스토큰";
         boolean requiredAdditionalInfo = true;
-        Member member = Member.builder()
-            .nickname(Nickname.create("nickname"))
-            .build();
+        Member member = saveMember();
         MemberInfo memberInfo = MemberInfo.of(member);
 
         // when
@@ -34,15 +33,11 @@ class LoginResponseTest {
     void ofSuccess() throws Exception {
         // given
         String accessToken = "엑세스토큰";
-        boolean registered = true;
         TokenInfo tokenInfo = TokenInfo.builder()
             .accessToken(accessToken)
             .refreshToken("리프레쉬")
             .build();
-        Member member = Member.builder()
-            .nickname(Nickname.create("nickname"))
-            .registered(registered)
-            .build();
+        Member member = saveMember();
         MemberInfo memberInfo = MemberInfo.of(member);
 
         // when
@@ -50,7 +45,16 @@ class LoginResponseTest {
 
         // then
         assertThat(result.accessToken()).isEqualTo(accessToken);
-        assertThat(result.requiredAdditionalInfo()).isEqualTo(!registered);
+        assertThat(result.requiredAdditionalInfo()).isEqualTo(!memberInfo.registered());
         assertThat(result.userInfo()).isEqualTo(memberInfo);
     }
+
+    private Member saveMember() {
+        return Member.builder()
+            .nickname(Nickname.create("nickname"))
+            .email(Email.create("email@naver.com"))
+            .registered(true)
+            .build();
+    }
+
 }

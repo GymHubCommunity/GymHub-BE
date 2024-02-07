@@ -2,6 +2,7 @@ package com.example.temp.member.domain;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.example.temp.common.entity.Email;
 import com.example.temp.member.infrastructure.nickname.Nickname;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.DisplayName;
@@ -43,7 +44,7 @@ class MemberRepositoryTest {
     private Member createMember(Nickname nickname) {
         Member member = Member.builder()
             .nickname(nickname)
-            .email("이멜")
+            .email(Email.create("이메일"))
             .profileUrl("프로필")
             .followStrategy(FollowStrategy.EAGER)
             .build();

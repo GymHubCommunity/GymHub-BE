@@ -8,6 +8,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.example.temp.common.entity.Email;
 import com.example.temp.oauth.OAuthProviderType;
 import com.example.temp.oauth.OAuthResponse;
 import org.junit.jupiter.api.BeforeEach;
@@ -77,7 +78,7 @@ class KakaoOAuthProviderTest {
 
         // then
         assertThat(result.type()).isEqualTo(OAuthProviderType.KAKAO);
-        assertThat(result.email()).isEqualTo(kakaoUserInfo.getEmail());
+        assertThat(result.email()).isEqualTo(Email.create(kakaoUserInfo.getEmail()));
         assertThat(result.name()).isEqualTo(kakaoUserInfo.getName());
         assertThat(result.idUsingResourceServer()).isEqualTo(kakaoUserInfo.getIdUsingResourceServer());
         assertThat(result.profileUrl()).isEqualTo(kakaoUserInfo.getProfileUrl());

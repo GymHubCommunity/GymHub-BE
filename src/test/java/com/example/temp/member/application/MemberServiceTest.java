@@ -7,6 +7,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.example.temp.auth.dto.response.MemberInfo;
+import com.example.temp.common.entity.Email;
 import com.example.temp.exception.ApiException;
 import com.example.temp.exception.ErrorCode;
 import com.example.temp.member.domain.FollowStrategy;
@@ -166,7 +167,7 @@ class MemberServiceTest {
     private Member saveRegisterMember(Nickname nickname) {
         Member member = Member.builder()
             .nickname(nickname)
-            .email("이메일")
+            .email(Email.create("이메일"))
             .profileUrl("프로필주소")
             .registered(true)
             .followStrategy(FollowStrategy.EAGER)
@@ -179,7 +180,7 @@ class MemberServiceTest {
     private Member saveMember(Nickname nickname) {
         Member member = Member.builder()
             .nickname(nickname)
-            .email("이메일")
+            .email(Email.create("이메일"))
             .profileUrl("프로필주소")
             .registered(false)
             .followStrategy(FollowStrategy.EAGER)

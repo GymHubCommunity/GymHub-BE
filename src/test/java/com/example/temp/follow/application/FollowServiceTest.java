@@ -11,6 +11,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.example.temp.common.entity.Email;
 import com.example.temp.exception.ApiException;
 import com.example.temp.follow.domain.Follow;
 import com.example.temp.follow.domain.FollowStatus;
@@ -532,7 +533,7 @@ class FollowServiceTest {
 
     private Member saveMemberWithAccountPolicy(boolean isPublic) {
         Member member = Member.builder()
-            .email("이메일")
+            .email(Email.create("이메일"))
             .profileUrl("프로필")
             .nickname(Nickname.create("nick" + (globalIdx++)))
             .followStrategy(FollowStrategy.EAGER)
@@ -544,7 +545,7 @@ class FollowServiceTest {
 
     private Member saveMemberWithFollowStrategy(FollowStrategy followStrategy) {
         Member member = Member.builder()
-            .email("이메일")
+            .email(Email.create("이메일"))
             .profileUrl("프로필")
             .nickname(Nickname.create("nick" + (globalIdx++)))
             .followStrategy(followStrategy)

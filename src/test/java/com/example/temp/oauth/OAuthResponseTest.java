@@ -2,6 +2,7 @@ package com.example.temp.oauth;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.example.temp.common.entity.Email;
 import com.example.temp.member.domain.Member;
 import com.example.temp.member.infrastructure.nickname.Nickname;
 import org.junit.jupiter.api.BeforeEach;
@@ -48,7 +49,7 @@ class OAuthResponseTest {
 
         // then
         assertThat(result.type()).isEqualTo(type);
-        assertThat(result.email()).isEqualTo(oAuthUserInfo.getEmail());
+        assertThat(result.email()).isEqualTo(Email.create(oAuthUserInfo.getEmail()));
         assertThat(result.name()).isEqualTo(oAuthUserInfo.getName());
         assertThat(result.idUsingResourceServer()).isEqualTo(oAuthUserInfo.getIdUsingResourceServer());
         assertThat(result.profileUrl()).isEqualTo(oAuthUserInfo.getProfileUrl());

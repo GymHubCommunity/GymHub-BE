@@ -1,5 +1,6 @@
 package com.example.temp.member.domain;
 
+import com.example.temp.common.entity.Email;
 import com.example.temp.exception.ApiException;
 import com.example.temp.exception.ErrorCode;
 import com.example.temp.follow.domain.FollowStatus;
@@ -34,14 +35,15 @@ public class Member {
      */
     private boolean registered;
 
+    @Embedded
     @Column(nullable = false)
-    private String email;
+    private Email email;
 
     @Column(nullable = false)
     private String profileUrl;
 
-    @Column(nullable = false, unique = true)
     @Embedded
+    @Column(nullable = false, unique = true)
     private Nickname nickname;
 
     @Enumerated(EnumType.STRING)
@@ -51,7 +53,7 @@ public class Member {
     private boolean publicAccount;
 
     @Builder
-    private Member(String email, boolean registered, String profileUrl, Nickname nickname,
+    private Member(Email email, boolean registered, String profileUrl, Nickname nickname,
         FollowStrategy followStrategy, boolean publicAccount) {
         this.email = email;
         this.registered = registered;
@@ -65,7 +67,7 @@ public class Member {
         return followStrategy.getFollowStatus();
     }
 
-    public static Member createInitStatus(String email, String profileUrl, Nickname nickname) {
+    public static Member createInitStatus(Email email, String profileUrl, Nickname nickname) {
         return Member.builder()
             .registered(false)
             .publicAccount(false)
@@ -87,6 +89,10 @@ public class Member {
 
     public String getNicknameStr() {
         return nickname.getNickname();
+    }
+
+    public String getEmailStr() {
+        return email.getEmail();
     }
 }
 
