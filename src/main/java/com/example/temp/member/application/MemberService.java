@@ -42,7 +42,7 @@ public class MemberService {
             if (memberRepository.existsByNickname(nickname)) {
                 throw new NicknameDuplicatedException();
             }
-            Member member = oAuthResponse.toMemberWithNickname(nickname);
+            Member member = oAuthResponse.toInitStatusMemberWith(nickname);
             memberRepository.save(member);
             return member;
         } catch (DataIntegrityViolationException e) {

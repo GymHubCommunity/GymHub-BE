@@ -59,6 +59,18 @@ public class Member {
         return followStrategy.getFollowStatus();
     }
 
+    @Builder(builderMethodName = "buildInitStatus")
+    private Member(String email, String profileUrl, String nickname,
+        FollowStrategy followStrategy) {
+        this.init = false;
+        this.publicAccount = false;
+        this.email = email;
+        this.profileUrl = profileUrl;
+        this.nickname = nickname;
+        this.followStrategy = followStrategy;
+    }
+
+
     public void init(String nickname, String profileUrl) {
         if (init) {
             throw new ApiException(ErrorCode.MEMBER_ALREADY_REGISTER);

@@ -16,12 +16,11 @@ public record OAuthResponse(
             oAuthUserInfo.getIdUsingResourceServer(), oAuthUserInfo.getProfileUrl());
     }
 
-    public Member toMemberWithNickname(String nickname) {
-        return Member.builder()
+    public Member toInitStatusMemberWith(String nickname) {
+        return Member.buildInitStatus()
             .email(this.email())
             .profileUrl(this.profileUrl())
             .nickname(nickname)
-            .init(false)
             .followStrategy(FollowStrategy.EAGER)
             .publicAccount(true)
             .build();

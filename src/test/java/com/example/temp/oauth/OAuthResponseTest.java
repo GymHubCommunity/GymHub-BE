@@ -61,7 +61,7 @@ class OAuthResponseTest {
         OAuthResponse oAuthResponse = OAuthResponse.of(OAuthProviderType.GOOGLE, oAuthUserInfo);
 
         // when
-        Member result = oAuthResponse.toMemberWithNickname(nickname);
+        Member result = oAuthResponse.toInitStatusMemberWith(nickname);
 
         // then
         assertThat(result.isInit()).isFalse();
