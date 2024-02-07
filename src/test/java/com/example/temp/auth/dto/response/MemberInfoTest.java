@@ -48,7 +48,7 @@ class MemberInfoTest {
         Member member = Member.builder()
             .email(Email.create("이멜"))
             .profileUrl("프로필주소")
-            .nickname(Nickname.create("생성된 닉네임"))
+            .nickname(Nickname.create("생성닉네임"))
             .registered(true)
             .followStrategy(FollowStrategy.EAGER)
             .build();
