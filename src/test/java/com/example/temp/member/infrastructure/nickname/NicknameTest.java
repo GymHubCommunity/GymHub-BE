@@ -2,6 +2,7 @@ package com.example.temp.member.infrastructure.nickname;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import com.example.temp.exception.ApiException;
 import com.example.temp.exception.ErrorCode;
@@ -16,8 +17,8 @@ class NicknameTest {
     @DisplayName("Nickname의 값이 일치하면 동등한 객체인지 확인한다.")
     void equals() throws Exception {
         // given
-        Nickname nickname1 = Nickname.create("닉넴NickNAME12");
-        Nickname nickname2 = Nickname.create("닉넴NickNAME12");
+        Nickname nickname1 = Nickname.create("닉넴");
+        Nickname nickname2 = Nickname.create("닉넴");
 
         // when & then
         assertThat(nickname1.equals(nickname2)).isTrue();
@@ -36,6 +37,15 @@ class NicknameTest {
         // then
         assertThat(result).isTrue();
     }
+
+    @ParameterizedTest
+    @DisplayName("Nickname을 생성한다.")
+    @ValueSource(strings = {"닉넴NickNAME12", "닉넴", "ab", "12", "123456789012", "NiCKNAM2"})
+    void createNickname(String str) throws Exception {
+        // when & then
+        assertDoesNotThrow(() -> Nickname.create(str));
+    }
+
 
     @Test
     @DisplayName("Nickname의 길이는 12글자를 초과할 수 없다.")
