@@ -90,7 +90,7 @@ public class JwtTokenManager implements TokenManager, TokenParser {
      * @param refreshToken
      * @return
      * @throws TokenInvalidException 토큰의 서명이 적절하지 않을 때, 해당 Exception이 발생합니다.
-     * @throws ExpiredJwtException   refreshToken이 만료되었을 때, 해당 Exception이 발생합니다.
+     * @throws ExpiredJwtException refreshToken이 만료되었을 때, 해당 Exception이 발생합니다.
      */
     @Override
     public TokenInfo reIssue(String refreshToken) {
