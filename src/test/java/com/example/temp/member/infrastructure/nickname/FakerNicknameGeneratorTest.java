@@ -20,11 +20,11 @@ class FakerNicknameGeneratorTest {
     @Test
     @DisplayName("랜덤한 닉네임을 생성한다")
     void createNickname() throws Exception {
-        Set<String> nicknames = new HashSet<>();
+        Set<Nickname> nicknames = new HashSet<>();
         for (int i = 0; i < 1000; i++) {
             Nickname nickname = nicknameGenerator.generate();
             assertThat(nickname).isNotNull();
-            nicknames.add(nickname.getNickname());
+            nicknames.add(nickname);
         }
         assertThat(nicknames.size()).isBetween(2, 1000);
     }
