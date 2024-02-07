@@ -19,8 +19,29 @@ class MemberInfoTest {
     EntityManager em;
 
     @Test
-    @DisplayName("LoginInfoResponse를 생성한다")
+    @DisplayName("생성자의 순서가 올바른지 테스트한다")
     void create() throws Exception {
+        // given
+        long id = 1L;
+        String email = "email";
+        String profileUrl = "profile";
+        String nickname = "nick";
+        boolean registered = true;
+
+        // when
+        MemberInfo result = new MemberInfo(id, email, profileUrl, nickname, registered);
+
+        // then
+        assertThat(result.id()).isEqualTo(id);
+        assertThat(result.email()).isEqualTo(email);
+        assertThat(result.profileUrl()).isEqualTo(profileUrl);
+        assertThat(result.nickname()).isEqualTo(nickname);
+        assertThat(result.registered()).isEqualTo(registered);
+    }
+
+    @Test
+    @DisplayName("LoginInfoResponse를 생성한다")
+    void ofSuccess() throws Exception {
         // given
         Member member = Member.builder()
             .email("이멜")
