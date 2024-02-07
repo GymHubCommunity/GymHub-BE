@@ -1,6 +1,5 @@
 package com.example.temp.oauth;
 
-import com.example.temp.member.domain.FollowStrategy;
 import com.example.temp.member.domain.Member;
 
 public record OAuthResponse(
@@ -17,13 +16,6 @@ public record OAuthResponse(
     }
 
     public Member toInitStatusMemberWith(String nickname) {
-        return Member.builder()
-            .registered(false)
-            .email(this.email())
-            .profileUrl(this.profileUrl())
-            .nickname(nickname)
-            .followStrategy(FollowStrategy.EAGER)
-            .publicAccount(true)
-            .build();
+        return Member.createInitStatus(this.email(), this.profileUrl(), nickname);
     }
 }
