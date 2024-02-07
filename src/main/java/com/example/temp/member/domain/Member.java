@@ -27,7 +27,10 @@ public class Member {
     @Column(name = "member_id")
     private Long id;
 
-    private boolean init;
+    /**
+     * 사용자에게 profileUrl과 nickname을 인증받았다면 true, 그렇지 않다면 false를 갖습니다.
+     */
+    private boolean registered;
 
     @Column(nullable = false)
     private String email;
@@ -45,10 +48,10 @@ public class Member {
     private boolean publicAccount;
 
     @Builder
-    private Member(boolean init, String email, String profileUrl, String nickname,
+    private Member(String email, boolean registered, String profileUrl, String nickname,
         FollowStrategy followStrategy, boolean publicAccount) {
-        this.init = init;
         this.email = email;
+        this.registered = registered;
         this.profileUrl = profileUrl;
         this.nickname = nickname;
         this.followStrategy = followStrategy;
@@ -62,7 +65,7 @@ public class Member {
     @Builder(builderMethodName = "buildInitStatus")
     private Member(String email, String profileUrl, String nickname,
         FollowStrategy followStrategy) {
-        this.init = false;
+        this.registered = false;
         this.publicAccount = false;
         this.email = email;
         this.profileUrl = profileUrl;
@@ -70,12 +73,11 @@ public class Member {
         this.followStrategy = followStrategy;
     }
 
-
     public void init(String nickname, String profileUrl) {
-        if (init) {
+        if (registered) {
             throw new ApiException(ErrorCode.MEMBER_ALREADY_REGISTER);
         }
-        this.init = true;
+        this.registered = true;
         this.nickname = nickname;
         this.profileUrl = profileUrl;
     }

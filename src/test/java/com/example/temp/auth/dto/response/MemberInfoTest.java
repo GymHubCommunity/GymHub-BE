@@ -26,8 +26,8 @@ class MemberInfoTest {
             .email("이멜")
             .profileUrl("프로필주소")
             .nickname("생성된 닉네임")
+            .registered(true)
             .followStrategy(FollowStrategy.EAGER)
-            .init(true)
             .build();
         em.persist(member);
 
@@ -39,6 +39,6 @@ class MemberInfoTest {
         assertThat(response.profileUrl()).isEqualTo(member.getProfileUrl());
         assertThat(response.email()).isEqualTo(member.getEmail());
         assertThat(response.nickname()).isEqualTo(member.getNickname());
-        assertThat(response.init()).isEqualTo(member.isInit());
+        assertThat(response.init()).isEqualTo(member.isRegistered());
     }
 }

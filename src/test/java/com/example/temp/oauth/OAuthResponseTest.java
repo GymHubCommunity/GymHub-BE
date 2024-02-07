@@ -64,7 +64,7 @@ class OAuthResponseTest {
         Member result = oAuthResponse.toInitStatusMemberWith(nickname);
 
         // then
-        assertThat(result.isInit()).isFalse();
+        assertThat(result.isRegistered()).isFalse();
         assertThat(result.getNickname()).isEqualTo(nickname);
         assertThat(result.getEmail()).isEqualTo(oAuthResponse.email());
         assertThat(result.getProfileUrl()).isEqualTo(oAuthResponse.profileUrl());

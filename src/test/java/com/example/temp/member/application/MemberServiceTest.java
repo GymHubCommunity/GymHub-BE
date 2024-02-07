@@ -167,8 +167,9 @@ class MemberServiceTest {
             .nickname(nickname)
             .email("이메일")
             .profileUrl("프로필주소")
-            .init(true)
+            .registered(true)
             .followStrategy(FollowStrategy.EAGER)
+            .publicAccount(true)
             .build();
         em.persist(member);
         return member;
@@ -179,9 +180,9 @@ class MemberServiceTest {
             .nickname(nickname)
             .email("이메일")
             .profileUrl("프로필주소")
+            .registered(false)
             .followStrategy(FollowStrategy.EAGER)
             .publicAccount(true)
-            .init(false)
             .build();
         em.persist(member);
         return member;

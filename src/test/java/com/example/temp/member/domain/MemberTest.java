@@ -11,20 +11,20 @@ import org.junit.jupiter.api.Test;
 class MemberTest {
 
     @Test
-    @DisplayName("회원을_초기화한다")
+    @DisplayName("회원을 초기화한다")
     void init() throws Exception {
         // given
         String changedNickname = "변경할닉넴";
         String changedProfileUrl = "변경할프로필주소";
         Member member = Member.builder()
-            .init(false)
+            .registered(false)
             .build();
 
         // when
         member.init(changedNickname, changedProfileUrl);
 
         // then
-        assertThat(member.isInit()).isTrue();
+        assertThat(member.isRegistered()).isTrue();
         assertThat(member.getNickname()).isEqualTo(changedNickname);
         assertThat(member.getProfileUrl()).isEqualTo(changedProfileUrl);
     }
@@ -36,7 +36,7 @@ class MemberTest {
         String changedNickname = "변경할닉넴";
         String changedProfileUrl = "변경할프로필주소";
         Member member = Member.builder()
-            .init(true)
+            .registered(true)
             .build();
 
         // when & then

@@ -15,6 +15,6 @@ public record MemberInfo(
 
     public static MemberInfo of(Member member) {
         return new MemberInfo(member.getId(), member.getEmail(), member.getProfileUrl(),
-            member.getNickname(), member.isInit());
+            member.getNickname(), member.isRegistered());
     }
 }
