@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
  * 알파벳 대소문자와 숫자를 포함하여 NICKNAME_MAX_LENGTH 길이만큼의 랜덤한 문자열을 생성하는 객체입니다.
  */
 @Component
+@SuppressWarnings("java:S2245")
 public class RandomNicknameGenerator implements NicknameGenerator {
 
     private static final char[] ALPHABETS_AND_NUM = createAlphabetsAndNums();
@@ -17,6 +18,7 @@ public class RandomNicknameGenerator implements NicknameGenerator {
         String alphabetAndNumStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890";
         return alphabetAndNumStr.toCharArray();
     }
+
 
     private final Random random = new Random();
 
