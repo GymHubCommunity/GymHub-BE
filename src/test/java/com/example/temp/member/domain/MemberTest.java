@@ -44,4 +44,15 @@ class MemberTest {
             .isInstanceOf(ApiException.class)
             .hasMessageContaining(ErrorCode.MEMBER_ALREADY_REGISTER.getMessage());
     }
+
+    @Test
+    @DisplayName("초기화가 되지 않은 멤버를 생성한다.")
+    void buildInitStatus() throws Exception {
+
+        // when
+        Member member = Member.buildInitStatus().build();
+
+        // then
+        assertThat(member.isRegistered()).isFalse();
+    }
 }
