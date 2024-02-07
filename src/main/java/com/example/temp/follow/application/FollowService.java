@@ -11,7 +11,7 @@ import com.example.temp.follow.domain.Follow;
 import com.example.temp.follow.domain.FollowRepository;
 import com.example.temp.follow.domain.FollowStatus;
 import com.example.temp.follow.dto.response.FollowInfo;
-import com.example.temp.follow.response.FollowResponse;
+import com.example.temp.follow.dto.response.FollowResponse;
 import com.example.temp.member.domain.Member;
 import com.example.temp.member.domain.MemberRepository;
 import java.util.List;
