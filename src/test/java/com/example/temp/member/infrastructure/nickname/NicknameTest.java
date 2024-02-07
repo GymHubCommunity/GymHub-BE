@@ -57,7 +57,7 @@ class NicknameTest {
     }
 
     @Test
-    @DisplayName("Nickname의 길이는 2글자 이상이어야 합니다.")
+    @DisplayName("Nickname의 길이는 2글자 이상이어야 한다.")
     void nicknameTooShort() throws Exception {
         // when & then
         assertThatThrownBy(() -> Nickname.create("닉"))

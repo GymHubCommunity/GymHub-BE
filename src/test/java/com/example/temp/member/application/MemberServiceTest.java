@@ -47,10 +47,33 @@ class MemberServiceTest {
 
     @BeforeEach
     void setUp() {
-        oAuthUserInfo = createOAuthUserInfo();
+        oAuthUserInfo = mockOAuthClientResponse();
         oAuthResponse = OAuthResponse.of(OAuthProviderType.GOOGLE, oAuthUserInfo);
     }
 
+    private OAuthUserInfo mockOAuthClientResponse() {
+        return new OAuthUserInfo() {
+            @Override
+            public String getProfileUrl() {
+                return "프로필주소";
+            }
+
+            @Override
+            public String getEmail() {
+                return "이메일";
+            }
+
+            @Override
+            public String getIdUsingResourceServer() {
+                return "id";
+            }
+
+            @Override
+            public String getName() {
+                return "이름";
+            }
+        };
+    }
 
     @Test
     @DisplayName("임시 멤버를 생성한다")
@@ -72,7 +95,7 @@ class MemberServiceTest {
     @DisplayName("중복된 닉네임으로는 임시 멤버를 생성할 수 없다.")
     void registerTempFailDuplicatedNickname() throws Exception {
         // given
-        Nickname createdNickname = Nickname.create("중복되지않은닉네임");
+        Nickname createdNickname = Nickname.create("중복닉네임");
         saveMember(createdNickname);
         when(nicknameGenerator.generate())
             .thenReturn(createdNickname);
@@ -86,7 +109,7 @@ class MemberServiceTest {
     @DisplayName("중복된 닉네임으로 임시 회원을 저장하려 할 때, 다섯 번까지 재시도한다.")
     void tryRegisterTempSeveralTimeIfDuplicatedNickname() throws Exception {
         // given
-        Nickname createdNickname = Nickname.create("중복되지않은닉네임");
+        Nickname createdNickname = Nickname.create("중복닉네임");
         saveMember(createdNickname);
         when(nicknameGenerator.generate())
             .thenReturn(createdNickname);
@@ -194,30 +217,6 @@ class MemberServiceTest {
         assertThat(result.getId()).isNotNull();
         assertThat(result.getEmail()).isEqualTo(oAuthResponse.email());
         assertThat(result.getProfileUrl()).isEqualTo(oAuthResponse.profileUrl());
-    }
-
-    private OAuthUserInfo createOAuthUserInfo() {
-        return new OAuthUserInfo() {
-            @Override
-            public String getProfileUrl() {
-                return "프로필주소";
-            }
-
-            @Override
-            public String getEmail() {
-                return "이메일";
-            }
-
-            @Override
-            public String getIdUsingResourceServer() {
-                return "id";
-            }
-
-            @Override
-            public String getName() {
-                return "이름";
-            }
-        };
     }
 
 }
