@@ -1,7 +1,10 @@
 package com.example.temp.member.domain;
 
+import com.example.temp.follow.domain.FollowStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -31,10 +34,23 @@ public class Member {
     @Column(nullable = false, unique = true)
     private String nickname;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private FollowStrategy followStrategy;
+
+    private boolean publicAccount;
+
     @Builder
-    private Member(String email, String profileUrl, String nickname) {
+    private Member(String email, String profileUrl, String nickname,
+        FollowStrategy followStrategy, boolean publicAccount) {
         this.email = email;
         this.profileUrl = profileUrl;
         this.nickname = nickname;
+        this.followStrategy = followStrategy;
+        this.publicAccount = publicAccount;
+    }
+
+    public FollowStatus getStatusBasedOnStrategy() {
+        return followStrategy.getFollowStatus();
     }
 }

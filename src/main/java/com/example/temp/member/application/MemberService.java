@@ -7,6 +7,7 @@ import com.example.temp.member.infrastructure.nickname.NicknameGenerator;
 import com.example.temp.oauth.OAuthResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,7 +31,7 @@ public class MemberService {
      * @throws NicknameDuplicatedException 중복된 닉네임으로 Member를 저장하려 할 때 발생합니다.
      */
     @Transactional
-    @Retryable(retryFor = NicknameDuplicatedException.class, maxAttempts = LOOP_MAX_CNT)
+    @Retryable(retryFor = NicknameDuplicatedException.class, maxAttempts = LOOP_MAX_CNT, backoff = @Backoff(delay = 0))
     public Member register(OAuthResponse oAuthResponse) {
         try {
             String nickname = nicknameGenerator.generate();

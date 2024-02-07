@@ -2,6 +2,7 @@ package com.example.temp.auth.dto.response;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.example.temp.member.domain.FollowStrategy;
 import com.example.temp.member.domain.Member;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.DisplayName;
@@ -25,6 +26,7 @@ class LoginMemberResponseTest {
             .email("이멜")
             .profileUrl("프로필주소")
             .nickname("생성된 닉네임")
+            .followStrategy(FollowStrategy.EAGER)
             .build();
         em.persist(member);
 
