@@ -3,13 +3,13 @@ package com.example.temp.auth.infrastructure;
 import com.example.temp.common.interceptor.AuthenticationInterceptor;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.core.MethodParameter;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
-@Service
+@Component
 public class LoginUserArgumentResolver implements HandlerMethodArgumentResolver {
 
     @Override
