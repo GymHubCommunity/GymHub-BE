@@ -52,10 +52,10 @@ public class MemberService {
     }
 
     /**
-     * 초기화가 되어 있지 않던 Member를 사용 가능한 상태로 변경합니다.
+     * 가입 처리가 완료되지 않은 회원을 가입시킵니다.
      *
      * @param executorId 로그인한 사용자의 ID
-     * @param request
+     * @param request 회원 가입에 필요한 정보
      * @return 회원가입이 완료된 Member 객체의 정보를 반환합니다.
      */
     @Transactional
