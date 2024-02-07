@@ -56,7 +56,7 @@ class MemberServiceTest {
     @DisplayName("임시 멤버를 생성한다")
     void registerTempSuccess() throws Exception {
         // given
-        Nickname createdNickname = Nickname.create("중복되지않은_닉네임");
+        Nickname createdNickname = Nickname.create("중복되지않은닉네임");
         when(nicknameGenerator.generate())
             .thenReturn(createdNickname);
 
@@ -72,7 +72,7 @@ class MemberServiceTest {
     @DisplayName("중복된 닉네임으로는 임시 멤버를 생성할 수 없다.")
     void registerTempFailDuplicatedNickname() throws Exception {
         // given
-        Nickname createdNickname = Nickname.create("중복되지않은_닉네임");
+        Nickname createdNickname = Nickname.create("중복되지않은닉네임");
         saveMember(createdNickname);
         when(nicknameGenerator.generate())
             .thenReturn(createdNickname);
@@ -86,7 +86,7 @@ class MemberServiceTest {
     @DisplayName("중복된 닉네임으로 임시 회원을 저장하려 할 때, 다섯 번까지 재시도한다.")
     void tryRegisterTempSeveralTimeIfDuplicatedNickname() throws Exception {
         // given
-        Nickname createdNickname = Nickname.create("중복되지않은_닉네임");
+        Nickname createdNickname = Nickname.create("중복되지않은닉네임");
         saveMember(createdNickname);
         when(nicknameGenerator.generate())
             .thenReturn(createdNickname);
@@ -102,8 +102,8 @@ class MemberServiceTest {
     @DisplayName("닉네임 중복으로 임시 회원 저장을 실패한 뒤 다시 시도했을 때, 다섯 번 안에 중복되지 않은 닉네임이 만들어지면 임시 회원을 저장할 수 있다.")
     void tryRegisterTempSuccessRecovery() throws Exception {
         // given
-        Nickname duplicatedNickname = Nickname.create("중복된_닉네임");
-        Nickname createdNickname = Nickname.create("중복되지않은_닉네임");
+        Nickname duplicatedNickname = Nickname.create("중복된닉네임");
+        Nickname createdNickname = Nickname.create("중복되지않은닉네임");
         saveMember(duplicatedNickname);
         when(nicknameGenerator.generate())
             .thenReturn(duplicatedNickname, duplicatedNickname, duplicatedNickname,
@@ -122,8 +122,8 @@ class MemberServiceTest {
     void registerSuccess() throws Exception {
         // given
         Member member = saveMember(Nickname.create("닉넴"));
-        String changedProfileUrl = "변경하는 프로필 주소";
-        String changedNickname = "변경할 닉네임";
+        String changedProfileUrl = "변경할프로필";
+        String changedNickname = "변경할닉네임";
 
         // when
         MemberInfo result = memberService.register(member.getId(),
@@ -141,8 +141,8 @@ class MemberServiceTest {
     void registerFailAlreadyRegistered() throws Exception {
         // given
         Member member = saveRegisterMember(Nickname.create("닉넴"));
-        String changedProfileUrl = "변경하는 프로필 주소";
-        String changedNickname = "변경할 닉네임";
+        String changedProfileUrl = "변경하는프로필주소";
+        String changedNickname = "변경할닉네임";
 
         // when & then
         assertThatThrownBy(() -> memberService.register(member.getId(),
