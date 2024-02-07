@@ -50,6 +50,13 @@ public class MemberService {
         }
     }
 
+    /**
+     * 초기화가 되어 있지 않던 Member를 사용 가능한 상태로 변경합니다.
+     *
+     * @param executorId 로그인한 사용자의 ID
+     * @param request
+     * @return 회원가입이 완료된 Member 객체의 정보를 반환합니다.
+     */
     @Transactional
     public MemberInfo register(long executorId, MemberRegisterRequest request) {
         Member member = memberRepository.findById(executorId)
