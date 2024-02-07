@@ -36,15 +36,15 @@ public class Member {
     private boolean registered;
 
     @Embedded
+    @Column(nullable = false, unique = true)
+    private Nickname nickname;
+
+    @Embedded
     @Column(nullable = false)
     private Email email;
 
     @Column(nullable = false)
     private String profileUrl;
-
-    @Embedded
-    @Column(nullable = false, unique = true)
-    private Nickname nickname;
 
     private boolean publicAccount;
 
@@ -53,12 +53,12 @@ public class Member {
     private FollowStrategy followStrategy;
 
     @Builder
-    private Member(boolean registered, Email email, String profileUrl, Nickname nickname,
+    private Member(boolean registered, Nickname nickname, Email email, String profileUrl,
         boolean publicAccount, FollowStrategy followStrategy) {
         this.registered = registered;
+        this.nickname = nickname;
         this.email = email;
         this.profileUrl = profileUrl;
-        this.nickname = nickname;
         this.publicAccount = publicAccount;
         this.followStrategy = followStrategy;
     }
