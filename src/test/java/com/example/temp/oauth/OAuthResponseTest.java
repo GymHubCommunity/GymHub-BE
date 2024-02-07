@@ -3,6 +3,7 @@ package com.example.temp.oauth;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.example.temp.member.domain.Member;
+import com.example.temp.member.infrastructure.nickname.Nickname;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -57,7 +58,7 @@ class OAuthResponseTest {
     @DisplayName("OAuthResponse와 nickname을 사용해 초기화되지 않은 멤버를 만든다.")
     void createMemberUsingOAuthResponse() throws Exception {
         // given
-        String nickname = "닉네임";
+        Nickname nickname = Nickname.create("닉네임");
         OAuthResponse oAuthResponse = OAuthResponse.of(OAuthProviderType.GOOGLE, oAuthUserInfo);
 
         // when

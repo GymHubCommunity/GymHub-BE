@@ -3,7 +3,9 @@ package com.example.temp.member.domain;
 import com.example.temp.exception.ApiException;
 import com.example.temp.exception.ErrorCode;
 import com.example.temp.follow.domain.FollowStatus;
+import com.example.temp.member.infrastructure.nickname.Nickname;
 import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -39,7 +41,8 @@ public class Member {
     private String profileUrl;
 
     @Column(nullable = false, unique = true)
-    private String nickname;
+    @Embedded
+    private Nickname nickname;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -48,7 +51,7 @@ public class Member {
     private boolean publicAccount;
 
     @Builder
-    private Member(String email, boolean registered, String profileUrl, String nickname,
+    private Member(String email, boolean registered, String profileUrl, Nickname nickname,
         FollowStrategy followStrategy, boolean publicAccount) {
         this.email = email;
         this.registered = registered;
@@ -62,7 +65,7 @@ public class Member {
         return followStrategy.getFollowStatus();
     }
 
-    public static Member createInitStatus(String email, String profileUrl, String nickname) {
+    public static Member createInitStatus(String email, String profileUrl, Nickname nickname) {
         return Member.builder()
             .registered(false)
             .publicAccount(false)
@@ -73,7 +76,7 @@ public class Member {
             .build();
     }
 
-    public void init(String nickname, String profileUrl) {
+    public void init(Nickname nickname, String profileUrl) {
         if (registered) {
             throw new ApiException(ErrorCode.MEMBER_ALREADY_REGISTER);
         }
@@ -81,4 +84,9 @@ public class Member {
         this.nickname = nickname;
         this.profileUrl = profileUrl;
     }
+
+    public String getNicknameStr() {
+        return nickname.getNickname();
+    }
 }
+

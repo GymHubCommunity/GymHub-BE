@@ -13,6 +13,7 @@ import com.example.temp.member.domain.FollowStrategy;
 import com.example.temp.member.domain.Member;
 import com.example.temp.member.dto.request.MemberRegisterRequest;
 import com.example.temp.member.exception.NicknameDuplicatedException;
+import com.example.temp.member.infrastructure.nickname.Nickname;
 import com.example.temp.member.infrastructure.nickname.NicknameGenerator;
 import com.example.temp.oauth.OAuthProviderType;
 import com.example.temp.oauth.OAuthResponse;
@@ -54,7 +55,7 @@ class MemberServiceTest {
     @DisplayName("임시 멤버를 생성한다")
     void registerTempSuccess() throws Exception {
         // given
-        String createdNickname = "중복되지않은_닉네임";
+        Nickname createdNickname = Nickname.create("중복되지않은_닉네임");
         when(nicknameGenerator.generate())
             .thenReturn(createdNickname);
 
@@ -70,7 +71,7 @@ class MemberServiceTest {
     @DisplayName("중복된 닉네임으로는 임시 멤버를 생성할 수 없다.")
     void registerTempFailDuplicatedNickname() throws Exception {
         // given
-        String createdNickname = "중복된_닉네임";
+        Nickname createdNickname = Nickname.create("중복되지않은_닉네임");
         saveMember(createdNickname);
         when(nicknameGenerator.generate())
             .thenReturn(createdNickname);
@@ -84,7 +85,7 @@ class MemberServiceTest {
     @DisplayName("중복된 닉네임으로 임시 회원을 저장하려 할 때, 다섯 번까지 재시도한다.")
     void tryRegisterTempSeveralTimeIfDuplicatedNickname() throws Exception {
         // given
-        String createdNickname = "중복된_닉네임";
+        Nickname createdNickname = Nickname.create("중복되지않은_닉네임");
         saveMember(createdNickname);
         when(nicknameGenerator.generate())
             .thenReturn(createdNickname);
@@ -100,8 +101,8 @@ class MemberServiceTest {
     @DisplayName("닉네임 중복으로 임시 회원 저장을 실패한 뒤 다시 시도했을 때, 다섯 번 안에 중복되지 않은 닉네임이 만들어지면 임시 회원을 저장할 수 있다.")
     void tryRegisterTempSuccessRecovery() throws Exception {
         // given
-        String duplicatedNickname = "중복된_닉네임";
-        String createdNickname = "중복되지_않은_닉네임";
+        Nickname duplicatedNickname = Nickname.create("중복된_닉네임");
+        Nickname createdNickname = Nickname.create("중복되지않은_닉네임");
         saveMember(duplicatedNickname);
         when(nicknameGenerator.generate())
             .thenReturn(duplicatedNickname, duplicatedNickname, duplicatedNickname,
@@ -119,7 +120,7 @@ class MemberServiceTest {
     @DisplayName("회원을 저장한다")
     void registerSuccess() throws Exception {
         // given
-        Member member = saveMember("닉넴");
+        Member member = saveMember(Nickname.create("닉넴"));
         String changedProfileUrl = "변경하는 프로필 주소";
         String changedNickname = "변경할 닉네임";
 
@@ -138,7 +139,7 @@ class MemberServiceTest {
     @DisplayName("이미 회원가입된 사용자 계정으로 회원가입을 할 수 없다.")
     void registerFailAlreadyRegistered() throws Exception {
         // given
-        Member member = saveRegisterMember("닉넴");
+        Member member = saveRegisterMember(Nickname.create("닉넴"));
         String changedProfileUrl = "변경하는 프로필 주소";
         String changedNickname = "변경할 닉네임";
 
@@ -162,7 +163,7 @@ class MemberServiceTest {
             .hasMessageContaining(ErrorCode.AUTHENTICATED_FAIL.getMessage());
     }
 
-    private Member saveRegisterMember(String nickname) {
+    private Member saveRegisterMember(Nickname nickname) {
         Member member = Member.builder()
             .nickname(nickname)
             .email("이메일")
@@ -175,7 +176,7 @@ class MemberServiceTest {
         return member;
     }
 
-    private Member saveMember(String nickname) {
+    private Member saveMember(Nickname nickname) {
         Member member = Member.builder()
             .nickname(nickname)
             .email("이메일")

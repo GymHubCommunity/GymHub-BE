@@ -1,6 +1,7 @@
 package com.example.temp.oauth;
 
 import com.example.temp.member.domain.Member;
+import com.example.temp.member.infrastructure.nickname.Nickname;
 
 public record OAuthResponse(
     OAuthProviderType type,
@@ -15,7 +16,7 @@ public record OAuthResponse(
             oAuthUserInfo.getIdUsingResourceServer(), oAuthUserInfo.getProfileUrl());
     }
 
-    public Member toInitStatusMemberWith(String nickname) {
+    public Member toInitStatusMemberWith(Nickname nickname) {
         return Member.createInitStatus(this.email(), this.profileUrl(), nickname);
     }
 }

@@ -9,10 +9,11 @@ public class FakerNicknameGenerator implements NicknameGenerator {
     Faker faker = new Faker();
 
     @Override
-    public String generate() {
+    public Nickname generate() {
         String job = faker.job().position();
         String color = faker.color().name();
         String champ = faker.leagueOfLegends().champion();
-        return String.format("%s's %s %s", job, color, champ);
+        String value = String.format("%s's %s %s", job, color, champ);
+        return Nickname.create(value);
     }
 }

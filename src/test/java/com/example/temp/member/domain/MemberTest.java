@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.example.temp.exception.ApiException;
 import com.example.temp.exception.ErrorCode;
+import com.example.temp.member.infrastructure.nickname.Nickname;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -14,7 +15,7 @@ class MemberTest {
     @DisplayName("회원을 초기화한다")
     void init() throws Exception {
         // given
-        String changedNickname = "변경할닉넴";
+        Nickname changedNickname = Nickname.create("변경할닉넴");
         String changedProfileUrl = "변경할프로필주소";
         Member member = Member.builder()
             .registered(false)
@@ -33,7 +34,7 @@ class MemberTest {
     @DisplayName("초기화되어있던 회원은 초기화할 수 없다")
     void initFailAlreadyInit() throws Exception {
         // given
-        String changedNickname = "변경할닉넴";
+        Nickname changedNickname = Nickname.create("변경할닉넴");
         String changedProfileUrl = "변경할프로필주소";
         Member member = Member.builder()
             .registered(true)
@@ -51,7 +52,7 @@ class MemberTest {
         // given
         String email = "email";
         String profileUrl = "profileUrl";
-        String nickname = "nickname";
+        Nickname nickname = Nickname.create("nickname");
 
         // when
         Member member = Member.createInitStatus(email, profileUrl, nickname);

@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.example.temp.member.domain.FollowStrategy;
 import com.example.temp.member.domain.Member;
+import com.example.temp.member.infrastructure.nickname.Nickname;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -46,7 +47,7 @@ class MemberInfoTest {
         Member member = Member.builder()
             .email("이멜")
             .profileUrl("프로필주소")
-            .nickname("생성된 닉네임")
+            .nickname(Nickname.create("생성된 닉네임"))
             .registered(true)
             .followStrategy(FollowStrategy.EAGER)
             .build();
@@ -59,7 +60,7 @@ class MemberInfoTest {
         assertThat(response.id()).isNotNull();
         assertThat(response.profileUrl()).isEqualTo(member.getProfileUrl());
         assertThat(response.email()).isEqualTo(member.getEmail());
-        assertThat(response.nickname()).isEqualTo(member.getNickname());
+        assertThat(response.nickname()).isEqualTo(member.getNicknameStr());
         assertThat(response.registered()).isEqualTo(member.isRegistered());
     }
 }

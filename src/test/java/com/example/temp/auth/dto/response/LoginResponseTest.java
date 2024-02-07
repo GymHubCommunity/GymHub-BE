@@ -3,6 +3,7 @@ package com.example.temp.auth.dto.response;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.example.temp.member.domain.Member;
+import com.example.temp.member.infrastructure.nickname.Nickname;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -15,6 +16,7 @@ class LoginResponseTest {
         String accessToken = "엑세스토큰";
         boolean requiredAdditionalInfo = true;
         Member member = Member.builder()
+            .nickname(Nickname.create("nickname"))
             .build();
         MemberInfo memberInfo = MemberInfo.of(member);
 
@@ -38,6 +40,7 @@ class LoginResponseTest {
             .refreshToken("리프레쉬")
             .build();
         Member member = Member.builder()
+            .nickname(Nickname.create("nickname"))
             .registered(registered)
             .build();
         MemberInfo memberInfo = MemberInfo.of(member);

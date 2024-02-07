@@ -18,6 +18,7 @@ import com.example.temp.follow.dto.response.FollowInfo;
 import com.example.temp.follow.response.FollowResponse;
 import com.example.temp.member.domain.FollowStrategy;
 import com.example.temp.member.domain.Member;
+import com.example.temp.member.infrastructure.nickname.Nickname;
 import jakarta.persistence.EntityManager;
 import java.util.ArrayList;
 import java.util.List;
@@ -533,7 +534,7 @@ class FollowServiceTest {
         Member member = Member.builder()
             .email("이메일")
             .profileUrl("프로필")
-            .nickname("nickname" + globalIdx++)
+            .nickname(Nickname.create("nick" + (globalIdx++)))
             .followStrategy(FollowStrategy.EAGER)
             .publicAccount(isPublic)
             .build();
@@ -545,7 +546,7 @@ class FollowServiceTest {
         Member member = Member.builder()
             .email("이메일")
             .profileUrl("프로필")
-            .nickname("nickname" + globalIdx++)
+            .nickname(Nickname.create("nick" + (globalIdx++)))
             .followStrategy(followStrategy)
             .publicAccount(true)
             .build();

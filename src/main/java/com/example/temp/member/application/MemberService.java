@@ -7,6 +7,7 @@ import com.example.temp.member.domain.Member;
 import com.example.temp.member.domain.MemberRepository;
 import com.example.temp.member.dto.request.MemberRegisterRequest;
 import com.example.temp.member.exception.NicknameDuplicatedException;
+import com.example.temp.member.infrastructure.nickname.Nickname;
 import com.example.temp.member.infrastructure.nickname.NicknameGenerator;
 import com.example.temp.oauth.OAuthResponse;
 import lombok.RequiredArgsConstructor;
@@ -38,7 +39,7 @@ public class MemberService {
     @Retryable(retryFor = NicknameDuplicatedException.class, maxAttempts = LOOP_MAX_CNT, backoff = @Backoff(delay = 0))
     public Member saveInitStatusMember(OAuthResponse oAuthResponse) {
         try {
-            String nickname = nicknameGenerator.generate();
+            Nickname nickname = nicknameGenerator.generate();
             if (memberRepository.existsByNickname(nickname)) {
                 throw new NicknameDuplicatedException();
             }
@@ -61,7 +62,7 @@ public class MemberService {
     public MemberInfo register(long executorId, MemberRegisterRequest request) {
         Member member = memberRepository.findById(executorId)
             .orElseThrow(() -> new ApiException(ErrorCode.AUTHENTICATED_FAIL));
-        member.init(request.nickname(), request.profileUrl());
+        member.init(Nickname.create(request.nickname()), request.profileUrl());
         return MemberInfo.of(member);
     }
 }
