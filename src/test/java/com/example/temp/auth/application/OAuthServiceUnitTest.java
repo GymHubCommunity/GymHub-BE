@@ -76,7 +76,7 @@ class OAuthServiceUnitTest {
 
         // then
         assertThat(response.id()).isEqualTo(member.getId());
-        assertThat(response.email()).isEqualTo(member.getEmailStr());
+        assertThat(response.email()).isEqualTo(member.getEmailValue());
         assertThat(response.profileUrl()).isEqualTo(member.getProfileUrl());
     }
 
@@ -94,7 +94,7 @@ class OAuthServiceUnitTest {
 
         // then
         assertThat(response.id()).isEqualTo(member.getId());
-        assertThat(response.email()).isEqualTo(member.getEmailStr());
+        assertThat(response.email()).isEqualTo(member.getEmailValue());
         assertThat(response.profileUrl()).isEqualTo(member.getProfileUrl());
     }
 

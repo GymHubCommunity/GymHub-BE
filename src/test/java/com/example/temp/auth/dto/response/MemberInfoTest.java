@@ -60,8 +60,8 @@ class MemberInfoTest {
         // then
         assertThat(response.id()).isNotNull();
         assertThat(response.profileUrl()).isEqualTo(member.getProfileUrl());
-        assertThat(response.email()).isEqualTo(member.getEmailStr());
-        assertThat(response.nickname()).isEqualTo(member.getNicknameStr());
+        assertThat(response.email()).isEqualTo(member.getEmailValue());
+        assertThat(response.nickname()).isEqualTo(member.getNicknameValue());
         assertThat(response.registered()).isEqualTo(member.isRegistered());
     }
 }

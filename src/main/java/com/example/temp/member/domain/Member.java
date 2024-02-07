@@ -104,11 +104,11 @@ public class Member {
         return followStrategy.getFollowStatus();
     }
 
-    public String getNicknameStr() {
+    public String getNicknameValue() {
         return nickname.getValue();
     }
 
-    public String getEmailStr() {
+    public String getEmailValue() {
         return email.getValue();
     }
 }
