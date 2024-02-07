@@ -36,11 +36,9 @@ public class Member {
     private boolean registered;
 
     @Embedded
-    @Column(nullable = false, unique = true)
     private Nickname nickname;
 
     @Embedded
-    @Column(nullable = false)
     private Email email;
 
     @Column(nullable = false)
@@ -107,11 +105,11 @@ public class Member {
     }
 
     public String getNicknameStr() {
-        return nickname.getNickname();
+        return nickname.getValue();
     }
 
     public String getEmailStr() {
-        return email.getEmail();
+        return email.getValue();
     }
 }
 

@@ -1,5 +1,6 @@
 package com.example.temp.common.entity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -11,19 +12,19 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @EqualsAndHashCode
-@SuppressWarnings("java:S1700")
 public class Email {
 
-    private String email;
+    @Column(name = "email", nullable = false)
+    private String value;
 
     @Builder
-    private Email(String email) {
-        this.email = email;
+    private Email(String value) {
+        this.value = value;
     }
 
-    public static Email create(String email) {
+    public static Email create(String value) {
         return Email.builder()
-            .email(email)
+            .value(value)
             .build();
     }
 }
