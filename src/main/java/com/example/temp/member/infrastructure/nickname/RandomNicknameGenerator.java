@@ -11,11 +11,11 @@ import org.springframework.stereotype.Component;
 @Component
 public class RandomNicknameGenerator implements NicknameGenerator {
 
-    private static final String ALPHABETS_AND_NUM_STR = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890";
     private static final char[] ALPHABETS_AND_NUM = createAlphabetsAndNums();
 
     private static char[] createAlphabetsAndNums() {
-        return ALPHABETS_AND_NUM_STR.toCharArray();
+        String alphabetAndNumStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890";
+        return alphabetAndNumStr.toCharArray();
     }
 
     private final Random random = new Random();
