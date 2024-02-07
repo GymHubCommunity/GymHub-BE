@@ -10,7 +10,7 @@ public record MemberInfo(
     String nickname,
 
     @JsonIgnore
-    boolean init
+    boolean registered
 ) {
 
     public static MemberInfo of(Member member) {

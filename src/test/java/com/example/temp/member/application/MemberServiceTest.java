@@ -128,7 +128,7 @@ class MemberServiceTest {
             new MemberRegisterRequest(changedProfileUrl, changedNickname));
 
         // then
-        assertThat(result.init()).isTrue();
+        assertThat(result.registered()).isTrue();
         assertThat(result.id()).isEqualTo(member.getId());
         assertThat(result.profileUrl()).isEqualTo(changedProfileUrl);
         assertThat(result.nickname()).isEqualTo(changedNickname);
