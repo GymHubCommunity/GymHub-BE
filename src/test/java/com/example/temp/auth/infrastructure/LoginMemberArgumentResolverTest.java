@@ -11,17 +11,17 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.core.MethodParameter;
 
-class LoginUserArgumentResolverTest {
+class LoginMemberArgumentResolverTest {
 
     @Mock
     private MethodParameter parameter;
 
-    private LoginUserArgumentResolver loginUserArgumentResolver;
+    private LoginMemberArgumentResolver loginMemberArgumentResolver;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        loginUserArgumentResolver = new LoginUserArgumentResolver();
+        loginMemberArgumentResolver = new LoginMemberArgumentResolver();
     }
 
     @DisplayName("로그인 어노테이션이 붙어 있으면 support메서드가 true를 리턴한다.")
@@ -31,7 +31,7 @@ class LoginUserArgumentResolverTest {
         when(parameter.getParameterAnnotation(Login.class)).thenReturn(mock(Login.class));
 
         // when
-        boolean supports = loginUserArgumentResolver.supportsParameter(parameter);
+        boolean supports = loginMemberArgumentResolver.supportsParameter(parameter);
 
         // then
         assertThat(supports).isTrue();
@@ -44,7 +44,7 @@ class LoginUserArgumentResolverTest {
         when(parameter.getParameterAnnotation(Login.class)).thenReturn(null);
 
         // when
-        boolean supports = loginUserArgumentResolver.supportsParameter(parameter);
+        boolean supports = loginMemberArgumentResolver.supportsParameter(parameter);
 
         // then
         assertThat(supports).isFalse();
