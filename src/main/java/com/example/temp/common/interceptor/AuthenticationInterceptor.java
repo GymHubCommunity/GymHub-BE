@@ -14,7 +14,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
 public class AuthenticationInterceptor implements HandlerInterceptor {
 
     public static final String BEARER = "Bearer ";
-    public static final String EXECUTOR = "executor";
+    public static final String MEMBER_ID = "memberId";
 
     private final TokenParser tokenParser;
 
@@ -28,7 +28,7 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
         }
         String accessToken = accessTokenBeforeProcessing.substring(BEARER.length());
         long memberId = tokenParser.parse(accessToken);
-        request.setAttribute(EXECUTOR, memberId);
+        request.setAttribute(MEMBER_ID, memberId);
         return true;
     }
 

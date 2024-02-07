@@ -34,7 +34,7 @@ class AuthenticationInterceptorTest {
     @Mock
     HttpServletResponse response;
 
-    long executorId = 1L;
+    long memberId = 1L;
 
     @BeforeEach
     void setUp() {
@@ -47,7 +47,7 @@ class AuthenticationInterceptorTest {
         // given
         String token = "token";
         when(tokenParser.parse(token))
-            .thenReturn(executorId);
+            .thenReturn(memberId);
         when(request.getHeader(HttpHeaders.AUTHORIZATION))
             .thenReturn("Bearer " + token);
 
@@ -56,7 +56,7 @@ class AuthenticationInterceptorTest {
 
         // then
         assertThat(result).isTrue();
-        verify(request, times(1)).setAttribute("executor", executorId);
+        verify(request, times(1)).setAttribute("memberId", memberId);
     }
 
     @Test
