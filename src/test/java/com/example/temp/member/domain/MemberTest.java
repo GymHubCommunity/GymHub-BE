@@ -48,11 +48,20 @@ class MemberTest {
     @Test
     @DisplayName("초기화가 되지 않은 멤버를 생성한다.")
     void buildInitStatus() throws Exception {
+        // given
+        String email = "email";
+        String profileUrl = "profileUrl";
+        String nickname = "nickname";
 
         // when
-        Member member = Member.buildInitStatus().build();
+        Member member = Member.createInitStatus(email, profileUrl, nickname);
 
         // then
         assertThat(member.isRegistered()).isFalse();
+        assertThat(member.getEmail()).isEqualTo(email);
+        assertThat(member.getProfileUrl()).isEqualTo(profileUrl);
+        assertThat(member.getNickname()).isEqualTo(nickname);
+
+
     }
 }

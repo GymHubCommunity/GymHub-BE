@@ -62,15 +62,15 @@ public class Member {
         return followStrategy.getFollowStatus();
     }
 
-    @Builder(builderMethodName = "buildInitStatus")
-    private Member(String email, String profileUrl, String nickname,
-        FollowStrategy followStrategy) {
-        this.registered = false;
-        this.publicAccount = false;
-        this.email = email;
-        this.profileUrl = profileUrl;
-        this.nickname = nickname;
-        this.followStrategy = followStrategy;
+    public static Member createInitStatus(String email, String profileUrl, String nickname) {
+        return Member.builder()
+            .registered(false)
+            .publicAccount(false)
+            .followStrategy(FollowStrategy.LAZY)
+            .email(email)
+            .profileUrl(profileUrl)
+            .nickname(nickname)
+            .build();
     }
 
     public void init(String nickname, String profileUrl) {

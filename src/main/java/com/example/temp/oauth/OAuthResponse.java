@@ -17,7 +17,8 @@ public record OAuthResponse(
     }
 
     public Member toInitStatusMemberWith(String nickname) {
-        return Member.buildInitStatus()
+        return Member.builder()
+            .registered(false)
             .email(this.email())
             .profileUrl(this.profileUrl())
             .nickname(nickname)
