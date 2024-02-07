@@ -7,6 +7,6 @@ public record LoginResponse(
 ) {
 
     public static LoginResponse of(TokenInfo tokenInfo, MemberInfo memberResponse) {
-        return new LoginResponse(tokenInfo.accessToken(), memberResponse.init(), memberResponse);
+        return new LoginResponse(tokenInfo.accessToken(), !memberResponse.registered(), memberResponse);
     }
 }
