@@ -1,4 +1,4 @@
-package com.example.temp.follow.response;
+package com.example.temp.follow.dto.response;
 
 import com.example.temp.follow.domain.Follow;
 import com.example.temp.follow.domain.FollowStatus;

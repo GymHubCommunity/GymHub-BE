@@ -6,9 +6,15 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.example.temp.auth.dto.response.MemberInfo;
+import com.example.temp.common.entity.Email;
+import com.example.temp.exception.ApiException;
+import com.example.temp.exception.ErrorCode;
 import com.example.temp.member.domain.FollowStrategy;
 import com.example.temp.member.domain.Member;
+import com.example.temp.member.dto.request.MemberRegisterRequest;
 import com.example.temp.member.exception.NicknameDuplicatedException;
+import com.example.temp.member.infrastructure.nickname.Nickname;
 import com.example.temp.member.infrastructure.nickname.NicknameGenerator;
 import com.example.temp.oauth.OAuthProviderType;
 import com.example.temp.oauth.OAuthResponse;
@@ -41,95 +47,11 @@ class MemberServiceTest {
 
     @BeforeEach
     void setUp() {
-        oAuthUserInfo = createOAuthUserInfo();
+        oAuthUserInfo = mockOAuthClientResponse();
         oAuthResponse = OAuthResponse.of(OAuthProviderType.GOOGLE, oAuthUserInfo);
     }
 
-
-    @Test
-    @DisplayName("회원을 가입시킨다")
-    void registerSuccess() throws Exception {
-        // given
-        String createdNickname = "중복되지않은_닉네임";
-        when(nicknameGenerator.generate())
-            .thenReturn(createdNickname);
-
-        // when
-        Member result = memberService.register(oAuthResponse);
-
-        // then
-        assertThat(result.getNickname()).isEqualTo(createdNickname);
-        validateMemberIsSame(result, oAuthResponse);
-    }
-
-    @Test
-    @DisplayName("중복된 닉네임으로는 회원가입이 불가능하다")
-    void registerFailDuplicatedNickname() throws Exception {
-        // given
-        String createdNickname = "중복된_닉네임";
-        saveMember(createdNickname);
-        when(nicknameGenerator.generate())
-            .thenReturn(createdNickname);
-
-        // when & then
-        assertThatThrownBy(() -> memberService.register(oAuthResponse))
-            .isInstanceOf(NicknameDuplicatedException.class);
-    }
-
-    @Test
-    @DisplayName("중복된 닉네임으로 회원가입 요청 시, 다섯 번까지 재시도한다.")
-    void trySeveralTimeIfDuplicatedNickname() throws Exception {
-        // given
-        String createdNickname = "중복된_닉네임";
-        saveMember(createdNickname);
-        when(nicknameGenerator.generate())
-            .thenReturn(createdNickname);
-
-        // when & then
-        assertThatThrownBy(() -> memberService.register(oAuthResponse))
-            .isInstanceOf(NicknameDuplicatedException.class);
-        verify(nicknameGenerator, times(5))
-            .generate();
-    }
-
-    @Test
-    @DisplayName("닉네임 중복으로 회원가입 실패 후 다시 시도했을 때, 다섯 번 안에 중복되지 않은 닉네임이 만들어지면 회원가입이 가능하다")
-    void trySuccessRecovery() throws Exception {
-        // given
-        String duplicatedNickname = "중복된_닉네임";
-        String createdNickname = "중복되지_않은_닉네임";
-        saveMember(duplicatedNickname);
-        when(nicknameGenerator.generate())
-            .thenReturn(duplicatedNickname, duplicatedNickname, duplicatedNickname,
-                duplicatedNickname, createdNickname);
-
-        // when
-        Member result = memberService.register(oAuthResponse);
-
-        // then
-        assertThat(result.getNickname()).isEqualTo(createdNickname);
-        validateMemberIsSame(result, oAuthResponse);
-    }
-
-    private Member saveMember(String nickname) {
-        Member member = Member.builder()
-            .nickname(nickname)
-            .email("이메일")
-            .profileUrl("프로필주소")
-            .followStrategy(FollowStrategy.EAGER)
-            .publicAccount(true)
-            .build();
-        em.persist(member);
-        return member;
-    }
-
-    private void validateMemberIsSame(Member result, OAuthResponse oAuthResponse) {
-        assertThat(result.getId()).isNotNull();
-        assertThat(result.getEmail()).isEqualTo(oAuthResponse.email());
-        assertThat(result.getProfileUrl()).isEqualTo(oAuthResponse.profileUrl());
-    }
-
-    private OAuthUserInfo createOAuthUserInfo() {
+    private OAuthUserInfo mockOAuthClientResponse() {
         return new OAuthUserInfo() {
             @Override
             public String getProfileUrl() {
@@ -151,6 +73,150 @@ class MemberServiceTest {
                 return "이름";
             }
         };
+    }
+
+    @Test
+    @DisplayName("임시 멤버를 생성한다")
+    void registerTempSuccess() throws Exception {
+        // given
+        Nickname createdNickname = Nickname.create("중복되지않은닉네임");
+        when(nicknameGenerator.generate())
+            .thenReturn(createdNickname);
+
+        // when
+        Member result = memberService.saveInitStatusMember(oAuthResponse);
+
+        // then
+        assertThat(result.getNickname()).isEqualTo(createdNickname);
+        validateMemberIsSame(result, oAuthResponse);
+    }
+
+    @Test
+    @DisplayName("중복된 닉네임으로는 임시 멤버를 생성할 수 없다.")
+    void registerTempFailDuplicatedNickname() throws Exception {
+        // given
+        Nickname createdNickname = Nickname.create("중복닉네임");
+        saveMember(createdNickname);
+        when(nicknameGenerator.generate())
+            .thenReturn(createdNickname);
+
+        // when & then
+        assertThatThrownBy(() -> memberService.saveInitStatusMember(oAuthResponse))
+            .isInstanceOf(NicknameDuplicatedException.class);
+    }
+
+    @Test
+    @DisplayName("중복된 닉네임으로 임시 회원을 저장하려 할 때, 다섯 번까지 재시도한다.")
+    void tryRegisterTempSeveralTimeIfDuplicatedNickname() throws Exception {
+        // given
+        Nickname createdNickname = Nickname.create("중복닉네임");
+        saveMember(createdNickname);
+        when(nicknameGenerator.generate())
+            .thenReturn(createdNickname);
+
+        // when & then
+        assertThatThrownBy(() -> memberService.saveInitStatusMember(oAuthResponse))
+            .isInstanceOf(NicknameDuplicatedException.class);
+        verify(nicknameGenerator, times(5))
+            .generate();
+    }
+
+    @Test
+    @DisplayName("닉네임 중복으로 임시 회원 저장을 실패한 뒤 다시 시도했을 때, 다섯 번 안에 중복되지 않은 닉네임이 만들어지면 임시 회원을 저장할 수 있다.")
+    void tryRegisterTempSuccessRecovery() throws Exception {
+        // given
+        Nickname duplicatedNickname = Nickname.create("중복된닉네임");
+        Nickname createdNickname = Nickname.create("중복되지않은닉네임");
+        saveMember(duplicatedNickname);
+        when(nicknameGenerator.generate())
+            .thenReturn(duplicatedNickname, duplicatedNickname, duplicatedNickname,
+                duplicatedNickname, createdNickname);
+
+        // when
+        Member result = memberService.saveInitStatusMember(oAuthResponse);
+
+        // then
+        assertThat(result.getNickname()).isEqualTo(createdNickname);
+        validateMemberIsSame(result, oAuthResponse);
+    }
+
+    @Test
+    @DisplayName("회원을 저장한다")
+    void registerSuccess() throws Exception {
+        // given
+        Member member = saveMember(Nickname.create("닉넴"));
+        String changedProfileUrl = "변경할프로필";
+        String changedNickname = "변경할닉네임";
+
+        // when
+        MemberInfo result = memberService.register(member.getId(),
+            new MemberRegisterRequest(changedProfileUrl, changedNickname));
+
+        // then
+        assertThat(result.registered()).isTrue();
+        assertThat(result.id()).isEqualTo(member.getId());
+        assertThat(result.profileUrl()).isEqualTo(changedProfileUrl);
+        assertThat(result.nickname()).isEqualTo(changedNickname);
+    }
+
+    @Test
+    @DisplayName("이미 회원가입된 사용자 계정으로 회원가입을 할 수 없다.")
+    void registerFailAlreadyRegistered() throws Exception {
+        // given
+        Member member = saveRegisterMember(Nickname.create("닉넴"));
+        String changedProfileUrl = "변경하는프로필주소";
+        String changedNickname = "변경할닉네임";
+
+        // when & then
+        assertThatThrownBy(() -> memberService.register(member.getId(),
+            new MemberRegisterRequest(changedProfileUrl, changedNickname)))
+            .isInstanceOf(ApiException.class)
+            .hasMessageContaining(ErrorCode.MEMBER_ALREADY_REGISTER.getMessage());
+    }
+
+    @Test
+    @DisplayName("DB에 존재하지 않는 회원은 회원가입 요청이 불가능하다.")
+    void registerFailNotAuthn() throws Exception {
+        // given
+        long notExistMemberId = 999_999_999L;
+
+        // when & then
+        assertThatThrownBy(() -> memberService.register(notExistMemberId,
+            new MemberRegisterRequest("이미지url", "닉넴")))
+            .isInstanceOf(ApiException.class)
+            .hasMessageContaining(ErrorCode.AUTHENTICATED_FAIL.getMessage());
+    }
+
+    private Member saveRegisterMember(Nickname nickname) {
+        Member member = Member.builder()
+            .nickname(nickname)
+            .email(Email.create("이메일"))
+            .profileUrl("프로필주소")
+            .registered(true)
+            .followStrategy(FollowStrategy.EAGER)
+            .publicAccount(true)
+            .build();
+        em.persist(member);
+        return member;
+    }
+
+    private Member saveMember(Nickname nickname) {
+        Member member = Member.builder()
+            .nickname(nickname)
+            .email(Email.create("이메일"))
+            .profileUrl("프로필주소")
+            .registered(false)
+            .followStrategy(FollowStrategy.EAGER)
+            .publicAccount(true)
+            .build();
+        em.persist(member);
+        return member;
+    }
+
+    private void validateMemberIsSame(Member result, OAuthResponse oAuthResponse) {
+        assertThat(result.getId()).isNotNull();
+        assertThat(result.getEmail()).isEqualTo(oAuthResponse.email());
+        assertThat(result.getProfileUrl()).isEqualTo(oAuthResponse.profileUrl());
     }
 
 }

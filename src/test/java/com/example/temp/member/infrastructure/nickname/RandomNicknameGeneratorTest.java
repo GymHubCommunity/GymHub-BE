@@ -8,13 +8,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-class FakerNicknameGeneratorTest {
+class RandomNicknameGeneratorTest {
 
-    FakerNicknameGenerator nicknameGenerator;
+    RandomNicknameGenerator nicknameGenerator;
 
     @BeforeEach
     void setUp() {
-        nicknameGenerator = new FakerNicknameGenerator();
+        nicknameGenerator = new RandomNicknameGenerator();
     }
 
     @Test
@@ -28,5 +28,4 @@ class FakerNicknameGeneratorTest {
         }
         assertThat(nicknames.size()).isBetween(2, 1000);
     }
-
 }

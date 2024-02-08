@@ -13,8 +13,15 @@ public enum ErrorCode {
     AUTHENTICATED_FAIL(HttpStatus.UNAUTHORIZED, "인증되지 않은 사용자입니다."),
     AUTHORIZED_FAIL(HttpStatus.FORBIDDEN, "인가 권한이 없는 사용자입니다."),
 
+
     // 회원
     MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "해당되는 회원을 찾을 수 없습니다."),
+    MEMBER_ALREADY_REGISTER(HttpStatus.BAD_REQUEST, "이미 가입이 완료된 회원입니다."),
+
+    // 닉네임
+    NICKNAME_TOO_LONG(HttpStatus.BAD_REQUEST, "닉네임의 길이가 너무 깁니다."),
+    NICKNAME_TOO_SHORT(HttpStatus.BAD_REQUEST, "닉네임의 길이가 너무 짧습니다."),
+    NICKNAME_PATTERN_MISMATCH(HttpStatus.BAD_REQUEST, "닉네임에 허용되지 않는 문자가 포함되었습니다."),
 
     // 팔로우
     FOLLOW_NOT_FOUND(HttpStatus.NOT_FOUND, "두 회원 간에 팔로우 관계를 찾을 수 없습니다."),

@@ -1,8 +1,13 @@
 package com.example.temp.member.application;
 
+import com.example.temp.auth.dto.response.MemberInfo;
+import com.example.temp.exception.ApiException;
+import com.example.temp.exception.ErrorCode;
 import com.example.temp.member.domain.Member;
 import com.example.temp.member.domain.MemberRepository;
+import com.example.temp.member.dto.request.MemberRegisterRequest;
 import com.example.temp.member.exception.NicknameDuplicatedException;
+import com.example.temp.member.infrastructure.nickname.Nickname;
 import com.example.temp.member.infrastructure.nickname.NicknameGenerator;
 import com.example.temp.oauth.OAuthResponse;
 import lombok.RequiredArgsConstructor;
@@ -32,13 +37,13 @@ public class MemberService {
      */
     @Transactional
     @Retryable(retryFor = NicknameDuplicatedException.class, maxAttempts = LOOP_MAX_CNT, backoff = @Backoff(delay = 0))
-    public Member register(OAuthResponse oAuthResponse) {
+    public Member saveInitStatusMember(OAuthResponse oAuthResponse) {
         try {
-            String nickname = nicknameGenerator.generate();
+            Nickname nickname = nicknameGenerator.generate();
             if (memberRepository.existsByNickname(nickname)) {
                 throw new NicknameDuplicatedException();
             }
-            Member member = oAuthResponse.toMemberWithNickname(nickname);
+            Member member = oAuthResponse.toInitStatusMemberWith(nickname);
             memberRepository.save(member);
             return member;
         } catch (DataIntegrityViolationException e) {
@@ -46,4 +51,18 @@ public class MemberService {
         }
     }
 
+    /**
+     * 가입 처리가 완료되지 않은 회원을 가입시킵니다.
+     *
+     * @param executorId 로그인한 사용자의 ID
+     * @param request 회원 가입에 필요한 정보
+     * @return 회원가입이 완료된 Member 객체의 정보를 반환합니다.
+     */
+    @Transactional
+    public MemberInfo register(long executorId, MemberRegisterRequest request) {
+        Member member = memberRepository.findById(executorId)
+            .orElseThrow(() -> new ApiException(ErrorCode.AUTHENTICATED_FAIL));
+        member.init(Nickname.create(request.nickname()), request.profileUrl());
+        return MemberInfo.of(member);
+    }
 }

@@ -3,7 +3,7 @@ package com.example.temp.follow.presentation;
 import com.example.temp.follow.application.FollowService;
 import com.example.temp.follow.dto.response.FollowInfo;
 import com.example.temp.follow.dto.response.FollowInfos;
-import com.example.temp.follow.response.FollowResponse;
+import com.example.temp.follow.dto.response.FollowResponse;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

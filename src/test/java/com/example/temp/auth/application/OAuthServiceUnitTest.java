@@ -8,9 +8,11 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.example.temp.auth.dto.response.LoginMemberResponse;
+import com.example.temp.auth.dto.response.MemberInfo;
+import com.example.temp.common.entity.Email;
 import com.example.temp.member.application.MemberService;
 import com.example.temp.member.domain.Member;
+import com.example.temp.member.infrastructure.nickname.Nickname;
 import com.example.temp.oauth.OAuthProviderResolver;
 import com.example.temp.oauth.OAuthProviderType;
 import com.example.temp.oauth.OAuthResponse;
@@ -48,8 +50,11 @@ class OAuthServiceUnitTest {
     @BeforeEach
     void setUp() {
         oAuthService = new OAuthService(oAuthProviderResolver, oAuthInfoRepository, memberService);
-        oAuthResponse = new OAuthResponse(OAuthProviderType.GOOGLE, "이메일", "닉네임", "123", "프로필주소");
-        member = Member.builder().build();
+        oAuthResponse = new OAuthResponse(OAuthProviderType.GOOGLE, Email.create("이메일"), "닉네임", "123", "프로필주소");
+        member = Member.builder()
+            .nickname(Nickname.create("defaultNick"))
+            .email(Email.create("default@email.com"))
+            .build();
         oAuthInfo = OAuthInfo.builder()
             .member(member)
             .build();
@@ -63,15 +68,15 @@ class OAuthServiceUnitTest {
             .thenReturn(oAuthResponse);
         when(oAuthInfoRepository.findByIdUsingResourceServerAndType(anyString(), any(OAuthProviderType.class)))
             .thenReturn(Optional.empty());
-        when(memberService.register(any(OAuthResponse.class)))
+        when(memberService.saveInitStatusMember(any(OAuthResponse.class)))
             .thenReturn(member);
 
         // when
-        LoginMemberResponse response = oAuthService.login("google", "1234");
+        MemberInfo response = oAuthService.login("google", "1234");
 
         // then
         assertThat(response.id()).isEqualTo(member.getId());
-        assertThat(response.email()).isEqualTo(member.getEmail());
+        assertThat(response.email()).isEqualTo(member.getEmailValue());
         assertThat(response.profileUrl()).isEqualTo(member.getProfileUrl());
     }
 
@@ -85,11 +90,11 @@ class OAuthServiceUnitTest {
             .thenReturn(Optional.of(oAuthInfo));
 
         // when
-        LoginMemberResponse response = oAuthService.login("google", "1234");
+        MemberInfo response = oAuthService.login("google", "1234");
 
         // then
         assertThat(response.id()).isEqualTo(member.getId());
-        assertThat(response.email()).isEqualTo(member.getEmail());
+        assertThat(response.email()).isEqualTo(member.getEmailValue());
         assertThat(response.profileUrl()).isEqualTo(member.getProfileUrl());
     }
 
@@ -101,7 +106,7 @@ class OAuthServiceUnitTest {
             .thenReturn(oAuthResponse);
         when(oAuthInfoRepository.findByIdUsingResourceServerAndType(anyString(), any(OAuthProviderType.class)))
             .thenReturn(Optional.empty());
-        when(memberService.register(any(OAuthResponse.class)))
+        when(memberService.saveInitStatusMember(any(OAuthResponse.class)))
             .thenReturn(member);
 
         // when
@@ -109,7 +114,7 @@ class OAuthServiceUnitTest {
 
         // then
         verify(memberService, times(1))
-            .register(any(OAuthResponse.class));
+            .saveInitStatusMember(any(OAuthResponse.class));
         verify(oAuthInfoRepository, times(1))
             .save(any(OAuthInfo.class));
     }
@@ -128,7 +133,7 @@ class OAuthServiceUnitTest {
 
         // then
         verify(memberService, never())
-            .register(any(OAuthResponse.class));
+            .saveInitStatusMember(any(OAuthResponse.class));
     }
 
 }
