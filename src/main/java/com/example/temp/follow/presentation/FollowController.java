@@ -1,5 +1,7 @@
 package com.example.temp.follow.presentation;
 
+import com.example.temp.common.annotation.Login;
+import com.example.temp.common.dto.UserContext;
 import com.example.temp.follow.application.FollowService;
 import com.example.temp.follow.dto.response.FollowInfo;
 import com.example.temp.follow.dto.response.FollowInfos;
@@ -17,46 +19,41 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class FollowController {
 
-    /**
-     * 로그인된 사용자의 ID를 모킹했습니다. 현재 access token을 통해 사용자의 id를 받아오는 로직이 만들어지지 않아, 임시로 사용중입니다.
-     */
-    public static final long AUTHENTICATED_MEMBER_ID = 1L;
-
     private final FollowService followService;
 
     @GetMapping("/members/{memberId}/followings")
-    public ResponseEntity<FollowInfos> getFollowings(@PathVariable Long memberId) {
-        List<FollowInfo> followInfos = followService.getFollowings(AUTHENTICATED_MEMBER_ID, memberId);
+    public ResponseEntity<FollowInfos> getFollowings(@Login UserContext userContext, @PathVariable Long memberId) {
+        List<FollowInfo> followInfos = followService.getFollowings(userContext, memberId);
         return ResponseEntity.ok(FollowInfos.from(followInfos));
     }
 
     @GetMapping("/members/{memberId}/followers")
-    public ResponseEntity<FollowInfos> getFollowers(@PathVariable Long memberId) {
-        List<FollowInfo> followInfos = followService.getFollowers(AUTHENTICATED_MEMBER_ID, memberId);
+    public ResponseEntity<FollowInfos> getFollowers(@Login UserContext userContext, @PathVariable Long memberId) {
+        List<FollowInfo> followInfos = followService.getFollowers(userContext, memberId);
         return ResponseEntity.ok(FollowInfos.from(followInfos));
     }
 
     @PostMapping("/members/{memberId}/follow")
-    public ResponseEntity<FollowResponse> follow(@PathVariable Long memberId) {
-        FollowResponse response = followService.follow(AUTHENTICATED_MEMBER_ID, memberId);
+    public ResponseEntity<FollowResponse> follow(@Login UserContext userContext, @PathVariable Long memberId) {
+        FollowResponse response = followService.follow(userContext, memberId);
         return ResponseEntity.ok(response);
     }
 
     @PostMapping("/members/{memberId}/unfollow")
-    public ResponseEntity<Void> unfollow(@PathVariable Long memberId) {
-        followService.unfollow(AUTHENTICATED_MEMBER_ID, memberId);
+    public ResponseEntity<Void> unfollow(@Login UserContext userContext, @PathVariable Long memberId) {
+        followService.unfollow(userContext, memberId);
         return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/follows/{followId}")
-    public ResponseEntity<Void> acceptFollowRequest(@PathVariable Long followId) {
-        followService.acceptFollowRequest(AUTHENTICATED_MEMBER_ID, followId);
+    public ResponseEntity<Void> acceptFollowRequest(@Login UserContext userContext, @PathVariable Long followId) {
+        followService.acceptFollowRequest(userContext, followId);
         return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/follows/{followId}")
-    public ResponseEntity<Void> rejectFollowRequest(@PathVariable Long followId) {
-        followService.rejectFollowRequest(AUTHENTICATED_MEMBER_ID, followId);
+    public ResponseEntity<Void> rejectFollowRequest(@Login UserContext userContext, @PathVariable Long followId) {
+        followService.rejectFollowRequest(userContext, followId);
         return ResponseEntity.noContent().build();
     }
 }
