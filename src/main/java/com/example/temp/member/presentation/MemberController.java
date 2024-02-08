@@ -3,6 +3,7 @@ package com.example.temp.member.presentation;
 import com.example.temp.auth.dto.response.MemberInfo;
 import com.example.temp.member.application.MemberService;
 import com.example.temp.member.dto.request.MemberRegisterRequest;
+import com.example.temp.member.dto.request.TogglePrivacyRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -25,4 +26,10 @@ public class MemberController {
         return ResponseEntity.ok(response);
     }
 
+    @PostMapping("/account/privacy")
+    public ResponseEntity<Void> togglePrivacy(@RequestAttribute(name = "executor") long executorId,
+        @RequestBody TogglePrivacyRequest request) {
+        memberService.changePrivacy(executorId, request.privacy());
+        return ResponseEntity.noContent().build();
+    }
 }

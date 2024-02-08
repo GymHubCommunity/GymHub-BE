@@ -55,7 +55,7 @@ public class MemberService {
      * 가입 처리가 완료되지 않은 회원을 가입시킵니다.
      *
      * @param executorId 로그인한 사용자의 ID
-     * @param request 회원 가입에 필요한 정보
+     * @param request    회원 가입에 필요한 정보
      * @return 회원가입이 완료된 Member 객체의 정보를 반환합니다.
      */
     @Transactional
@@ -64,5 +64,9 @@ public class MemberService {
             .orElseThrow(() -> new ApiException(ErrorCode.AUTHENTICATED_FAIL));
         member.init(Nickname.create(request.nickname()), request.profileUrl());
         return MemberInfo.of(member);
+    }
+
+    public void changePrivacy(long executorId, String privacyStr) {
+
     }
 }
