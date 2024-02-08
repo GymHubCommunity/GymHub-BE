@@ -1,6 +1,6 @@
 package com.example.temp.common.config;
 
-import com.example.temp.auth.infrastructure.LoginUserArgumentResolver;
+import com.example.temp.auth.infrastructure.LoginMemberArgumentResolver;
 import com.example.temp.common.interceptor.AuthenticationInterceptor;
 import com.example.temp.common.properties.CorsProperties;
 import java.util.List;
@@ -19,7 +19,7 @@ public class WebConfig implements WebMvcConfigurer {
 
     private final AuthenticationInterceptor authenticationInterceptor;
 
-    private final LoginUserArgumentResolver loginUserArgumentResolver;
+    private final LoginMemberArgumentResolver loginMemberArgumentResolver;
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
@@ -40,6 +40,6 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
-        resolvers.add(loginUserArgumentResolver);
+        resolvers.add(loginMemberArgumentResolver);
     }
 }

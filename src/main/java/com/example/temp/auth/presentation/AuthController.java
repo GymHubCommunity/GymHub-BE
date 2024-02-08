@@ -4,8 +4,8 @@ import static org.springframework.http.HttpHeaders.SET_COOKIE;
 
 import com.example.temp.auth.dto.request.OAuthLoginRequest;
 import com.example.temp.auth.dto.response.AuthorizedUrl;
-import com.example.temp.auth.dto.response.LoginMemberResponse;
 import com.example.temp.auth.dto.response.LoginResponse;
+import com.example.temp.auth.dto.response.MemberInfo;
 import com.example.temp.auth.dto.response.TokenInfo;
 import com.example.temp.auth.infrastructure.TokenManager;
 import com.example.temp.oauth.application.OAuthService;
@@ -35,7 +35,7 @@ public class AuthController {
     @PostMapping("/oauth/{provider}/login")
     public ResponseEntity<LoginResponse> oauthLogin(@PathVariable String provider,
         @RequestBody OAuthLoginRequest request, HttpServletResponse response) {
-        LoginMemberResponse memberResponse = oAuthService.login(provider, request.authCode());
+        MemberInfo memberResponse = oAuthService.login(provider, request.authCode());
         TokenInfo tokenInfo = tokenManager.issue(memberResponse.id());
 
         createRefreshCookie(tokenInfo.refreshToken(), response);

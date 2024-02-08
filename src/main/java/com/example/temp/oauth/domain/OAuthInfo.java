@@ -4,6 +4,8 @@ import com.example.temp.member.domain.Member;
 import com.example.temp.oauth.OAuthProviderType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -30,6 +32,7 @@ public class OAuthInfo {
     @Column(nullable = false)
     private String idUsingResourceServer;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private OAuthProviderType type;
 

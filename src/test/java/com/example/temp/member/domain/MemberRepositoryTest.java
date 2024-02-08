@@ -2,6 +2,8 @@ package com.example.temp.member.domain;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.example.temp.common.entity.Email;
+import com.example.temp.member.infrastructure.nickname.Nickname;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -22,16 +24,15 @@ class MemberRepositoryTest {
     @Test
     @DisplayName("해당 닉네임이 DB에 존재하면 true를 반환한다.")
     void existsByNicknameSuccess() throws Exception {
-        String nickname = "firstNick";
+        Nickname nickname = Nickname.create("firstNick");
         assertThat(memberRepository.existsByNickname(nickname)).isFalse();
-
     }
 
     @Test
     @DisplayName("해당 닉네임이 DB에 존재하지 않으면 false를 반환한다.")
     void existsByNicknameFailDuplicated() throws Exception {
         // given
-        String nickname = "duplicated";
+        Nickname nickname = Nickname.create("duplicated");
         Member member = createMember(nickname);
         em.persist(member);
 
@@ -40,11 +41,12 @@ class MemberRepositoryTest {
 
     }
 
-    private Member createMember(String nickname) {
+    private Member createMember(Nickname nickname) {
         Member member = Member.builder()
             .nickname(nickname)
-            .email("이멜")
+            .email(Email.create("이메일"))
             .profileUrl("프로필")
+            .followStrategy(FollowStrategy.EAGER)
             .build();
         em.persist(member);
         return member;

@@ -8,19 +8,14 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.example.temp.common.entity.Email;
 import com.example.temp.oauth.OAuthProviderType;
 import com.example.temp.oauth.OAuthResponse;
-import com.example.temp.oauth.impl.google.GoogleOAuthClient;
-import com.example.temp.oauth.impl.google.GoogleOAuthProperties;
-import com.example.temp.oauth.impl.google.GoogleOAuthProvider;
-import com.example.temp.oauth.impl.google.GoogleToken;
-import com.example.temp.oauth.impl.google.GoogleUserInfo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
@@ -80,7 +75,7 @@ class GoogleOAuthProviderTest {
 
         // then
         assertThat(result.type()).isEqualTo(OAuthProviderType.GOOGLE);
-        assertThat(result.email()).isEqualTo(googleUserInfo.getEmail());
+        assertThat(result.email()).isEqualTo(Email.create(googleUserInfo.getEmail()));
         assertThat(result.name()).isEqualTo(googleUserInfo.getName());
         assertThat(result.idUsingResourceServer()).isEqualTo(googleUserInfo.getIdUsingResourceServer());
         assertThat(result.profileUrl()).isEqualTo(googleUserInfo.getProfileUrl());

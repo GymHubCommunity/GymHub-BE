@@ -1,5 +1,6 @@
 package com.example.temp.auth.infrastructure;
 
+import com.example.temp.auth.dto.MemberInfo;
 import com.example.temp.auth.dto.response.TokenInfo;
 import com.example.temp.auth.exception.TokenInvalidException;
 import io.jsonwebtoken.Claims;
@@ -112,5 +113,14 @@ public class JwtTokenManager implements TokenManager, TokenParser {
         Jws<Claims> claimsJws = parseToJwsClaims(token);
         Claims claims = claimsJws.getPayload();
         return Long.parseLong(claims.getSubject());
+    }
+
+    @Override
+    public MemberInfo parsedClaims(String token) {
+        Jws<Claims> claimsJws = parseToJwsClaims(token);
+        Claims claims = claimsJws.getPayload();
+        return MemberInfo.builder()
+            .id(Long.parseLong(claims.getSubject()))
+            .build();
     }
 }
