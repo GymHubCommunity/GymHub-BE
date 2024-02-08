@@ -23,7 +23,7 @@ public class GlobalExceptionHandler {
             .body(ErrorResponse.create(exception.getMessage()));
     }
 
-    @ExceptionHandler(Throwable.class)
+    @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleServerException(Exception exception) {
         log.warn(exception.getMessage());
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
