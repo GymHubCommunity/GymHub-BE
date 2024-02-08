@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 @RestControllerAdvice
 @Slf4j
@@ -21,6 +22,14 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleBadRequestStatus(RuntimeException exception) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
             .body(ErrorResponse.create(exception.getMessage()));
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ErrorResponse> handleMethodArgumentTypeMismatchException(
+        MethodArgumentTypeMismatchException exception) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+            .body(ErrorResponse.create(
+                String.format("'%s'의 타입이 잘못되었습니다.", exception.getParameter().getParameterName())));
     }
 
     @ExceptionHandler(Exception.class)
