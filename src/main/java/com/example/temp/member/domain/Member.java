@@ -44,8 +44,6 @@ public class Member {
     @Column(nullable = false)
     private String profileUrl;
 
-    private boolean publicAccount;
-
     @Column(nullable = false)
     @Enumerated
     private PrivacyStrategy privacyStrategy;
@@ -56,12 +54,11 @@ public class Member {
 
     @Builder
     private Member(boolean registered, Nickname nickname, Email email, String profileUrl,
-        boolean publicAccount, PrivacyStrategy privacyStrategy, FollowStrategy followStrategy) {
+        PrivacyStrategy privacyStrategy, FollowStrategy followStrategy) {
         this.registered = registered;
         this.nickname = nickname;
         this.email = email;
         this.profileUrl = profileUrl;
-        this.publicAccount = publicAccount;
         this.privacyStrategy = privacyStrategy;
         this.followStrategy = followStrategy;
     }
@@ -77,9 +74,8 @@ public class Member {
     public static Member createInitStatus(Email email, String profileUrl, Nickname nickname) {
         return Member.builder()
             .registered(false)
-            .publicAccount(false)
-            .followStrategy(FollowStrategy.LAZY)
             .privacyStrategy(PrivacyStrategy.PRIVATE)
+            .followStrategy(FollowStrategy.LAZY)
             .email(email)
             .profileUrl(profileUrl)
             .nickname(nickname)
@@ -121,6 +117,10 @@ public class Member {
 
     public void changePrivacy(PrivacyStrategy privacyStrategy) {
         this.privacyStrategy = privacyStrategy;
+    }
+
+    public boolean isPublicAccount() {
+        return privacyStrategy == PrivacyStrategy.PUBLIC;
     }
 }
 

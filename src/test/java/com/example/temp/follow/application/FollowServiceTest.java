@@ -529,29 +529,28 @@ class FollowServiceTest {
     }
 
     private Member saveMember() {
-        return saveMemberHelper(FollowStrategy.EAGER, PrivacyStrategy.PUBLIC, true);
+        return saveMemberHelper(FollowStrategy.EAGER, PrivacyStrategy.PUBLIC);
     }
 
     private Member saveMemberWithAccountPolicy(boolean isPublic) {
         if (isPublic) {
-            return saveMemberHelper(FollowStrategy.EAGER, PrivacyStrategy.PUBLIC, true);
+            return saveMemberHelper(FollowStrategy.EAGER, PrivacyStrategy.PUBLIC);
         } else {
-            return saveMemberHelper(FollowStrategy.LAZY, PrivacyStrategy.PRIVATE, false);
+            return saveMemberHelper(FollowStrategy.LAZY, PrivacyStrategy.PRIVATE);
         }
     }
 
     private Member saveMemberWithFollowStrategy(FollowStrategy followStrategy) {
-        return saveMemberHelper(followStrategy, PrivacyStrategy.PUBLIC, true);
+        return saveMemberHelper(followStrategy, PrivacyStrategy.PUBLIC);
     }
 
-    private Member saveMemberHelper(FollowStrategy followStrategy, PrivacyStrategy privacyStrategy, boolean isPublic) {
+    private Member saveMemberHelper(FollowStrategy followStrategy, PrivacyStrategy privacyStrategy) {
         Member member = Member.builder()
             .email(Email.create("이메일"))
             .profileUrl("프로필")
             .nickname(Nickname.create("nick" + (globalIdx++)))
             .followStrategy(followStrategy)
             .privacyStrategy(privacyStrategy)
-            .publicAccount(isPublic)
             .build();
         em.persist(member);
         return member;

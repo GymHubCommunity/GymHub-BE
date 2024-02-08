@@ -214,7 +214,6 @@ class FollowRepositoryTest {
             .nickname(Nickname.create("nick" + (globalIdx++)))
             .followStrategy(FollowStrategy.EAGER)
             .privacyStrategy(PrivacyStrategy.PUBLIC)
-            .publicAccount(true)
             .build();
         em.persist(member);
         return member;
