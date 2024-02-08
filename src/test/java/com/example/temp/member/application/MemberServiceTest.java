@@ -90,6 +90,8 @@ class MemberServiceTest {
         Member result = memberService.saveInitStatusMember(oAuthResponse);
 
         // then
+        assertThat(result.getPrivacyStrategy()).isEqualTo(PrivacyStrategy.PRIVATE);
+        assertThat(result.getFollowStrategy()).isEqualTo(FollowStrategy.LAZY);
         assertThat(result.getNickname()).isEqualTo(createdNickname);
         validateMemberIsSame(result, oAuthResponse);
     }
@@ -156,6 +158,8 @@ class MemberServiceTest {
             new MemberRegisterRequest(changedProfileUrl, changedNickname));
 
         // then
+        assertThat(member.getPrivacyStrategy()).isEqualTo(PrivacyStrategy.PUBLIC);
+        assertThat(member.getFollowStrategy()).isEqualTo(FollowStrategy.EAGER);
         assertThat(result.registered()).isTrue();
         assertThat(result.id()).isEqualTo(member.getId());
         assertThat(result.profileUrl()).isEqualTo(changedProfileUrl);

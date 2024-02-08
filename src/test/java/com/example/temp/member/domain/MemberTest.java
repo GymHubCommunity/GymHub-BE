@@ -1,5 +1,6 @@
 package com.example.temp.member.domain;
 
+import static com.example.temp.member.domain.FollowStrategy.EAGER;
 import static com.example.temp.member.domain.PrivacyStrategy.PRIVATE;
 import static com.example.temp.member.domain.PrivacyStrategy.PUBLIC;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -31,6 +32,8 @@ class MemberTest {
 
         // then
         assertThat(member.isRegistered()).isTrue();
+        assertThat(member.getPrivacyStrategy()).isEqualTo(PUBLIC);
+        assertThat(member.getFollowStrategy()).isEqualTo(EAGER);
         assertThat(member.getNickname()).isEqualTo(changedNickname);
         assertThat(member.getProfileUrl()).isEqualTo(changedProfileUrl);
     }

@@ -64,7 +64,7 @@ public class Member {
     }
 
     /**
-     * 가입이 완료되지 않은 회원 엔티티를 생성합니다. 해당 회원은 현재 가입되지 않은 상태이고, 비공개 계정이며, LAZY한 팔로우 전략을 갖습니다.
+     * 가입이 완료되지 않은 회원 엔티티를 생성합니다. 해당 회원은 현재 가입되지 않은 상태이고, 비공개 계정이며, LAZY 팔로우 전략을 갖습니다.
      *
      * @param email
      * @param profileUrl
@@ -83,7 +83,7 @@ public class Member {
     }
 
     /**
-     * nickname과 profileUrl을 입력받아 회원가입 처리를 완료합니다.
+     * nickname과 profileUrl을 입력받아 회원가입 처리를 완료합니다. 공개 계정이며, EAGER 팔로우 전략을 갖습니다.
      *
      * @param nickname
      * @param profileUrl
@@ -94,6 +94,8 @@ public class Member {
             throw new ApiException(ErrorCode.MEMBER_ALREADY_REGISTER);
         }
         this.registered = true;
+        this.privacyStrategy = PrivacyStrategy.PUBLIC;
+        this.followStrategy = FollowStrategy.EAGER;
         this.nickname = nickname;
         this.profileUrl = profileUrl;
     }
