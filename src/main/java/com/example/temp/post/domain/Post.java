@@ -13,6 +13,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -33,4 +34,13 @@ public class Post extends BaseTimeEntity {
 
     @Embedded
     private Content content;
+    
+    private String imageUrl;
+
+    @Builder
+    public Post(Member member, Content content, String imageUrl) {
+        this.member = member;
+        this.content = content;
+        this.imageUrl = imageUrl;
+    }
 }
