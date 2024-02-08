@@ -97,7 +97,7 @@ class MemberServiceTest {
     void registerTempFailDuplicatedNickname() throws Exception {
         // given
         Nickname createdNickname = Nickname.create("중복닉네임");
-        saveMember(createdNickname);
+        saveNotInitializedMember(createdNickname);
         when(nicknameGenerator.generate())
             .thenReturn(createdNickname);
 
@@ -111,7 +111,7 @@ class MemberServiceTest {
     void tryRegisterTempSeveralTimeIfDuplicatedNickname() throws Exception {
         // given
         Nickname createdNickname = Nickname.create("중복닉네임");
-        saveMember(createdNickname);
+        saveNotInitializedMember(createdNickname);
         when(nicknameGenerator.generate())
             .thenReturn(createdNickname);
 
@@ -128,7 +128,7 @@ class MemberServiceTest {
         // given
         Nickname duplicatedNickname = Nickname.create("중복된닉네임");
         Nickname createdNickname = Nickname.create("중복되지않은닉네임");
-        saveMember(duplicatedNickname);
+        saveNotInitializedMember(duplicatedNickname);
         when(nicknameGenerator.generate())
             .thenReturn(duplicatedNickname, duplicatedNickname, duplicatedNickname,
                 duplicatedNickname, createdNickname);
@@ -145,7 +145,7 @@ class MemberServiceTest {
     @DisplayName("회원을 저장한다")
     void registerSuccess() throws Exception {
         // given
-        Member member = saveMember(Nickname.create("닉넴"));
+        Member member = saveNotInitializedMember(Nickname.create("닉넴"));
         String changedProfileUrl = "변경할프로필";
         String changedNickname = "변경할닉네임";
 
@@ -164,7 +164,7 @@ class MemberServiceTest {
     @DisplayName("이미 회원가입된 사용자 계정으로 회원가입을 할 수 없다.")
     void registerFailAlreadyRegistered() throws Exception {
         // given
-        Member member = saveRegisterMember(Nickname.create("닉넴"));
+        Member member = saveRegisteredMember(Nickname.create("닉넴"));
         String changedProfileUrl = "변경하는프로필주소";
         String changedNickname = "변경할닉네임";
 
@@ -188,29 +188,22 @@ class MemberServiceTest {
             .hasMessageContaining(ErrorCode.AUTHENTICATED_FAIL.getMessage());
     }
 
-    private Member saveRegisterMember(Nickname nickname) {
-        Member member = Member.builder()
-            .nickname(nickname)
-            .email(Email.create("이메일"))
-            .profileUrl("프로필주소")
-            .registered(true)
-            .privacyStrategy(PrivacyStrategy.PUBLIC)
-            .followStrategy(FollowStrategy.EAGER)
-            .publicAccount(true)
-            .build();
-        em.persist(member);
-        return member;
+    private Member saveRegisteredMember(Nickname nickname) {
+        return saveMember(nickname, true, PrivacyStrategy.PRIVATE);
     }
 
-    private Member saveMember(Nickname nickname) {
+    private Member saveNotInitializedMember(Nickname nickname) {
+        return saveMember(nickname, false, PrivacyStrategy.PRIVATE);
+    }
+
+    private Member saveMember(Nickname nickname, boolean registered, PrivacyStrategy privacyStrategy) {
         Member member = Member.builder()
             .nickname(nickname)
             .email(Email.create("이메일"))
             .profileUrl("프로필주소")
-            .registered(false)
-            .privacyStrategy(PrivacyStrategy.PRIVATE)
-            .followStrategy(FollowStrategy.EAGER)
-            .publicAccount(true)
+            .registered(registered)
+            .privacyStrategy(privacyStrategy)
+            .followStrategy(FollowStrategy.LAZY)
             .build();
         em.persist(member);
         return member;
