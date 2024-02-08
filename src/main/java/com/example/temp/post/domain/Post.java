@@ -1,7 +1,9 @@
 package com.example.temp.post.domain;
 
+import com.example.temp.common.entity.BaseTimeEntity;
 import com.example.temp.member.domain.Member;
 import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -18,7 +20,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "posts")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
-public class Post {
+public class Post extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,6 +31,6 @@ public class Post {
     @JoinColumn(name = "member_id")
     private Member member;
 
-    @Column(nullable = false)
-    private String contents;
+    @Embedded
+    private Content content;
 }
