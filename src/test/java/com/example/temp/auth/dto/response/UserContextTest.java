@@ -15,7 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
 @Transactional
-class MemberInfoTest {
+class UserContextTest {
 
     @Autowired
     EntityManager em;
