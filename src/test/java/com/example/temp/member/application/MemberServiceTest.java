@@ -24,6 +24,8 @@ import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -186,6 +188,33 @@ class MemberServiceTest {
             new MemberRegisterRequest("이미지url", "닉넴")))
             .isInstanceOf(ApiException.class)
             .hasMessageContaining(ErrorCode.AUTHENTICATED_FAIL.getMessage());
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 회원은 계정 Privacy 상태를 바꿀 수 없다.")
+    void changeStatusFail() throws Exception {
+        // given
+        long notExistMemberId = 999_999_999L;
+
+        // when & then
+        assertThatThrownBy(() -> memberService.changePrivacy(notExistMemberId, PrivacyStrategy.PRIVATE))
+            .isInstanceOf(ApiException.class)
+            .hasMessageContaining(ErrorCode.AUTHENTICATED_FAIL.getMessage());
+    }
+
+    @ParameterizedTest
+    @DisplayName("계정 Privacy 상태를 변경한다.")
+    @ValueSource(strings = {"PRIVATE", "PUBLIC"})
+    void changeStatus(String privacyStr) throws Exception {
+        // given
+        PrivacyStrategy targetStrategy = PrivacyStrategy.valueOf(privacyStr);
+        Member member = saveRegisteredMember(Nickname.create("nick"));
+
+        // when
+        memberService.changePrivacy(member.getId(), targetStrategy);
+
+        // then
+        assertThat(member.getPrivacyStrategy()).isEqualTo(targetStrategy);
     }
 
     private Member saveRegisteredMember(Nickname nickname) {
