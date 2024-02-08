@@ -1,8 +1,8 @@
 package com.example.temp.common.config;
 
-import com.example.temp.auth.infrastructure.LoginMemberArgumentResolver;
 import com.example.temp.common.interceptor.AuthenticationInterceptor;
 import com.example.temp.common.properties.CorsProperties;
+import com.example.temp.common.resolver.LoginMemberArgumentResolver;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;

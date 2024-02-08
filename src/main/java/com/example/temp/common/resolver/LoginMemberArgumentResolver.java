@@ -1,5 +1,6 @@
-package com.example.temp.auth.infrastructure;
+package com.example.temp.common.resolver;
 
+import com.example.temp.common.annotation.Login;
 import com.example.temp.common.interceptor.AuthenticationInterceptor;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.core.MethodParameter;

@@ -1,4 +1,4 @@
-package com.example.temp.auth.infrastructure;
+package com.example.temp.common.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
