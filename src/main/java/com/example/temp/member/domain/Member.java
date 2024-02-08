@@ -46,18 +46,23 @@ public class Member {
 
     private boolean publicAccount;
 
+    @Column(nullable = false)
+    @Enumerated
+    private PrivacyStrategy privacyStrategy;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private FollowStrategy followStrategy;
 
     @Builder
     private Member(boolean registered, Nickname nickname, Email email, String profileUrl,
-        boolean publicAccount, FollowStrategy followStrategy) {
+        boolean publicAccount, PrivacyStrategy privacyStrategy, FollowStrategy followStrategy) {
         this.registered = registered;
         this.nickname = nickname;
         this.email = email;
         this.profileUrl = profileUrl;
         this.publicAccount = publicAccount;
+        this.privacyStrategy = privacyStrategy;
         this.followStrategy = followStrategy;
     }
 
@@ -74,6 +79,7 @@ public class Member {
             .registered(false)
             .publicAccount(false)
             .followStrategy(FollowStrategy.LAZY)
+            .privacyStrategy(PrivacyStrategy.PRIVATE)
             .email(email)
             .profileUrl(profileUrl)
             .nickname(nickname)
@@ -98,6 +104,7 @@ public class Member {
 
     /**
      * 해당 회원을 팔로우했을 때, 생성될 팔로우 엔티티의 상태를 반환합니다. FollowStrategy의 text 컬럼을 통해 자세한 전략을 확인할 수 있습니다.
+     *
      * @return 팔로우 엔티티의 상태값을 반환합니다. (ex. APPROVED, PENDING)
      */
     public FollowStatus getStatusBasedOnStrategy() {
@@ -110,6 +117,10 @@ public class Member {
 
     public String getEmailValue() {
         return email.getValue();
+    }
+
+    public void changePrivacy(PrivacyStrategy privacyStrategy) {
+        this.privacyStrategy = privacyStrategy;
     }
 }
 

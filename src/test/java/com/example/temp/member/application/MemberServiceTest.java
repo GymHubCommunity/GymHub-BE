@@ -12,6 +12,7 @@ import com.example.temp.exception.ApiException;
 import com.example.temp.exception.ErrorCode;
 import com.example.temp.member.domain.FollowStrategy;
 import com.example.temp.member.domain.Member;
+import com.example.temp.member.domain.PrivacyStrategy;
 import com.example.temp.member.dto.request.MemberRegisterRequest;
 import com.example.temp.member.exception.NicknameDuplicatedException;
 import com.example.temp.member.infrastructure.nickname.Nickname;
@@ -193,6 +194,7 @@ class MemberServiceTest {
             .email(Email.create("이메일"))
             .profileUrl("프로필주소")
             .registered(true)
+            .privacyStrategy(PrivacyStrategy.PUBLIC)
             .followStrategy(FollowStrategy.EAGER)
             .publicAccount(true)
             .build();
@@ -206,6 +208,7 @@ class MemberServiceTest {
             .email(Email.create("이메일"))
             .profileUrl("프로필주소")
             .registered(false)
+            .privacyStrategy(PrivacyStrategy.PRIVATE)
             .followStrategy(FollowStrategy.EAGER)
             .publicAccount(true)
             .build();
