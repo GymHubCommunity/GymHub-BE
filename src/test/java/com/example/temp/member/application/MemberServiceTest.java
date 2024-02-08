@@ -7,6 +7,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.example.temp.auth.dto.response.MemberInfo;
+import com.example.temp.common.dto.UserContext;
 import com.example.temp.common.entity.Email;
 import com.example.temp.common.exception.ApiException;
 import com.example.temp.common.exception.ErrorCode;
@@ -154,7 +155,7 @@ class MemberServiceTest {
         String changedNickname = "변경할닉네임";
 
         // when
-        MemberInfo result = memberService.register(member.getId(),
+        MemberInfo result = memberService.register(UserContext.from(member),
             new MemberRegisterRequest(changedProfileUrl, changedNickname));
 
         // then
@@ -175,7 +176,7 @@ class MemberServiceTest {
         String changedNickname = "변경할닉네임";
 
         // when & then
-        assertThatThrownBy(() -> memberService.register(member.getId(),
+        assertThatThrownBy(() -> memberService.register(UserContext.from(member),
             new MemberRegisterRequest(changedProfileUrl, changedNickname)))
             .isInstanceOf(ApiException.class)
             .hasMessageContaining(ErrorCode.MEMBER_ALREADY_REGISTER.getMessage());
@@ -188,7 +189,7 @@ class MemberServiceTest {
         long notExistMemberId = 999_999_999L;
 
         // when & then
-        assertThatThrownBy(() -> memberService.register(notExistMemberId,
+        assertThatThrownBy(() -> memberService.register(new UserContext(notExistMemberId),
             new MemberRegisterRequest("이미지url", "닉넴")))
             .isInstanceOf(ApiException.class)
             .hasMessageContaining(ErrorCode.AUTHENTICATED_FAIL.getMessage());
@@ -201,7 +202,7 @@ class MemberServiceTest {
         long notExistMemberId = 999_999_999L;
 
         // when & then
-        assertThatThrownBy(() -> memberService.changePrivacy(notExistMemberId, PrivacyPolicy.PRIVATE))
+        assertThatThrownBy(() -> memberService.changePrivacy(new UserContext(notExistMemberId), PrivacyPolicy.PRIVATE))
             .isInstanceOf(ApiException.class)
             .hasMessageContaining(ErrorCode.AUTHENTICATED_FAIL.getMessage());
     }
@@ -215,7 +216,7 @@ class MemberServiceTest {
         Member member = saveRegisteredMember(Nickname.create("nick"));
 
         // when
-        memberService.changePrivacy(member.getId(), targetPolicy);
+        memberService.changePrivacy(UserContext.from(member), targetPolicy);
 
         // then
         assertThat(member.getPrivacyPolicy()).isEqualTo(targetPolicy);
