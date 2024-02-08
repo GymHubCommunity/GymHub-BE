@@ -1,6 +1,6 @@
 package com.example.temp.common.interceptor;
 
-import com.example.temp.auth.dto.MemberInfo;
+import com.example.temp.common.dto.UserContext;
 import com.example.temp.auth.infrastructure.TokenParser;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -28,8 +28,8 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
             return false;
         }
         String accessToken = accessTokenBeforeProcessing.substring(BEARER.length());
-        MemberInfo memberInfo = tokenParser.parsedClaims(accessToken);
-        request.setAttribute(MEMBER_INFO, memberInfo);
+        UserContext userContext = tokenParser.parsedClaims(accessToken);
+        request.setAttribute(MEMBER_INFO, userContext);
         return true;
     }
 

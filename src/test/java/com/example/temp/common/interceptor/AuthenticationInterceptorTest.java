@@ -8,7 +8,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.example.temp.auth.dto.MemberInfo;
+import com.example.temp.common.dto.UserContext;
 import com.example.temp.auth.infrastructure.TokenParser;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -35,12 +35,12 @@ class AuthenticationInterceptorTest {
     @Mock
     HttpServletResponse response;
 
-    MemberInfo memberInfo;
+    UserContext userContext;
 
     @BeforeEach
     void setUp() {
         authenticationInterceptor = new AuthenticationInterceptor(tokenParser);
-        memberInfo = MemberInfo.builder()
+        userContext = UserContext.builder()
             .id(1L)
             .build();
     }
@@ -51,7 +51,7 @@ class AuthenticationInterceptorTest {
         // given
         String token = "token";
         when(tokenParser.parsedClaims(token))
-            .thenReturn(memberInfo);
+            .thenReturn(userContext);
         when(request.getHeader(HttpHeaders.AUTHORIZATION))
             .thenReturn("Bearer " + token);
 
@@ -60,7 +60,7 @@ class AuthenticationInterceptorTest {
 
         // then
         assertThat(result).isTrue();
-        verify(request, times(1)).setAttribute("memberInfo", memberInfo);
+        verify(request, times(1)).setAttribute("memberInfo", userContext);
     }
 
     @Test
