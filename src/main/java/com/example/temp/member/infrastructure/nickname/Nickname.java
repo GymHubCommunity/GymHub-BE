@@ -1,7 +1,7 @@
 package com.example.temp.member.infrastructure.nickname;
 
-import com.example.temp.exception.ApiException;
-import com.example.temp.exception.ErrorCode;
+import com.example.temp.common.exception.ApiException;
+import com.example.temp.common.exception.ErrorCode;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import java.util.Objects;

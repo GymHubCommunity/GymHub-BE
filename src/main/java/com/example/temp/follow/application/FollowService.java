@@ -1,12 +1,12 @@
 package com.example.temp.follow.application;
 
-import static com.example.temp.exception.ErrorCode.AUTHENTICATED_FAIL;
-import static com.example.temp.exception.ErrorCode.AUTHORIZED_FAIL;
-import static com.example.temp.exception.ErrorCode.FOLLOW_NOT_FOUND;
-import static com.example.temp.exception.ErrorCode.FOLLOW_SELF_FAIL;
-import static com.example.temp.exception.ErrorCode.MEMBER_NOT_FOUND;
+import static com.example.temp.common.exception.ErrorCode.AUTHENTICATED_FAIL;
+import static com.example.temp.common.exception.ErrorCode.AUTHORIZED_FAIL;
+import static com.example.temp.common.exception.ErrorCode.FOLLOW_NOT_FOUND;
+import static com.example.temp.common.exception.ErrorCode.FOLLOW_SELF_FAIL;
+import static com.example.temp.common.exception.ErrorCode.MEMBER_NOT_FOUND;
 
-import com.example.temp.exception.ApiException;
+import com.example.temp.common.exception.ApiException;
 import com.example.temp.follow.domain.Follow;
 import com.example.temp.follow.domain.FollowRepository;
 import com.example.temp.follow.domain.FollowStatus;

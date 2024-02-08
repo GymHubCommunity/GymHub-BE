@@ -1,8 +1,8 @@
 package com.example.temp.member.application;
 
 import com.example.temp.auth.dto.response.MemberInfo;
-import com.example.temp.exception.ApiException;
-import com.example.temp.exception.ErrorCode;
+import com.example.temp.common.exception.ApiException;
+import com.example.temp.common.exception.ErrorCode;
 import com.example.temp.member.domain.Member;
 import com.example.temp.member.domain.MemberRepository;
 import com.example.temp.member.domain.PrivacyPolicy;

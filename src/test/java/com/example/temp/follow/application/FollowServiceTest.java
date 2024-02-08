@@ -1,18 +1,18 @@
 package com.example.temp.follow.application;
 
-import static com.example.temp.exception.ErrorCode.AUTHENTICATED_FAIL;
-import static com.example.temp.exception.ErrorCode.AUTHORIZED_FAIL;
-import static com.example.temp.exception.ErrorCode.FOLLOW_ALREADY_RELATED;
-import static com.example.temp.exception.ErrorCode.FOLLOW_NOT_FOUND;
-import static com.example.temp.exception.ErrorCode.FOLLOW_NOT_PENDING;
-import static com.example.temp.exception.ErrorCode.FOLLOW_SELF_FAIL;
-import static com.example.temp.exception.ErrorCode.MEMBER_NOT_FOUND;
+import static com.example.temp.common.exception.ErrorCode.AUTHENTICATED_FAIL;
+import static com.example.temp.common.exception.ErrorCode.AUTHORIZED_FAIL;
+import static com.example.temp.common.exception.ErrorCode.FOLLOW_ALREADY_RELATED;
+import static com.example.temp.common.exception.ErrorCode.FOLLOW_NOT_FOUND;
+import static com.example.temp.common.exception.ErrorCode.FOLLOW_NOT_PENDING;
+import static com.example.temp.common.exception.ErrorCode.FOLLOW_SELF_FAIL;
+import static com.example.temp.common.exception.ErrorCode.MEMBER_NOT_FOUND;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.example.temp.common.entity.Email;
-import com.example.temp.exception.ApiException;
+import com.example.temp.common.exception.ApiException;
 import com.example.temp.follow.domain.Follow;
 import com.example.temp.follow.domain.FollowStatus;
 import com.example.temp.follow.dto.response.FollowInfo;

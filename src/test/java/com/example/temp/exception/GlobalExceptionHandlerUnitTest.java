@@ -2,6 +2,10 @@ package com.example.temp.exception;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.example.temp.common.exception.ApiException;
+import com.example.temp.common.exception.ErrorCode;
+import com.example.temp.common.exception.ErrorResponse;
+import com.example.temp.common.exception.GlobalExceptionHandler;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;

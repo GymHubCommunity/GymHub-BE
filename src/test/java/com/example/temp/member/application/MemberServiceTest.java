@@ -8,8 +8,8 @@ import static org.mockito.Mockito.when;
 
 import com.example.temp.auth.dto.response.MemberInfo;
 import com.example.temp.common.entity.Email;
-import com.example.temp.exception.ApiException;
-import com.example.temp.exception.ErrorCode;
+import com.example.temp.common.exception.ApiException;
+import com.example.temp.common.exception.ErrorCode;
 import com.example.temp.member.domain.FollowStrategy;
 import com.example.temp.member.domain.Member;
 import com.example.temp.member.domain.PrivacyPolicy;
