@@ -31,7 +31,7 @@ public enum ErrorCode {
     FOLLOW_NOT_PENDING(HttpStatus.BAD_REQUEST, "팔로우의 상태가 PENDING이 아니므로, 해당 요청을 수행할 수 없습니다."),
     FOLLOW_INACTIVE(HttpStatus.BAD_REQUEST, "해당 Follow는 비활성화된 상태이기 때문에, 해당 요청을 수행할 수 없습니다."),
 
-    //게시글_
+    //게시글
     CONTENT_TOO_LONG(HttpStatus.BAD_REQUEST, "게시글은 최대 2,000자 까지 가능합니다.");
 
     private final HttpStatus httpStatus;
