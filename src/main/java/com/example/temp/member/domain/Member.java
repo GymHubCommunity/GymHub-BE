@@ -46,7 +46,7 @@ public class Member {
 
     @Column(nullable = false)
     @Enumerated
-    private PrivacyStrategy privacyStrategy;
+    private PrivacyPolicy privacyPolicy;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -54,12 +54,12 @@ public class Member {
 
     @Builder
     private Member(boolean registered, Nickname nickname, Email email, String profileUrl,
-        PrivacyStrategy privacyStrategy, FollowStrategy followStrategy) {
+        PrivacyPolicy privacyPolicy, FollowStrategy followStrategy) {
         this.registered = registered;
         this.nickname = nickname;
         this.email = email;
         this.profileUrl = profileUrl;
-        this.privacyStrategy = privacyStrategy;
+        this.privacyPolicy = privacyPolicy;
         this.followStrategy = followStrategy;
     }
 
@@ -74,7 +74,7 @@ public class Member {
     public static Member createInitStatus(Email email, String profileUrl, Nickname nickname) {
         return Member.builder()
             .registered(false)
-            .privacyStrategy(PrivacyStrategy.PRIVATE)
+            .privacyPolicy(PrivacyPolicy.PRIVATE)
             .followStrategy(FollowStrategy.LAZY)
             .email(email)
             .profileUrl(profileUrl)
@@ -94,7 +94,7 @@ public class Member {
             throw new ApiException(ErrorCode.MEMBER_ALREADY_REGISTER);
         }
         this.registered = true;
-        this.privacyStrategy = PrivacyStrategy.PUBLIC;
+        this.privacyPolicy = PrivacyPolicy.PUBLIC;
         this.followStrategy = FollowStrategy.EAGER;
         this.nickname = nickname;
         this.profileUrl = profileUrl;
@@ -117,12 +117,12 @@ public class Member {
         return email.getValue();
     }
 
-    public void changePrivacy(PrivacyStrategy privacyStrategy) {
-        this.privacyStrategy = privacyStrategy;
+    public void changePrivacy(PrivacyPolicy privacyPolicy) {
+        this.privacyPolicy = privacyPolicy;
     }
 
     public boolean isPublicAccount() {
-        return privacyStrategy == PrivacyStrategy.PUBLIC;
+        return privacyPolicy == PrivacyPolicy.PUBLIC;
     }
 }
 

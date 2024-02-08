@@ -19,7 +19,7 @@ import com.example.temp.follow.dto.response.FollowInfo;
 import com.example.temp.follow.dto.response.FollowResponse;
 import com.example.temp.member.domain.FollowStrategy;
 import com.example.temp.member.domain.Member;
-import com.example.temp.member.domain.PrivacyStrategy;
+import com.example.temp.member.domain.PrivacyPolicy;
 import com.example.temp.member.infrastructure.nickname.Nickname;
 import jakarta.persistence.EntityManager;
 import java.util.ArrayList;
@@ -529,28 +529,28 @@ class FollowServiceTest {
     }
 
     private Member saveMember() {
-        return saveMemberHelper(FollowStrategy.EAGER, PrivacyStrategy.PUBLIC);
+        return saveMemberHelper(FollowStrategy.EAGER, PrivacyPolicy.PUBLIC);
     }
 
     private Member saveMemberWithAccountPolicy(boolean isPublic) {
         if (isPublic) {
-            return saveMemberHelper(FollowStrategy.EAGER, PrivacyStrategy.PUBLIC);
+            return saveMemberHelper(FollowStrategy.EAGER, PrivacyPolicy.PUBLIC);
         } else {
-            return saveMemberHelper(FollowStrategy.LAZY, PrivacyStrategy.PRIVATE);
+            return saveMemberHelper(FollowStrategy.LAZY, PrivacyPolicy.PRIVATE);
         }
     }
 
     private Member saveMemberWithFollowStrategy(FollowStrategy followStrategy) {
-        return saveMemberHelper(followStrategy, PrivacyStrategy.PUBLIC);
+        return saveMemberHelper(followStrategy, PrivacyPolicy.PUBLIC);
     }
 
-    private Member saveMemberHelper(FollowStrategy followStrategy, PrivacyStrategy privacyStrategy) {
+    private Member saveMemberHelper(FollowStrategy followStrategy, PrivacyPolicy privacyPolicy) {
         Member member = Member.builder()
             .email(Email.create("이메일"))
             .profileUrl("프로필")
             .nickname(Nickname.create("nick" + (globalIdx++)))
             .followStrategy(followStrategy)
-            .privacyStrategy(privacyStrategy)
+            .privacyPolicy(privacyPolicy)
             .build();
         em.persist(member);
         return member;

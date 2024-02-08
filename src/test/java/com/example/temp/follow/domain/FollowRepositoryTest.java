@@ -5,7 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.example.temp.common.entity.Email;
 import com.example.temp.member.domain.FollowStrategy;
 import com.example.temp.member.domain.Member;
-import com.example.temp.member.domain.PrivacyStrategy;
+import com.example.temp.member.domain.PrivacyPolicy;
 import com.example.temp.member.infrastructure.nickname.Nickname;
 import jakarta.persistence.EntityManager;
 import java.util.List;
@@ -213,7 +213,7 @@ class FollowRepositoryTest {
             .profileUrl("프로필")
             .nickname(Nickname.create("nick" + (globalIdx++)))
             .followStrategy(FollowStrategy.EAGER)
-            .privacyStrategy(PrivacyStrategy.PUBLIC)
+            .privacyPolicy(PrivacyPolicy.PUBLIC)
             .build();
         em.persist(member);
         return member;

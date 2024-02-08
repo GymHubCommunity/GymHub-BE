@@ -5,7 +5,7 @@ import com.example.temp.exception.ApiException;
 import com.example.temp.exception.ErrorCode;
 import com.example.temp.member.domain.Member;
 import com.example.temp.member.domain.MemberRepository;
-import com.example.temp.member.domain.PrivacyStrategy;
+import com.example.temp.member.domain.PrivacyPolicy;
 import com.example.temp.member.dto.request.MemberRegisterRequest;
 import com.example.temp.member.exception.NicknameDuplicatedException;
 import com.example.temp.member.infrastructure.nickname.Nickname;
@@ -67,9 +67,9 @@ public class MemberService {
         return MemberInfo.of(member);
     }
 
-    public void changePrivacy(long executorId, PrivacyStrategy privacyStrategy) {
+    public void changePrivacy(long executorId, PrivacyPolicy privacyPolicy) {
         Member member = memberRepository.findById(executorId)
             .orElseThrow(() -> new ApiException(ErrorCode.AUTHENTICATED_FAIL));
-        member.changePrivacy(privacyStrategy);
+        member.changePrivacy(privacyPolicy);
     }
 }

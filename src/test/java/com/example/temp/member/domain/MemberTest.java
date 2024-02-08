@@ -1,8 +1,8 @@
 package com.example.temp.member.domain;
 
 import static com.example.temp.member.domain.FollowStrategy.EAGER;
-import static com.example.temp.member.domain.PrivacyStrategy.PRIVATE;
-import static com.example.temp.member.domain.PrivacyStrategy.PUBLIC;
+import static com.example.temp.member.domain.PrivacyPolicy.PRIVATE;
+import static com.example.temp.member.domain.PrivacyPolicy.PUBLIC;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -32,7 +32,7 @@ class MemberTest {
 
         // then
         assertThat(member.isRegistered()).isTrue();
-        assertThat(member.getPrivacyStrategy()).isEqualTo(PUBLIC);
+        assertThat(member.getPrivacyPolicy()).isEqualTo(PUBLIC);
         assertThat(member.getFollowStrategy()).isEqualTo(EAGER);
         assertThat(member.getNickname()).isEqualTo(changedNickname);
         assertThat(member.getProfileUrl()).isEqualTo(changedProfileUrl);
@@ -69,7 +69,7 @@ class MemberTest {
         assertThat(member.isRegistered()).isFalse();
         assertThat(member.isPublicAccount()).isFalse();
         assertThat(member.getFollowStrategy()).isEqualTo(FollowStrategy.LAZY);
-        assertThat(member.getPrivacyStrategy()).isEqualTo(PRIVATE);
+        assertThat(member.getPrivacyPolicy()).isEqualTo(PRIVATE);
         assertThat(member.getEmail()).isEqualTo(email);
         assertThat(member.getProfileUrl()).isEqualTo(profileUrl);
         assertThat(member.getNickname()).isEqualTo(nickname);
@@ -81,14 +81,14 @@ class MemberTest {
     void changePublicAccount(String privacyStr) throws Exception {
         // given
         Member member = Member.builder()
-            .privacyStrategy(PrivacyStrategy.valueOf(privacyStr))
+            .privacyPolicy(PrivacyPolicy.valueOf(privacyStr))
             .build();
 
         // when
         member.changePrivacy(PUBLIC);
 
         // then
-        assertThat(member.getPrivacyStrategy()).isEqualTo(PUBLIC);
+        assertThat(member.getPrivacyPolicy()).isEqualTo(PUBLIC);
     }
 
     @ParameterizedTest
@@ -97,13 +97,13 @@ class MemberTest {
     void changePrivateAccount(String privacyStr) throws Exception {
         // given
         Member member = Member.builder()
-            .privacyStrategy(PrivacyStrategy.valueOf(privacyStr))
+            .privacyPolicy(PrivacyPolicy.valueOf(privacyStr))
             .build();
 
         // when
         member.changePrivacy(PRIVATE);
 
         // then
-        assertThat(member.getPrivacyStrategy()).isEqualTo(PRIVATE);
+        assertThat(member.getPrivacyPolicy()).isEqualTo(PRIVATE);
     }
 }

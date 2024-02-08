@@ -12,7 +12,7 @@ import com.example.temp.exception.ApiException;
 import com.example.temp.exception.ErrorCode;
 import com.example.temp.member.domain.FollowStrategy;
 import com.example.temp.member.domain.Member;
-import com.example.temp.member.domain.PrivacyStrategy;
+import com.example.temp.member.domain.PrivacyPolicy;
 import com.example.temp.member.dto.request.MemberRegisterRequest;
 import com.example.temp.member.exception.NicknameDuplicatedException;
 import com.example.temp.member.infrastructure.nickname.Nickname;
@@ -90,7 +90,7 @@ class MemberServiceTest {
         Member result = memberService.saveInitStatusMember(oAuthResponse);
 
         // then
-        assertThat(result.getPrivacyStrategy()).isEqualTo(PrivacyStrategy.PRIVATE);
+        assertThat(result.getPrivacyPolicy()).isEqualTo(PrivacyPolicy.PRIVATE);
         assertThat(result.getFollowStrategy()).isEqualTo(FollowStrategy.LAZY);
         assertThat(result.getNickname()).isEqualTo(createdNickname);
         validateMemberIsSame(result, oAuthResponse);
@@ -158,7 +158,7 @@ class MemberServiceTest {
             new MemberRegisterRequest(changedProfileUrl, changedNickname));
 
         // then
-        assertThat(member.getPrivacyStrategy()).isEqualTo(PrivacyStrategy.PUBLIC);
+        assertThat(member.getPrivacyPolicy()).isEqualTo(PrivacyPolicy.PUBLIC);
         assertThat(member.getFollowStrategy()).isEqualTo(FollowStrategy.EAGER);
         assertThat(result.registered()).isTrue();
         assertThat(result.id()).isEqualTo(member.getId());
@@ -201,7 +201,7 @@ class MemberServiceTest {
         long notExistMemberId = 999_999_999L;
 
         // when & then
-        assertThatThrownBy(() -> memberService.changePrivacy(notExistMemberId, PrivacyStrategy.PRIVATE))
+        assertThatThrownBy(() -> memberService.changePrivacy(notExistMemberId, PrivacyPolicy.PRIVATE))
             .isInstanceOf(ApiException.class)
             .hasMessageContaining(ErrorCode.AUTHENTICATED_FAIL.getMessage());
     }
@@ -211,31 +211,31 @@ class MemberServiceTest {
     @ValueSource(strings = {"PRIVATE", "PUBLIC"})
     void changeStatus(String privacyStr) throws Exception {
         // given
-        PrivacyStrategy targetStrategy = PrivacyStrategy.valueOf(privacyStr);
+        PrivacyPolicy targetPolicy = PrivacyPolicy.valueOf(privacyStr);
         Member member = saveRegisteredMember(Nickname.create("nick"));
 
         // when
-        memberService.changePrivacy(member.getId(), targetStrategy);
+        memberService.changePrivacy(member.getId(), targetPolicy);
 
         // then
-        assertThat(member.getPrivacyStrategy()).isEqualTo(targetStrategy);
+        assertThat(member.getPrivacyPolicy()).isEqualTo(targetPolicy);
     }
 
     private Member saveRegisteredMember(Nickname nickname) {
-        return saveMember(nickname, true, PrivacyStrategy.PRIVATE);
+        return saveMember(nickname, true, PrivacyPolicy.PRIVATE);
     }
 
     private Member saveNotInitializedMember(Nickname nickname) {
-        return saveMember(nickname, false, PrivacyStrategy.PRIVATE);
+        return saveMember(nickname, false, PrivacyPolicy.PRIVATE);
     }
 
-    private Member saveMember(Nickname nickname, boolean registered, PrivacyStrategy privacyStrategy) {
+    private Member saveMember(Nickname nickname, boolean registered, PrivacyPolicy privacyPolicy) {
         Member member = Member.builder()
             .nickname(nickname)
             .email(Email.create("이메일"))
             .profileUrl("프로필주소")
             .registered(registered)
-            .privacyStrategy(privacyStrategy)
+            .privacyPolicy(privacyPolicy)
             .followStrategy(FollowStrategy.LAZY)
             .build();
         em.persist(member);
