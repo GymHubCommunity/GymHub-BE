@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
+import com.example.temp.auth.dto.MemberInfo;
 import com.example.temp.auth.dto.response.TokenInfo;
 import com.example.temp.auth.exception.TokenInvalidException;
 import io.jsonwebtoken.Claims;
@@ -142,6 +143,21 @@ class JwtTokenManagerTest {
 
         // then
         assertThat(result).isEqualTo(memberId);
+    }
+
+    @Test
+    @DisplayName("토큰을 파싱해서 memberInfo 객체를 얻는다.")
+    void parsedClaims() throws Exception {
+        // given
+        long memberId = 1L;
+        Date future = Date.from(fixedMachineTime.plusSeconds(100000L));
+        String token = createToken(future, memberId);
+
+        // when
+        MemberInfo memberInfo = jwtTokenManager.parsedClaims(token);
+
+        // then
+        assertThat(memberInfo.id()).isEqualTo(memberId);
     }
 
     private String createToken(Date expired, long subject) {
