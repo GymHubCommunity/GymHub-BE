@@ -68,6 +68,7 @@ public class MemberService {
         return MemberInfo.of(member);
     }
 
+    @Transactional
     public void changePrivacy(UserContext userContext, PrivacyPolicy privacyPolicy) {
         Member member = memberRepository.findById(userContext.id())
             .orElseThrow(() -> new ApiException(ErrorCode.AUTHENTICATED_FAIL));
