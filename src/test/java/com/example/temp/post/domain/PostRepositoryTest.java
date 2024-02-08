@@ -6,6 +6,7 @@ import com.example.temp.common.entity.Email;
 import com.example.temp.member.domain.FollowStrategy;
 import com.example.temp.member.domain.Member;
 import com.example.temp.member.domain.MemberRepository;
+import com.example.temp.member.domain.PrivacyPolicy;
 import com.example.temp.member.infrastructure.nickname.Nickname;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
@@ -114,7 +115,7 @@ class PostRepositoryTest {
             .profileUrl("프로필")
             .nickname(Nickname.create("nick" + (globalIdx++)))
             .followStrategy(FollowStrategy.EAGER)
-            .publicAccount(true)
+            .privacyPolicy(PrivacyPolicy.PUBLIC)
             .build();
         memberRepository.save(member);
         return member;
