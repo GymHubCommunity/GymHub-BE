@@ -1,8 +1,8 @@
 package com.example.temp.member.domain;
 
 import com.example.temp.common.entity.Email;
-import com.example.temp.exception.ApiException;
-import com.example.temp.exception.ErrorCode;
+import com.example.temp.common.exception.ApiException;
+import com.example.temp.common.exception.ErrorCode;
 import com.example.temp.follow.domain.FollowStatus;
 import com.example.temp.member.infrastructure.nickname.Nickname;
 import jakarta.persistence.Column;
@@ -44,7 +44,9 @@ public class Member {
     @Column(nullable = false)
     private String profileUrl;
 
-    private boolean publicAccount;
+    @Column(nullable = false)
+    @Enumerated
+    private PrivacyPolicy privacyPolicy;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -52,17 +54,17 @@ public class Member {
 
     @Builder
     private Member(boolean registered, Nickname nickname, Email email, String profileUrl,
-        boolean publicAccount, FollowStrategy followStrategy) {
+        PrivacyPolicy privacyPolicy, FollowStrategy followStrategy) {
         this.registered = registered;
         this.nickname = nickname;
         this.email = email;
         this.profileUrl = profileUrl;
-        this.publicAccount = publicAccount;
+        this.privacyPolicy = privacyPolicy;
         this.followStrategy = followStrategy;
     }
 
     /**
-     * 가입이 완료되지 않은 회원 엔티티를 생성합니다. 해당 회원은 현재 가입되지 않은 상태이고, 비공개 계정이며, LAZY한 팔로우 전략을 갖습니다.
+     * 가입이 완료되지 않은 회원 엔티티를 생성합니다. 해당 회원은 현재 가입되지 않은 상태이고, 비공개 계정이며, LAZY 팔로우 전략을 갖습니다.
      *
      * @param email
      * @param profileUrl
@@ -72,7 +74,7 @@ public class Member {
     public static Member createInitStatus(Email email, String profileUrl, Nickname nickname) {
         return Member.builder()
             .registered(false)
-            .publicAccount(false)
+            .privacyPolicy(PrivacyPolicy.PRIVATE)
             .followStrategy(FollowStrategy.LAZY)
             .email(email)
             .profileUrl(profileUrl)
@@ -81,7 +83,7 @@ public class Member {
     }
 
     /**
-     * nickname과 profileUrl을 입력받아 회원가입 처리를 완료합니다.
+     * nickname과 profileUrl을 입력받아 회원가입 처리를 완료합니다. 공개 계정이며, EAGER 팔로우 전략을 갖습니다.
      *
      * @param nickname
      * @param profileUrl
@@ -92,12 +94,15 @@ public class Member {
             throw new ApiException(ErrorCode.MEMBER_ALREADY_REGISTER);
         }
         this.registered = true;
+        this.privacyPolicy = PrivacyPolicy.PUBLIC;
+        this.followStrategy = FollowStrategy.EAGER;
         this.nickname = nickname;
         this.profileUrl = profileUrl;
     }
 
     /**
      * 해당 회원을 팔로우했을 때, 생성될 팔로우 엔티티의 상태를 반환합니다. FollowStrategy의 text 컬럼을 통해 자세한 전략을 확인할 수 있습니다.
+     *
      * @return 팔로우 엔티티의 상태값을 반환합니다. (ex. APPROVED, PENDING)
      */
     public FollowStatus getStatusBasedOnStrategy() {
@@ -110,6 +115,14 @@ public class Member {
 
     public String getEmailValue() {
         return email.getValue();
+    }
+
+    public void changePrivacy(PrivacyPolicy privacyPolicy) {
+        this.privacyPolicy = privacyPolicy;
+    }
+
+    public boolean isPublicAccount() {
+        return privacyPolicy == PrivacyPolicy.PUBLIC;
     }
 }
 

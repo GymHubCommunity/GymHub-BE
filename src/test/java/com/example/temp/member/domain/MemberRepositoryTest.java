@@ -47,6 +47,7 @@ class MemberRepositoryTest {
             .email(Email.create("이메일"))
             .profileUrl("프로필")
             .followStrategy(FollowStrategy.EAGER)
+            .privacyPolicy(PrivacyPolicy.PRIVATE)
             .build();
         em.persist(member);
         return member;

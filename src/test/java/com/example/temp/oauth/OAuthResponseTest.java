@@ -1,8 +1,10 @@
 package com.example.temp.oauth;
 
+import static com.example.temp.member.domain.PrivacyPolicy.PRIVATE;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.example.temp.common.entity.Email;
+import com.example.temp.member.domain.FollowStrategy;
 import com.example.temp.member.domain.Member;
 import com.example.temp.member.infrastructure.nickname.Nickname;
 import org.junit.jupiter.api.BeforeEach;
@@ -67,6 +69,9 @@ class OAuthResponseTest {
 
         // then
         assertThat(result.isRegistered()).isFalse();
+        assertThat(result.isPublicAccount()).isFalse();
+        assertThat(result.getFollowStrategy()).isEqualTo(FollowStrategy.LAZY);
+        assertThat(result.getPrivacyPolicy()).isEqualTo(PRIVATE);
         assertThat(result.getNickname()).isEqualTo(nickname);
         assertThat(result.getEmail()).isEqualTo(oAuthResponse.email());
         assertThat(result.getProfileUrl()).isEqualTo(oAuthResponse.profileUrl());

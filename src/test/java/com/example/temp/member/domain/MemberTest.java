@@ -1,14 +1,19 @@
 package com.example.temp.member.domain;
 
+import static com.example.temp.member.domain.FollowStrategy.EAGER;
+import static com.example.temp.member.domain.PrivacyPolicy.PRIVATE;
+import static com.example.temp.member.domain.PrivacyPolicy.PUBLIC;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.example.temp.common.entity.Email;
-import com.example.temp.exception.ApiException;
-import com.example.temp.exception.ErrorCode;
+import com.example.temp.common.exception.ApiException;
+import com.example.temp.common.exception.ErrorCode;
 import com.example.temp.member.infrastructure.nickname.Nickname;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 class MemberTest {
 
@@ -27,6 +32,8 @@ class MemberTest {
 
         // then
         assertThat(member.isRegistered()).isTrue();
+        assertThat(member.getPrivacyPolicy()).isEqualTo(PUBLIC);
+        assertThat(member.getFollowStrategy()).isEqualTo(EAGER);
         assertThat(member.getNickname()).isEqualTo(changedNickname);
         assertThat(member.getProfileUrl()).isEqualTo(changedProfileUrl);
     }
@@ -60,10 +67,43 @@ class MemberTest {
 
         // then
         assertThat(member.isRegistered()).isFalse();
+        assertThat(member.isPublicAccount()).isFalse();
+        assertThat(member.getFollowStrategy()).isEqualTo(FollowStrategy.LAZY);
+        assertThat(member.getPrivacyPolicy()).isEqualTo(PRIVATE);
         assertThat(member.getEmail()).isEqualTo(email);
         assertThat(member.getProfileUrl()).isEqualTo(profileUrl);
         assertThat(member.getNickname()).isEqualTo(nickname);
+    }
 
+    @ParameterizedTest
+    @DisplayName("계정을 공개 계정으로 만든다.")
+    @ValueSource(strings = {"PUBLIC", "PRIVATE"})
+    void changePublicAccount(String privacyStr) throws Exception {
+        // given
+        Member member = Member.builder()
+            .privacyPolicy(PrivacyPolicy.valueOf(privacyStr))
+            .build();
 
+        // when
+        member.changePrivacy(PUBLIC);
+
+        // then
+        assertThat(member.getPrivacyPolicy()).isEqualTo(PUBLIC);
+    }
+
+    @ParameterizedTest
+    @DisplayName("계정을 비공개 계정으로 만든다.")
+    @ValueSource(strings = {"PUBLIC", "PRIVATE"})
+    void changePrivateAccount(String privacyStr) throws Exception {
+        // given
+        Member member = Member.builder()
+            .privacyPolicy(PrivacyPolicy.valueOf(privacyStr))
+            .build();
+
+        // when
+        member.changePrivacy(PRIVATE);
+
+        // then
+        assertThat(member.getPrivacyPolicy()).isEqualTo(PRIVATE);
     }
 }

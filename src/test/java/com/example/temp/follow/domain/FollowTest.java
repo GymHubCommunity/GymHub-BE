@@ -1,13 +1,13 @@
 package com.example.temp.follow.domain;
 
-import static com.example.temp.exception.ErrorCode.FOLLOW_ALREADY_RELATED;
-import static com.example.temp.exception.ErrorCode.FOLLOW_INACTIVE;
-import static com.example.temp.exception.ErrorCode.FOLLOW_NOT_PENDING;
-import static com.example.temp.exception.ErrorCode.FOLLOW_STATUS_CHANGE_NOT_ALLOWED;
+import static com.example.temp.common.exception.ErrorCode.FOLLOW_ALREADY_RELATED;
+import static com.example.temp.common.exception.ErrorCode.FOLLOW_INACTIVE;
+import static com.example.temp.common.exception.ErrorCode.FOLLOW_NOT_PENDING;
+import static com.example.temp.common.exception.ErrorCode.FOLLOW_STATUS_CHANGE_NOT_ALLOWED;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import com.example.temp.exception.ApiException;
+import com.example.temp.common.exception.ApiException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;

@@ -1,24 +1,26 @@
 package com.example.temp.follow.application;
 
-import static com.example.temp.exception.ErrorCode.AUTHENTICATED_FAIL;
-import static com.example.temp.exception.ErrorCode.AUTHORIZED_FAIL;
-import static com.example.temp.exception.ErrorCode.FOLLOW_ALREADY_RELATED;
-import static com.example.temp.exception.ErrorCode.FOLLOW_NOT_FOUND;
-import static com.example.temp.exception.ErrorCode.FOLLOW_NOT_PENDING;
-import static com.example.temp.exception.ErrorCode.FOLLOW_SELF_FAIL;
-import static com.example.temp.exception.ErrorCode.MEMBER_NOT_FOUND;
+import static com.example.temp.common.exception.ErrorCode.AUTHENTICATED_FAIL;
+import static com.example.temp.common.exception.ErrorCode.AUTHORIZED_FAIL;
+import static com.example.temp.common.exception.ErrorCode.FOLLOW_ALREADY_RELATED;
+import static com.example.temp.common.exception.ErrorCode.FOLLOW_NOT_FOUND;
+import static com.example.temp.common.exception.ErrorCode.FOLLOW_NOT_PENDING;
+import static com.example.temp.common.exception.ErrorCode.FOLLOW_SELF_FAIL;
+import static com.example.temp.common.exception.ErrorCode.MEMBER_NOT_FOUND;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.example.temp.common.dto.UserContext;
 import com.example.temp.common.entity.Email;
-import com.example.temp.exception.ApiException;
+import com.example.temp.common.exception.ApiException;
 import com.example.temp.follow.domain.Follow;
 import com.example.temp.follow.domain.FollowStatus;
 import com.example.temp.follow.dto.response.FollowInfo;
 import com.example.temp.follow.dto.response.FollowResponse;
 import com.example.temp.member.domain.FollowStrategy;
 import com.example.temp.member.domain.Member;
+import com.example.temp.member.domain.PrivacyPolicy;
 import com.example.temp.member.infrastructure.nickname.Nickname;
 import jakarta.persistence.EntityManager;
 import java.util.ArrayList;
@@ -57,7 +59,7 @@ class FollowServiceTest {
         Member toMember = saveMemberWithFollowStrategy(FollowStrategy.EAGER);
 
         // when
-        FollowResponse response = followService.follow(fromMember.getId(), toMember.getId());
+        FollowResponse response = followService.follow(UserContext.from(fromMember), toMember.getId());
 
         // then
         assertThat(response.status()).isEqualTo(toMember.getFollowStrategy().getFollowStatus());
@@ -71,7 +73,7 @@ class FollowServiceTest {
         Member sameMember = saveMember();
 
         // when
-        assertThatThrownBy(() -> followService.follow(sameMember.getId(), sameMember.getId()))
+        assertThatThrownBy(() -> followService.follow(UserContext.from(sameMember), sameMember.getId()))
             .isInstanceOf(ApiException.class)
             .hasMessageContaining(FOLLOW_SELF_FAIL.getMessage());
     }
@@ -84,7 +86,7 @@ class FollowServiceTest {
         Member toMember = saveMemberWithFollowStrategy(FollowStrategy.EAGER);
 
         // when
-        FollowResponse response = followService.follow(fromMember.getId(), toMember.getId());
+        FollowResponse response = followService.follow(UserContext.from(fromMember), toMember.getId());
 
         // then
         assertThat(response.status()).isEqualTo(FollowStatus.APPROVED);
@@ -98,7 +100,7 @@ class FollowServiceTest {
         Member toMember = saveMemberWithFollowStrategy(FollowStrategy.LAZY);
 
         // when
-        FollowResponse response = followService.follow(fromMember.getId(), toMember.getId());
+        FollowResponse response = followService.follow(UserContext.from(fromMember), toMember.getId());
 
         // then
         assertThat(response.status()).isEqualTo(FollowStatus.PENDING);
@@ -113,7 +115,7 @@ class FollowServiceTest {
         saveFollow(fromMember, toMember, FollowStatus.APPROVED);
 
         // when & then
-        assertThatThrownBy(() -> followService.follow(fromMember.getId(), toMember.getId()))
+        assertThatThrownBy(() -> followService.follow(UserContext.from(fromMember), toMember.getId()))
             .isInstanceOf(ApiException.class)
             .hasMessageContaining(FOLLOW_ALREADY_RELATED.getMessage());
     }
@@ -127,7 +129,7 @@ class FollowServiceTest {
         saveFollow(fromMember, toMember, FollowStatus.PENDING);
 
         // when
-        assertThatThrownBy(() -> followService.follow(fromMember.getId(), toMember.getId()))
+        assertThatThrownBy(() -> followService.follow(UserContext.from(fromMember), toMember.getId()))
             .isInstanceOf(ApiException.class)
             .hasMessageContaining(FOLLOW_ALREADY_RELATED.getMessage());
     }
@@ -142,7 +144,7 @@ class FollowServiceTest {
         saveFollow(fromMember, toMember, FollowStatus.valueOf(statusStr));
 
         // when
-        FollowResponse response = followService.follow(fromMember.getId(), toMember.getId());
+        FollowResponse response = followService.follow(UserContext.from(fromMember), toMember.getId());
 
         // then
         assertThat(response.status()).isEqualTo(FollowStatus.APPROVED);
@@ -156,7 +158,7 @@ class FollowServiceTest {
         Member fromMember = saveMember();
 
         // when & then
-        assertThatThrownBy(() -> followService.follow(fromMember.getId(), notExistMemberId))
+        assertThatThrownBy(() -> followService.follow(UserContext.from(fromMember), notExistMemberId))
             .isInstanceOf(ApiException.class)
             .hasMessageContaining(MEMBER_NOT_FOUND.getMessage());
     }
@@ -169,7 +171,7 @@ class FollowServiceTest {
         Member toMember = saveMember();
 
         // when & then
-        assertThatThrownBy(() -> followService.follow(notExistMemberId, toMember.getId()))
+        assertThatThrownBy(() -> followService.follow(new UserContext(notExistMemberId), toMember.getId()))
             .isInstanceOf(ApiException.class)
             .hasMessageContaining(AUTHENTICATED_FAIL.getMessage());
     }
@@ -183,7 +185,7 @@ class FollowServiceTest {
         Follow follow = saveFollow(fromMember, target, FollowStatus.APPROVED);
 
         // when
-        followService.unfollow(fromMember.getId(), target.getId());
+        followService.unfollow(UserContext.from(fromMember), target.getId());
 
         // then
         assertThat(follow.getStatus()).isEqualTo(FollowStatus.CANCELED);
@@ -197,7 +199,7 @@ class FollowServiceTest {
         Member target = saveMember();
 
         // when & then
-        assertThatThrownBy(() -> followService.unfollow(fromMember.getId(), target.getId()))
+        assertThatThrownBy(() -> followService.unfollow(UserContext.from(fromMember), target.getId()))
             .isInstanceOf(ApiException.class)
             .hasMessageContaining(FOLLOW_NOT_FOUND.getMessage());
     }
@@ -209,7 +211,7 @@ class FollowServiceTest {
         Member fromMember = saveMember();
 
         // when & then
-        assertThatThrownBy(() -> followService.unfollow(fromMember.getId(), notExistMemberId))
+        assertThatThrownBy(() -> followService.unfollow(UserContext.from(fromMember), notExistMemberId))
             .isInstanceOf(ApiException.class)
             .hasMessageContaining(MEMBER_NOT_FOUND.getMessage());
     }
@@ -223,7 +225,7 @@ class FollowServiceTest {
         Follow follow = saveFollow(fromMember, target, FollowStatus.PENDING);
 
         // when
-        followService.acceptFollowRequest(target.getId(), follow.getId());
+        followService.acceptFollowRequest(UserContext.from(target), follow.getId());
 
         // then
         assertThat(follow.getStatus()).isEqualTo(FollowStatus.APPROVED);
@@ -239,7 +241,7 @@ class FollowServiceTest {
         Member anotherMember = saveMember();
 
         // when & then
-        assertThatThrownBy(() -> followService.acceptFollowRequest(anotherMember.getId(), follow.getId()))
+        assertThatThrownBy(() -> followService.acceptFollowRequest(UserContext.from(anotherMember), follow.getId()))
             .isInstanceOf(ApiException.class)
             .hasMessageContaining(AUTHORIZED_FAIL.getMessage());
     }
@@ -254,7 +256,7 @@ class FollowServiceTest {
         Follow follow = saveFollow(fromMember, target, FollowStatus.valueOf(statusStr));
 
         // when & then
-        assertThatThrownBy(() -> followService.acceptFollowRequest(target.getId(), follow.getId()))
+        assertThatThrownBy(() -> followService.acceptFollowRequest(UserContext.from(target), follow.getId()))
             .isInstanceOf(ApiException.class)
             .hasMessageContaining(FOLLOW_NOT_PENDING.getMessage());
     }
@@ -269,7 +271,7 @@ class FollowServiceTest {
         Follow follow = saveFollow(fromMember, target, FollowStatus.valueOf(prevStatus));
 
         // when
-        followService.rejectFollowRequest(target.getId(), follow.getId());
+        followService.rejectFollowRequest(UserContext.from(target), follow.getId());
 
         // then
         assertThat(follow.getStatus()).isEqualTo(FollowStatus.REJECTED);
@@ -285,7 +287,7 @@ class FollowServiceTest {
         Member anotherMember = saveMember();
 
         // when & then
-        assertThatThrownBy(() -> followService.rejectFollowRequest(anotherMember.getId(), follow.getId()))
+        assertThatThrownBy(() -> followService.rejectFollowRequest(UserContext.from(anotherMember), follow.getId()))
             .isInstanceOf(ApiException.class)
             .hasMessageContaining(AUTHORIZED_FAIL.getMessage());
     }
@@ -304,7 +306,7 @@ class FollowServiceTest {
             .toList();
 
         // when
-        List<FollowInfo> infos = followService.getFollowings(target.getId(), target.getId());
+        List<FollowInfo> infos = followService.getFollowings(UserContext.from(target), target.getId());
 
         // then
         assertThat(infos).hasSize(followingCnt)
@@ -334,7 +336,7 @@ class FollowServiceTest {
         saveTargetFollowings(FollowStatus.APPROVED, target, members, idx, approvedCnt);
 
         // when
-        List<FollowInfo> infos = followService.getFollowings(target.getId(), target.getId());
+        List<FollowInfo> infos = followService.getFollowings(UserContext.from(target), target.getId());
 
         // then
         assertThat(infos).hasSize(approvedCnt);
@@ -350,7 +352,7 @@ class FollowServiceTest {
         Member anotherMember = saveMember();
 
         // when & then
-        assertThatCode(() -> followService.getFollowings(anotherMember.getId(), publicAccountMember.getId()))
+        assertThatCode(() -> followService.getFollowings(UserContext.from(anotherMember), publicAccountMember.getId()))
             .doesNotThrowAnyException();
     }
 
@@ -365,7 +367,7 @@ class FollowServiceTest {
         saveFollow(anotherMember, privateMember, FollowStatus.APPROVED);
 
         // when & then
-        assertThatCode(() -> followService.getFollowings(anotherMember.getId(), privateMember.getId()))
+        assertThatCode(() -> followService.getFollowings(UserContext.from(anotherMember), privateMember.getId()))
             .doesNotThrowAnyException();
     }
 
@@ -380,7 +382,7 @@ class FollowServiceTest {
         saveFollow(anotherMember, privateMember, FollowStatus.PENDING);
 
         // when & then
-        assertThatThrownBy(() -> followService.getFollowings(anotherMember.getId(), privateMember.getId()))
+        assertThatThrownBy(() -> followService.getFollowings(UserContext.from(anotherMember), privateMember.getId()))
             .isInstanceOf(ApiException.class)
             .hasMessageContaining(AUTHORIZED_FAIL.getMessage());
     }
@@ -402,7 +404,7 @@ class FollowServiceTest {
         em.clear();
 
         // when
-        List<FollowInfo> infos = followService.getFollowers(target.getId(), target.getId());
+        List<FollowInfo> infos = followService.getFollowers(UserContext.from(target), target.getId());
 
         // then
         assertThat(infos).hasSize(approvedCnt)
@@ -432,7 +434,7 @@ class FollowServiceTest {
         saveTargetFollowers(FollowStatus.APPROVED, target, members, idx, approvedCnt);
 
         // when
-        List<FollowInfo> infos = followService.getFollowers(target.getId(), target.getId());
+        List<FollowInfo> infos = followService.getFollowers(UserContext.from(target), target.getId());
 
         // then
         assertThat(infos).hasSize(approvedCnt);
@@ -448,7 +450,7 @@ class FollowServiceTest {
         Member anotherMember = saveMember();
 
         // when & then
-        assertThatCode(() -> followService.getFollowers(anotherMember.getId(), publicAccountMember.getId()))
+        assertThatCode(() -> followService.getFollowers(UserContext.from(anotherMember), publicAccountMember.getId()))
             .doesNotThrowAnyException();
     }
 
@@ -463,7 +465,7 @@ class FollowServiceTest {
         saveFollow(anotherMember, privateMember, FollowStatus.APPROVED);
 
         // when & then
-        assertThatCode(() -> followService.getFollowers(anotherMember.getId(), privateMember.getId()))
+        assertThatCode(() -> followService.getFollowers(UserContext.from(anotherMember), privateMember.getId()))
             .doesNotThrowAnyException();
     }
 
@@ -478,7 +480,7 @@ class FollowServiceTest {
         saveFollow(privateMember, anotherMember, FollowStatus.PENDING);
 
         // when & then
-        assertThatThrownBy(() -> followService.getFollowers(anotherMember.getId(), privateMember.getId()))
+        assertThatThrownBy(() -> followService.getFollowers(UserContext.from(anotherMember), privateMember.getId()))
             .isInstanceOf(ApiException.class)
             .hasMessageContaining(AUTHORIZED_FAIL.getMessage());
     }
@@ -528,28 +530,28 @@ class FollowServiceTest {
     }
 
     private Member saveMember() {
-        return saveMemberWithFollowStrategy(FollowStrategy.EAGER);
+        return saveMemberHelper(FollowStrategy.EAGER, PrivacyPolicy.PUBLIC);
     }
 
     private Member saveMemberWithAccountPolicy(boolean isPublic) {
-        Member member = Member.builder()
-            .email(Email.create("이메일"))
-            .profileUrl("프로필")
-            .nickname(Nickname.create("nick" + (globalIdx++)))
-            .followStrategy(FollowStrategy.EAGER)
-            .publicAccount(isPublic)
-            .build();
-        em.persist(member);
-        return member;
+        if (isPublic) {
+            return saveMemberHelper(FollowStrategy.EAGER, PrivacyPolicy.PUBLIC);
+        } else {
+            return saveMemberHelper(FollowStrategy.LAZY, PrivacyPolicy.PRIVATE);
+        }
     }
 
     private Member saveMemberWithFollowStrategy(FollowStrategy followStrategy) {
+        return saveMemberHelper(followStrategy, PrivacyPolicy.PUBLIC);
+    }
+
+    private Member saveMemberHelper(FollowStrategy followStrategy, PrivacyPolicy privacyPolicy) {
         Member member = Member.builder()
             .email(Email.create("이메일"))
             .profileUrl("프로필")
             .nickname(Nickname.create("nick" + (globalIdx++)))
             .followStrategy(followStrategy)
-            .publicAccount(true)
+            .privacyPolicy(privacyPolicy)
             .build();
         em.persist(member);
         return member;

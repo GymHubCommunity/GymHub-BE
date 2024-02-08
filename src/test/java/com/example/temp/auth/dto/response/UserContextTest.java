@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.example.temp.common.entity.Email;
 import com.example.temp.member.domain.FollowStrategy;
 import com.example.temp.member.domain.Member;
+import com.example.temp.member.domain.PrivacyPolicy;
 import com.example.temp.member.infrastructure.nickname.Nickname;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.DisplayName;
@@ -51,6 +52,7 @@ class UserContextTest {
             .nickname(Nickname.create("생성된닉네임"))
             .registered(true)
             .followStrategy(FollowStrategy.EAGER)
+            .privacyPolicy(PrivacyPolicy.PRIVATE)
             .build();
         em.persist(member);
 

@@ -1,11 +1,13 @@
 package com.example.temp.common.config;
 
+import com.example.temp.common.convertor.StringToPrivacyPolicyConverter;
 import com.example.temp.common.interceptor.AuthenticationInterceptor;
 import com.example.temp.common.properties.CorsProperties;
 import com.example.temp.common.resolver.LoginUserArgumentResolver;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.format.FormatterRegistry;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
@@ -41,5 +43,10 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
         resolvers.add(loginUserArgumentResolver);
+    }
+
+    @Override
+    public void addFormatters(FormatterRegistry registry) {
+        registry.addConverter(new StringToPrivacyPolicyConverter());
     }
 }

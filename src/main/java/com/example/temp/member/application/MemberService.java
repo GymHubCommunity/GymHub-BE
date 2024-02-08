@@ -1,10 +1,12 @@
 package com.example.temp.member.application;
 
 import com.example.temp.auth.dto.response.MemberInfo;
-import com.example.temp.exception.ApiException;
-import com.example.temp.exception.ErrorCode;
+import com.example.temp.common.dto.UserContext;
+import com.example.temp.common.exception.ApiException;
+import com.example.temp.common.exception.ErrorCode;
 import com.example.temp.member.domain.Member;
 import com.example.temp.member.domain.MemberRepository;
+import com.example.temp.member.domain.PrivacyPolicy;
 import com.example.temp.member.dto.request.MemberRegisterRequest;
 import com.example.temp.member.exception.NicknameDuplicatedException;
 import com.example.temp.member.infrastructure.nickname.Nickname;
@@ -54,15 +56,22 @@ public class MemberService {
     /**
      * 가입 처리가 완료되지 않은 회원을 가입시킵니다.
      *
-     * @param executorId 로그인한 사용자의 ID
-     * @param request 회원 가입에 필요한 정보
+     * @param userContext 로그인한 사용자의 정보
+     * @param request    회원 가입에 필요한 정보
      * @return 회원가입이 완료된 Member 객체의 정보를 반환합니다.
      */
     @Transactional
-    public MemberInfo register(long executorId, MemberRegisterRequest request) {
-        Member member = memberRepository.findById(executorId)
+    public MemberInfo register(UserContext userContext, MemberRegisterRequest request) {
+        Member member = memberRepository.findById(userContext.id())
             .orElseThrow(() -> new ApiException(ErrorCode.AUTHENTICATED_FAIL));
         member.init(Nickname.create(request.nickname()), request.profileUrl());
         return MemberInfo.of(member);
+    }
+
+    @Transactional
+    public void changePrivacy(UserContext userContext, PrivacyPolicy privacyPolicy) {
+        Member member = memberRepository.findById(userContext.id())
+            .orElseThrow(() -> new ApiException(ErrorCode.AUTHENTICATED_FAIL));
+        member.changePrivacy(privacyPolicy);
     }
 }
