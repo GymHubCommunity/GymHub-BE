@@ -31,12 +31,12 @@ public class PostService {
     public PagePostResponse findPostsFromFollowings(UserContext userContext, Pageable pageable) {
         Member member = memberRepository.findById(userContext.id())
             .orElseThrow(() -> new ApiException(MEMBER_NOT_FOUND));
-        List<Member> followingMembers = findFollowingMemberFrom(member);
-        Page<Post> posts = postRepository.findByMemberInOrderByCreatedAtDesc(followingMembers, pageable);
+        List<Member> followings = findFollowingFrom(member);
+        Page<Post> posts = postRepository.findByMemberInOrderByCreatedAtDesc(followings, pageable);
         return PagePostResponse.from(posts);
     }
 
-    private List<Member> findFollowingMemberFrom(Member member) {
+    private List<Member> findFollowingFrom(Member member) {
         return followRepository.findAllByFromIdAndStatus(
                 member.getId(), FollowStatus.APPROVED).stream()
             .map(Follow::getTo)
