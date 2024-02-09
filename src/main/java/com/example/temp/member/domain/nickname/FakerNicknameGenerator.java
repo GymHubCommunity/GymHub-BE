@@ -1,4 +1,4 @@
-package com.example.temp.member.infrastructure.nickname;
+package com.example.temp.member.domain.nickname;
 
 import com.github.javafaker.Faker;
 

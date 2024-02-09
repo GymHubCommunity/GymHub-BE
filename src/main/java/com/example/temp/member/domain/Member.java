@@ -4,7 +4,7 @@ import com.example.temp.common.entity.Email;
 import com.example.temp.common.exception.ApiException;
 import com.example.temp.common.exception.ErrorCode;
 import com.example.temp.follow.domain.FollowStatus;
-import com.example.temp.member.infrastructure.nickname.Nickname;
+import com.example.temp.member.domain.nickname.Nickname;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;

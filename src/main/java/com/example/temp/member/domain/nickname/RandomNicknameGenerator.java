@@ -1,6 +1,6 @@
-package com.example.temp.member.infrastructure.nickname;
+package com.example.temp.member.domain.nickname;
 
-import static com.example.temp.member.infrastructure.nickname.Nickname.NICKNAME_MAX_LENGTH;
+import static com.example.temp.member.domain.nickname.Nickname.NICKNAME_MAX_LENGTH;
 
 import java.util.Random;
 import org.springframework.stereotype.Component;
