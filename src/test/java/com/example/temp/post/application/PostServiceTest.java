@@ -1,6 +1,7 @@
 package com.example.temp.post.application;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.groups.Tuple.*;
 
 import com.example.temp.common.dto.UserContext;
 import com.example.temp.common.entity.Email;
@@ -66,8 +67,7 @@ class PostServiceTest {
         PagePostResponse pagePostResponse = postService.findPostsByFollowedMembers(userContext, pageable);
 
         // Then
-        assertThat(pagePostResponse.posts()).hasSize(2);
-        assertThat(pagePostResponse.posts())
+        assertThat(pagePostResponse.posts()).hasSize(2)
             .extracting("writerInfo")
             .containsExactlyInAnyOrder(WriterInfo.from(member2), WriterInfo.from(member3));
     }
@@ -96,12 +96,9 @@ class PostServiceTest {
         PagePostResponse pagePostResponse = postService.findPostsByFollowedMembers(userContext, pageable);
 
         // Then
-        assertThat(pagePostResponse.posts()).hasSize(2);
-        assertThat(pagePostResponse.posts())
+        assertThat(pagePostResponse.posts()).hasSize(2)
             .extracting(post -> post.writerInfo().writerId())
-            .containsExactlyInAnyOrder(member2.getId(), member3.getId());
-        assertThat(pagePostResponse.posts())
-            .extracting(post -> post.writerInfo().writerId())
+            .containsExactlyInAnyOrder(member2.getId(), member3.getId())
             .doesNotContain(member4.getId());
     }
 
@@ -116,10 +113,10 @@ class PostServiceTest {
         saveFollow(member1, member2);
         saveFollow(member1, member3);
 
-        Post post1 = savePost(member2, "content1", "image1");
-        Post post2 = savePost(member3, "content2", "image2");
-        Post post3 = savePost(member2, "content3", "image3");
-        Post post4 = savePost(member3, "content4", "image4");
+        savePost(member2, "content1", "image1");
+        savePost(member3, "content2", "image2");
+        savePost(member2, "content3", "image3");
+        savePost(member3, "content4", "image4");
 
         UserContext userContext = UserContext.from(member1);
         Pageable pageable = PageRequest.of(0, 10);
@@ -132,10 +129,10 @@ class PostServiceTest {
         assertThat(posts).hasSize(4)
             .extracting("writerInfo", "content")
             .containsExactly(
-                Tuple.tuple(WriterInfo.from(member3), "content4"),
-                Tuple.tuple(WriterInfo.from(member2), "content3"),
-                Tuple.tuple(WriterInfo.from(member3), "content2"),
-                Tuple.tuple(WriterInfo.from(member2), "content1")
+                tuple(WriterInfo.from(member3), "content4"),
+                tuple(WriterInfo.from(member2), "content3"),
+                tuple(WriterInfo.from(member3), "content2"),
+                tuple(WriterInfo.from(member2), "content1")
             );
     }
 
