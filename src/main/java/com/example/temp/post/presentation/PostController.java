@@ -22,9 +22,9 @@ public class PostController {
     private final PostService postService;
 
     @GetMapping
-    public ResponseEntity<PagePostResponse> findFollowedPosts(@Login UserContext userContext,
+    public ResponseEntity<PagePostResponse> getFollowingPosts(@Login UserContext userContext,
         @PageableDefault(sort = "createdAt", direction = DESC) Pageable pageable) {
-        PagePostResponse posts = postService.findPostsByFollowedMembers(userContext, pageable);
+        PagePostResponse posts = postService.findPostsFromFollowings(userContext, pageable);
         return ResponseEntity.ok(posts);
     }
 }
