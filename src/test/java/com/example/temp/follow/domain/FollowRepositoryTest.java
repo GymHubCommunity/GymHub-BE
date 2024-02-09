@@ -197,6 +197,26 @@ class FollowRepositoryTest {
         assertThat(result).isEmpty();
     }
 
+    @Test
+    @DisplayName("특정 멤버가 팔로우하고 있는, 그리고 팔로우를 받은 모든 팔로우를 가져온다.")
+    void finAllRelatedFollowers() throws Exception {
+        // given
+        Member target = saveMember();
+        Member member1 = saveMember();
+        Member member2 = saveMember();
+
+        Follow related1 = saveFollow(target, member1, FollowStatus.REJECTED);
+        Follow related2 = saveFollow(member2, target, FollowStatus.APPROVED);
+        Follow notRelatedFollow = saveFollow(member1, member2, FollowStatus.APPROVED);
+
+        // when
+        List<Follow> follows = followRepository.findAllRelatedByMemberId(target.getId());
+
+        // then
+        assertThat(follows).hasSize(2)
+            .contains(related1, related2);
+    }
+
     private Follow saveFollow(Member fromMember, Member toMember1, FollowStatus status) {
         Follow follow = Follow.builder()
             .from(fromMember)
