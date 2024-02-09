@@ -10,9 +10,11 @@ import com.example.temp.member.domain.PrivacyPolicy;
 import com.example.temp.member.domain.nickname.Nickname;
 import com.example.temp.member.domain.nickname.NicknameGenerator;
 import com.example.temp.member.dto.request.MemberRegisterRequest;
+import com.example.temp.member.event.MemberDeletedEvent;
 import com.example.temp.member.exception.NicknameDuplicatedException;
 import com.example.temp.oauth.OAuthResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
@@ -28,6 +30,7 @@ public class MemberService {
 
     private final MemberRepository memberRepository;
     private final NicknameGenerator nicknameGenerator;
+    private final ApplicationEventPublisher eventPublisher;
 
     /**
      * OAuthResponse과 nicknameGenerator에서 생성한 닉네임을 사용해 Member를 저장합니다. NicknameDuplicatedException 발생 시 최대 다섯 번 재시도를 하며
@@ -75,7 +78,7 @@ public class MemberService {
     }
 
     /**
-     * 회원을 탈퇴시킵니다.
+     * 회원을 탈퇴시킵니다. 회원이 삭제되면 연관된 엔티티(팔로우)들이 모두 삭제됩니다.
      *
      * @param userContext 로그인한 사용자의 정보
      * @param targetId    탈퇴시킬 대상의 ID
@@ -89,6 +92,7 @@ public class MemberService {
         Member member = memberRepository.findById(userContext.id())
             .orElseThrow(() -> new ApiException(ErrorCode.AUTHENTICATED_FAIL));
         member.delete();
+        eventPublisher.publishEvent(MemberDeletedEvent.create(member.getId()));
     }
 
     @Transactional
