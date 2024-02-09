@@ -38,7 +38,7 @@ public class Post extends BaseTimeEntity {
     private String imageUrl;
 
     @Builder
-    public Post(Member member, Content content, String imageUrl) {
+    private Post(Member member, Content content, String imageUrl) {
         this.member = member;
         this.content = content;
         this.imageUrl = imageUrl;
