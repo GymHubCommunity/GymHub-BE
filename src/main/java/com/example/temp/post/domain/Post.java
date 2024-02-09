@@ -43,4 +43,8 @@ public class Post extends BaseTimeEntity {
         this.content = content;
         this.imageUrl = imageUrl;
     }
+
+    public String getContent() {
+        return content.getValue();
+    }
 }

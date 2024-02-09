@@ -1,13 +1,12 @@
 package com.example.temp.post.dto.response;
 
-import com.example.temp.post.domain.Content;
 import com.example.temp.post.domain.Post;
 import lombok.Builder;
 
 @Builder
 public record PostElementResponse(
     WriterInfo writerInfo,
-    Content content,
+    String content,
     String imageUrl
 ) {
 
