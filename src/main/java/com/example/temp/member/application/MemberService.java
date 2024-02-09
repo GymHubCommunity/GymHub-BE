@@ -78,4 +78,8 @@ public class MemberService {
             .orElseThrow(() -> new ApiException(ErrorCode.AUTHENTICATED_FAIL));
         member.changePrivacy(privacyPolicy);
     }
+
+    public void withdraw(UserContext userContext, long targetId) {
+
+    }
 }
