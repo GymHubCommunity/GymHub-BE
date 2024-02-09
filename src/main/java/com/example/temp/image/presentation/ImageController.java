@@ -1,7 +1,5 @@
 package com.example.temp.image.presentation;
 
-import com.example.temp.common.annotation.Login;
-import com.example.temp.common.dto.UserContext;
 import com.example.temp.image.application.ImageService;
 import com.example.temp.image.dto.response.PresignedUrlResponse;
 import java.net.URL;
@@ -19,8 +17,8 @@ public class ImageController {
     private final ImageService imageService;
 
     @PostMapping("/presigned_url")
-    public ResponseEntity<PresignedUrlResponse> providePresignedUrl(@Login UserContext userContext) {
-        URL presignedUrl = imageService.createPresignedUrl(userContext);
+    public ResponseEntity<PresignedUrlResponse> providePresignedUrl() {
+        URL presignedUrl = imageService.createPresignedUrl();
         return ResponseEntity.ok(PresignedUrlResponse.create(presignedUrl));
     }
 }
