@@ -1,6 +1,7 @@
 package com.example.temp.post.domain;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.groups.Tuple.tuple;
 
 import com.example.temp.common.entity.Email;
 import com.example.temp.member.domain.FollowStrategy;
@@ -49,8 +50,8 @@ class PostRepositoryTest {
         List<Post> posts = postsPage.getContent();
 
         // Then
-        assertThat(posts).hasSize(2);
-        assertThat(posts).extracting("member")
+        assertThat(posts).hasSize(2)
+            .extracting("member")
             .containsExactlyInAnyOrder(member1, member2);
     }
 
@@ -76,6 +77,8 @@ class PostRepositoryTest {
     @Test
     void findByMemberInWithPagination() {
         // Given
+        final int pageNumber = 1;
+        final int pageSize = 5;
         Member member1 = saveMember("email1@test.com", "nick1");
         Member member2 = saveMember("email2@test.com", "nick2");
 
@@ -84,13 +87,13 @@ class PostRepositoryTest {
         }
 
         // When
-        Pageable pageable = PageRequest.of(1, 5, Sort.by("createdAt").descending());
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("createdAt").descending());
         Page<Post> postsPage = postRepository.findByMemberInOrderByCreatedAtDesc(List.of(member1, member2), pageable);
 
         // Then
-        assertThat(postsPage.getNumber()).isEqualTo(1);
-        assertThat(postsPage.getSize()).isEqualTo(5);
-        assertThat(postsPage.getContent()).hasSize(5);
+        assertThat(postsPage.getNumber()).isEqualTo(pageNumber);
+        assertThat(postsPage.getSize()).isEqualTo(pageSize);
+        assertThat(postsPage.getContent()).hasSize(pageSize);
     }
 
     @DisplayName("게시글은 최신순으로 조회 된다.")
@@ -100,8 +103,8 @@ class PostRepositoryTest {
         Member member1 = saveMember("email1@test.com", "nick1");
         Member member2 = saveMember("email2@test.com", "nick2");
 
-        Post post1 = savePost(member1, "내용1", "이미지1");
-        Post post2 = savePost(member2, "내용2", "이미지2");
+        savePost(member1, "내용1", "이미지1");
+        savePost(member2, "내용2", "이미지2");
 
         List<Member> followMembers = List.of(member1, member2);
         Pageable pageable = PageRequest.of(0, 10);
@@ -111,9 +114,12 @@ class PostRepositoryTest {
         List<Post> posts = postsPage.getContent();
 
         // Then
-        assertThat(posts).hasSize(2);
-        assertThat(posts.get(0)).isEqualTo(post2);
-        assertThat(posts.get(1)).isEqualTo(post1);
+        assertThat(posts).hasSize(2)
+            .extracting("content", "member")
+            .containsExactly(
+                tuple("내용2", member2),
+                tuple("내용1", member1)
+            );
     }
 
     private Post savePost(Member member, String content, String url) {
