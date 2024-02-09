@@ -5,7 +5,9 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = "s3")
 public record S3Properties(
     String region,
-    String endpoint
+    String endpoint,
+    String bucket,
+    long presignedExpires
 ) {
 
 }
