@@ -49,7 +49,7 @@ class PostRepositoryTest {
         Pageable pageable = PageRequest.of(0, 10);
 
         // When
-        Page<Post> postsPage = postRepository.findByMemberIn(followMembers, pageable);
+        Page<Post> postsPage = postRepository.findByMemberInOrderByCreatedAtDesc(followMembers, pageable);
         List<Post> posts = postsPage.getContent();
 
         // Then
@@ -60,7 +60,7 @@ class PostRepositoryTest {
 
     @DisplayName("팔로우 리스트에 없는 사용자 게시글은 조회할 수 없다.")
     @Test
-    void findByMemberInTest_withNotIncludedMember() {
+    void notFindByMemberNotIn() {
         // Given
         Member member1 = saveMember();
         Member member2 = saveMember();
@@ -71,7 +71,7 @@ class PostRepositoryTest {
 
         // When
         Pageable pageable = PageRequest.of(0, 10);
-        Page<Post> postsPage = postRepository.findByMemberIn(List.of(member1, member2), pageable);
+        Page<Post> postsPage = postRepository.findByMemberInOrderByCreatedAtDesc(List.of(member1, member2), pageable);
 
         // Then
         assertThat(postsPage.getContent()).isEmpty();
@@ -91,12 +91,36 @@ class PostRepositoryTest {
 
         // When
         Pageable pageable = PageRequest.of(1, 5, Sort.by("createdAt").descending());
-        Page<Post> postsPage = postRepository.findByMemberIn(List.of(member1, member2), pageable);
+        Page<Post> postsPage = postRepository.findByMemberInOrderByCreatedAtDesc(List.of(member1, member2), pageable);
 
         // Then
         assertThat(postsPage.getNumber()).isEqualTo(1);
         assertThat(postsPage.getSize()).isEqualTo(5);
         assertThat(postsPage.getContent()).hasSize(5);
+    }
+
+    @DisplayName("게시글은 최신순으로 조회 된다.")
+    @Test
+    void findByMemberInOrderByCreatedAtDesc() {
+        // Given
+        Member member1 = saveMember();
+        Member member2 = saveMember();
+
+        Post post1 = createPost(member1, "내용1", "이미지1");
+        Post post2 = createPost(member2, "내용2", "이미지2");
+        postRepository.saveAll(List.of(post1, post2));
+
+        List<Member> followMembers = List.of(member1, member2);
+        Pageable pageable = PageRequest.of(0, 10);
+
+        // When
+        Page<Post> postsPage = postRepository.findByMemberInOrderByCreatedAtDesc(followMembers, pageable);
+        List<Post> posts = postsPage.getContent();
+
+        // Then
+        assertThat(posts).hasSize(2);
+        assertThat(posts.get(0)).isEqualTo(post2);
+        assertThat(posts.get(1)).isEqualTo(post1);
     }
 
     private Post createPost(Member member, String content, String url) {
