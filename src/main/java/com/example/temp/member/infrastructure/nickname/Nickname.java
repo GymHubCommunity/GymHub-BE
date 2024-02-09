@@ -30,7 +30,7 @@ public class Nickname {
         this.value = value;
     }
 
-    public void validate(String value) {
+    private void validate(String value) {
         Objects.requireNonNull(value);
         if (value.length() < NICKNAME_MIN_LENGTH) {
             throw new ApiException(ErrorCode.NICKNAME_TOO_SHORT);
