@@ -4,6 +4,7 @@ import com.example.temp.common.annotation.Login;
 import com.example.temp.common.dto.UserContext;
 import com.example.temp.image.application.ImageService;
 import com.example.temp.image.dto.response.PresignedUrlResponse;
+import java.net.URL;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,7 +20,7 @@ public class ImageController {
 
     @PostMapping("/presigned_url")
     public ResponseEntity<PresignedUrlResponse> providePresignedUrl(@Login UserContext userContext) {
-        PresignedUrlResponse presignedUrlResponse = imageService.createPresignedUrl(userContext);
-        return ResponseEntity.ok(presignedUrlResponse);
+        URL presignedUrl = imageService.createPresignedUrl(userContext);
+        return ResponseEntity.ok(PresignedUrlResponse.create(presignedUrl));
     }
 }
