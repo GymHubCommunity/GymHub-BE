@@ -15,9 +15,11 @@ import com.example.temp.follow.dto.response.FollowInfo;
 import com.example.temp.follow.dto.response.FollowResponse;
 import com.example.temp.member.domain.Member;
 import com.example.temp.member.domain.MemberRepository;
+import com.example.temp.member.event.MemberDeletedEvent;
 import java.util.List;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -177,5 +179,13 @@ public class FollowService {
         follow.reject();
     }
 
-}
+    /**
+     * 회원이 삭제되었을 때, 해당 회원이 팔로우 중이거나, 해당 회원을 팔로우하고 있는 모든 팔로우를 삭제합니다.
+     */
+    @EventListener
+    public void handleMemberDeletedEvent(MemberDeletedEvent event) {
+        List<Follow> follows = followRepository.findAllRelatedByMemberId(event.getMemberId());
+        followRepository.deleteAllInBatch(follows);
+    }
 
+}
