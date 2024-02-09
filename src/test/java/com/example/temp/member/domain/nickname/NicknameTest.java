@@ -1,4 +1,4 @@
-package com.example.temp.member.infrastructure.nickname;
+package com.example.temp.member.domain.nickname;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;

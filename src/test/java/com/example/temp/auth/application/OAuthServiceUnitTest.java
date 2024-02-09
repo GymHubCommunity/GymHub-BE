@@ -12,7 +12,7 @@ import com.example.temp.auth.dto.response.MemberInfo;
 import com.example.temp.common.entity.Email;
 import com.example.temp.member.application.MemberService;
 import com.example.temp.member.domain.Member;
-import com.example.temp.member.infrastructure.nickname.Nickname;
+import com.example.temp.member.domain.nickname.Nickname;
 import com.example.temp.oauth.OAuthProviderResolver;
 import com.example.temp.oauth.OAuthProviderType;
 import com.example.temp.oauth.OAuthResponse;

@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.example.temp.common.entity.Email;
 import com.example.temp.member.domain.Member;
-import com.example.temp.member.infrastructure.nickname.Nickname;
+import com.example.temp.member.domain.nickname.Nickname;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
