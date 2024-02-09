@@ -547,6 +547,7 @@ class FollowServiceTest {
 
     private Member saveMemberHelper(FollowStrategy followStrategy, PrivacyPolicy privacyPolicy) {
         Member member = Member.builder()
+            .registered(true)
             .email(Email.create("이메일"))
             .profileUrl("프로필")
             .nickname(Nickname.create("nick" + (globalIdx++)))
