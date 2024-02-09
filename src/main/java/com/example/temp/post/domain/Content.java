@@ -4,7 +4,6 @@ import com.example.temp.common.exception.ApiException;
 import com.example.temp.common.exception.ErrorCode;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
-import jakarta.persistence.Lob;
 import jakarta.validation.constraints.NotBlank;
 import java.util.Objects;
 import lombok.AccessLevel;
@@ -21,7 +20,6 @@ public class Content {
 
     @NotBlank
     @Column(name = "content", nullable = false)
-    @Lob
     private String value;
 
     @Builder
