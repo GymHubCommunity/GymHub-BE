@@ -98,10 +98,10 @@ class PostServiceTest {
         // Then
         assertThat(pagePostResponse.posts()).hasSize(2);
         assertThat(pagePostResponse.posts())
-            .extracting(post -> post.writerInfo().id())
+            .extracting(post -> post.writerInfo().writerId())
             .containsExactlyInAnyOrder(member2.getId(), member3.getId());
         assertThat(pagePostResponse.posts())
-            .extracting(post -> post.writerInfo().id())
+            .extracting(post -> post.writerInfo().writerId())
             .doesNotContain(member4.getId());
     }
 

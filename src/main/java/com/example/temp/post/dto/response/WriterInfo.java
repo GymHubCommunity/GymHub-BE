@@ -5,14 +5,14 @@ import lombok.Builder;
 
 @Builder
 public record WriterInfo(
-    Long id,
+    Long writerId,
     String nickname,
     String email,
     String profileUrl) {
 
     public static WriterInfo from(Member member) {
         return WriterInfo.builder()
-            .id(member.getId())
+            .writerId(member.getId())
             .nickname(member.getNicknameValue())
             .email(member.getEmailValue())
             .profileUrl(member.getProfileUrl())
