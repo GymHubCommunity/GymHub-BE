@@ -37,11 +37,9 @@ class PostRepositoryTest {
         Member member2 = saveMember("email2@test.com", "nick2");
         Member member3 = saveMember("email3@test.com", "nick3");
 
-        Post post1 = createPost(member1, "내용1", "이미지1");
-        Post post2 = createPost(member2, "내용2", "이미지2");
-        Post post3 = createPost(member3, "내용3", "이미지3");
-
-        postRepository.saveAll(List.of(post1, post2, post3));
+        savePost(member1, "내용1", "이미지1");
+        savePost(member2, "내용2", "이미지2");
+        savePost(member3, "내용3", "이미지3");
 
         List<Member> followMembers = List.of(member1, member2);
         Pageable pageable = PageRequest.of(0, 10);
@@ -64,8 +62,7 @@ class PostRepositoryTest {
         Member member2 = saveMember("email2@test.com", "nick2");
         Member member3 = saveMember("email3@test.com", "nick3");
 
-        Post post = createPost(member3, "content", "image");
-        postRepository.save(post);
+        savePost(member3, "content", "image");
 
         // When
         Pageable pageable = PageRequest.of(0, 10);
@@ -83,8 +80,7 @@ class PostRepositoryTest {
         Member member2 = saveMember("email2@test.com", "nick2");
 
         for (int i = 0; i < 20; i++) {
-            Post post = createPost(member1, "content" + i, "image" + i);
-            postRepository.save(post);
+            savePost(member1, "content" + i, "image" + i);
         }
 
         // When
@@ -104,9 +100,8 @@ class PostRepositoryTest {
         Member member1 = saveMember("email1@test.com", "nick1");
         Member member2 = saveMember("email2@test.com", "nick2");
 
-        Post post1 = createPost(member1, "내용1", "이미지1");
-        Post post2 = createPost(member2, "내용2", "이미지2");
-        postRepository.saveAll(List.of(post1, post2));
+        Post post1 = savePost(member1, "내용1", "이미지1");
+        Post post2 = savePost(member2, "내용2", "이미지2");
 
         List<Member> followMembers = List.of(member1, member2);
         Pageable pageable = PageRequest.of(0, 10);
@@ -121,14 +116,15 @@ class PostRepositoryTest {
         assertThat(posts.get(1)).isEqualTo(post1);
     }
 
-    private Post createPost(Member member, String content, String url) {
-        return Post.builder()
+    private Post savePost(Member member, String content, String url) {
+        Post post = Post.builder()
             .member(member)
             .content(Content.builder()
                 .value(content)
                 .build())
             .imageUrl(url)
             .build();
+        return postRepository.save(post);
     }
 
     private Member saveMember(String email, String nickname) {
