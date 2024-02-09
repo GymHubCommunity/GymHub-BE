@@ -21,7 +21,7 @@ import com.example.temp.follow.dto.response.FollowResponse;
 import com.example.temp.member.domain.FollowStrategy;
 import com.example.temp.member.domain.Member;
 import com.example.temp.member.domain.PrivacyPolicy;
-import com.example.temp.member.infrastructure.nickname.Nickname;
+import com.example.temp.member.domain.nickname.Nickname;
 import jakarta.persistence.EntityManager;
 import java.util.ArrayList;
 import java.util.List;
