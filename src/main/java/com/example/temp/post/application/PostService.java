@@ -28,15 +28,15 @@ public class PostService {
     private final MemberRepository memberRepository;
     private final FollowRepository followRepository;
 
-    public PagePostResponse findPostsByFollowedMembers(UserContext userContext, Pageable pageable) {
+    public PagePostResponse findPostsFromFollowings(UserContext userContext, Pageable pageable) {
         Member member = memberRepository.findById(userContext.id())
             .orElseThrow(() -> new ApiException(MEMBER_NOT_FOUND));
-        List<Member> followedMember = findFollowedMemberFrom(member);
-        Page<Post> posts = postRepository.findByMemberInOrderByCreatedAtDesc(followedMember, pageable);
+        List<Member> followingMembers = findFollowingMemberFrom(member);
+        Page<Post> posts = postRepository.findByMemberInOrderByCreatedAtDesc(followingMembers, pageable);
         return PagePostResponse.from(posts);
     }
 
-    private List<Member> findFollowedMemberFrom(Member member) {
+    private List<Member> findFollowingMemberFrom(Member member) {
         return followRepository.findAllByFromIdAndStatus(
                 member.getId(), FollowStatus.APPROVED).stream()
             .map(Follow::getTo)

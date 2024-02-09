@@ -20,7 +20,6 @@ import com.example.temp.post.dto.response.PagePostResponse;
 import com.example.temp.post.dto.response.PostElementResponse;
 import com.example.temp.post.dto.response.WriterInfo;
 import java.util.List;
-import org.assertj.core.groups.Tuple;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,7 +63,7 @@ class PostServiceTest {
         Pageable pageable = PageRequest.of(0, 5);
 
         // When
-        PagePostResponse pagePostResponse = postService.findPostsByFollowedMembers(userContext, pageable);
+        PagePostResponse pagePostResponse = postService.findPostsFromFollowings(userContext, pageable);
 
         // Then
         assertThat(pagePostResponse.posts()).hasSize(2)
@@ -93,7 +92,7 @@ class PostServiceTest {
         Pageable pageable = PageRequest.of(0, 5);
 
         // When
-        PagePostResponse pagePostResponse = postService.findPostsByFollowedMembers(userContext, pageable);
+        PagePostResponse pagePostResponse = postService.findPostsFromFollowings(userContext, pageable);
 
         // Then
         assertThat(pagePostResponse.posts()).hasSize(2)
@@ -122,7 +121,7 @@ class PostServiceTest {
         Pageable pageable = PageRequest.of(0, 10);
 
         // When
-        PagePostResponse postsPage = postService.findPostsByFollowedMembers(userContext, pageable);
+        PagePostResponse postsPage = postService.findPostsFromFollowings(userContext, pageable);
         List<PostElementResponse> posts = postsPage.posts();
 
         // Then
