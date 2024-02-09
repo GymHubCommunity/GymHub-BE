@@ -212,6 +212,32 @@ class MemberServiceTest {
     }
 
     @Test
+    @DisplayName("서비스를 탈퇴한다.")
+    void withdraw() throws Exception {
+        // given
+        Member member = saveRegisteredMember(Nickname.create("nick"));
+
+        // when
+        memberService.withdraw(UserContext.from(member), member.getId());
+
+        // then
+        assertThat(member.isDeleted()).isTrue();
+    }
+
+    @Test
+    @DisplayName("자신의 계정만 탈퇴할 수 있다.")
+    void withdrawFailNotAuthz() throws Exception {
+        // given
+        Member anotherMember = saveRegisteredMember(Nickname.create("nick"));
+        Member loginMember = saveRegisteredMember(Nickname.create("nick2"));
+
+        // when & then
+        assertThatThrownBy(() -> memberService.withdraw(UserContext.from(loginMember), anotherMember.getId()))
+            .isInstanceOf(ApiException.class)
+            .hasMessageContaining(ErrorCode.AUTHORIZED_FAIL.getMessage());
+    }
+
+    @Test
     @DisplayName("존재하지 않는 회원은 계정 Privacy 상태를 바꿀 수 없다.")
     void changeStatusFail() throws Exception {
         // given

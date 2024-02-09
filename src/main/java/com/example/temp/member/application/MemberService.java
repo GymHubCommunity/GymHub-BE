@@ -59,6 +59,8 @@ public class MemberService {
      * @param userContext 로그인한 사용자의 정보
      * @param request     회원 가입에 필요한 정보
      * @return 회원가입이 완료된 Member 객체의 정보를 반환합니다.
+     * @throws ApiException NICKNAME_DUPLICATED: 닉네임이 중복되었을 때 발생합니다.
+     * @throws ApiException MEMBER_ALREADY_REGISTER: 이미 가입이 완료된 멤버가 해당 요청을 호출할 때 발생합니다.
      */
     @Transactional
     public MemberInfo register(UserContext userContext, MemberRegisterRequest request) {
@@ -72,6 +74,23 @@ public class MemberService {
         return MemberInfo.of(member);
     }
 
+    /**
+     * 회원을 탈퇴시킵니다.
+     *
+     * @param userContext 로그인한 사용자의 정보
+     * @param targetId    탈퇴시킬 대상의 ID
+     * @throws ApiException AUTHORIZED_FAIL: 로그인한 사용자와 탈퇴를 원하는 대상의 ID가 일치하지 않을 때 발생합니다.
+     */
+    @Transactional
+    public void withdraw(UserContext userContext, long targetId) {
+        if (userContext.id() != targetId) {
+            throw new ApiException(ErrorCode.AUTHORIZED_FAIL);
+        }
+        Member member = memberRepository.findById(userContext.id())
+            .orElseThrow(() -> new ApiException(ErrorCode.AUTHENTICATED_FAIL));
+        member.delete();
+    }
+
     @Transactional
     public void changePrivacy(UserContext userContext, PrivacyPolicy privacyPolicy) {
         Member member = memberRepository.findById(userContext.id())
@@ -79,7 +98,4 @@ public class MemberService {
         member.changePrivacy(privacyPolicy);
     }
 
-    public void withdraw(UserContext userContext, long targetId) {
-
-    }
 }

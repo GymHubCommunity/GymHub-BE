@@ -35,6 +35,11 @@ public class Member {
      */
     private boolean registered;
 
+    /**
+     * 탈퇴한 회원의 경우 true 값을 갖습니다.
+     */
+    private boolean deleted;
+
     @Embedded
     private Nickname nickname;
 
@@ -53,9 +58,10 @@ public class Member {
     private FollowStrategy followStrategy;
 
     @Builder
-    private Member(boolean registered, Nickname nickname, Email email, String profileUrl,
+    private Member(boolean registered, boolean deleted, Nickname nickname, Email email, String profileUrl,
         PrivacyPolicy privacyPolicy, FollowStrategy followStrategy) {
         this.registered = registered;
+        this.deleted = deleted;
         this.nickname = nickname;
         this.email = email;
         this.profileUrl = profileUrl;
@@ -74,6 +80,7 @@ public class Member {
     public static Member createInitStatus(Email email, String profileUrl, Nickname nickname) {
         return Member.builder()
             .registered(false)
+            .deleted(false)
             .privacyPolicy(PrivacyPolicy.PRIVATE)
             .followStrategy(FollowStrategy.LAZY)
             .email(email)
@@ -123,6 +130,10 @@ public class Member {
 
     public boolean isPublicAccount() {
         return privacyPolicy == PrivacyPolicy.PUBLIC;
+    }
+
+    public void delete() {
+        this.deleted = true;
     }
 }
 
