@@ -1,5 +1,6 @@
 package com.example.temp.member.application;
 
+import static com.example.temp.common.exception.ErrorCode.NICKNAME_DUPLICATED;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.times;
@@ -14,10 +15,10 @@ import com.example.temp.common.exception.ErrorCode;
 import com.example.temp.member.domain.FollowStrategy;
 import com.example.temp.member.domain.Member;
 import com.example.temp.member.domain.PrivacyPolicy;
-import com.example.temp.member.dto.request.MemberRegisterRequest;
-import com.example.temp.member.exception.NicknameDuplicatedException;
 import com.example.temp.member.domain.nickname.Nickname;
 import com.example.temp.member.domain.nickname.NicknameGenerator;
+import com.example.temp.member.dto.request.MemberRegisterRequest;
+import com.example.temp.member.exception.NicknameDuplicatedException;
 import com.example.temp.oauth.OAuthProviderType;
 import com.example.temp.oauth.OAuthResponse;
 import com.example.temp.oauth.OAuthUserInfo;
@@ -147,7 +148,7 @@ class MemberServiceTest {
     }
 
     @Test
-    @DisplayName("회원을 저장한다")
+    @DisplayName("회원가입한다.")
     void registerSuccess() throws Exception {
         // given
         Member member = saveNotInitializedMember(Nickname.create("닉넴"));
@@ -165,6 +166,21 @@ class MemberServiceTest {
         assertThat(result.id()).isEqualTo(member.getId());
         assertThat(result.profileUrl()).isEqualTo(changedProfileUrl);
         assertThat(result.nickname()).isEqualTo(changedNickname);
+    }
+
+    @Test
+    @DisplayName("회원가입 시 다른 회원과 중복된 닉네임으로는 가입이 불가능하다.")
+    void registerFailDuplicatedNickname() throws Exception {
+        // given
+        Nickname nickname = Nickname.create("닉넴");
+        saveRegisteredMember(nickname);
+        Member member = saveNotInitializedMember(Nickname.create("randomValue"));
+        MemberRegisterRequest request = new MemberRegisterRequest("profile", nickname.getValue());
+
+        // when & then
+        assertThatThrownBy(() -> memberService.register(UserContext.from(member), request))
+            .isInstanceOf(ApiException.class)
+            .hasMessageContaining(NICKNAME_DUPLICATED.getMessage());
     }
 
     @Test
