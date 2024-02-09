@@ -11,7 +11,7 @@ import com.example.temp.member.domain.FollowStrategy;
 import com.example.temp.member.domain.Member;
 import com.example.temp.member.domain.MemberRepository;
 import com.example.temp.member.domain.PrivacyPolicy;
-import com.example.temp.member.infrastructure.nickname.Nickname;
+import com.example.temp.member.domain.nickname.Nickname;
 import com.example.temp.post.domain.Content;
 import com.example.temp.post.domain.Post;
 import com.example.temp.post.domain.PostRepository;
