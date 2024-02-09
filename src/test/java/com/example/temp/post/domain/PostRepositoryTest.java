@@ -35,9 +35,9 @@ class PostRepositoryTest {
     @Test
     void findByMemberIn() {
         // Given
-        Member member1 = saveMember();
-        Member member2 = saveMember();
-        Member member3 = saveMember();
+        Member member1 = saveMember("email1@test.com", "nick1");
+        Member member2 = saveMember("email2@test.com", "nick2");
+        Member member3 = saveMember("email3@test.com", "nick3");
 
         Post post1 = createPost(member1, "내용1", "이미지1");
         Post post2 = createPost(member2, "내용2", "이미지2");
@@ -62,9 +62,9 @@ class PostRepositoryTest {
     @Test
     void notFindByMemberNotIn() {
         // Given
-        Member member1 = saveMember();
-        Member member2 = saveMember();
-        Member member3 = saveMember();
+        Member member1 = saveMember("email1@test.com", "nick1");
+        Member member2 = saveMember("email2@test.com", "nick2");
+        Member member3 = saveMember("email3@test.com", "nick3");
 
         Post post = createPost(member3, "content", "image");
         postRepository.save(post);
@@ -81,8 +81,8 @@ class PostRepositoryTest {
     @Test
     void findByMemberInWithPagination() {
         // Given
-        Member member1 = saveMember();
-        Member member2 = saveMember();
+        Member member1 = saveMember("email1@test.com", "nick1");
+        Member member2 = saveMember("email2@test.com", "nick2");
 
         for (int i = 0; i < 20; i++) {
             Post post = createPost(member1, "content" + i, "image" + i);
@@ -103,8 +103,8 @@ class PostRepositoryTest {
     @Test
     void findByMemberInOrderByCreatedAtDesc() {
         // Given
-        Member member1 = saveMember();
-        Member member2 = saveMember();
+        Member member1 = saveMember("email1@test.com", "nick1");
+        Member member2 = saveMember("email2@test.com", "nick2");
 
         Post post1 = createPost(member1, "내용1", "이미지1");
         Post post2 = createPost(member2, "내용2", "이미지2");
@@ -133,15 +133,14 @@ class PostRepositoryTest {
             .build();
     }
 
-    private Member saveMember() {
+    private Member saveMember(String email, String nickname) {
         Member member = Member.builder()
-            .email(Email.create("이메일"))
+            .email(Email.create(email))
             .profileUrl("프로필")
-            .nickname(Nickname.create("nick" + (globalIdx++)))
+            .nickname(Nickname.create(nickname))
             .followStrategy(FollowStrategy.EAGER)
             .privacyPolicy(PrivacyPolicy.PUBLIC)
             .build();
-        memberRepository.save(member);
-        return member;
+        return memberRepository.save(member);
     }
 }
