@@ -1,12 +1,14 @@
 package com.example.temp.common.entity;
 
 import static com.example.temp.common.entity.Extension.Type.IMAGE;
+import static com.example.temp.common.entity.Extension.Type.TEXT;
 
 import java.util.Objects;
 import lombok.Getter;
 
 @Getter
 public enum Extension {
+    TXT(TEXT),
     JPEG(IMAGE),
     JPG(IMAGE),
     PNG(IMAGE);
@@ -22,6 +24,7 @@ public enum Extension {
     }
 
     enum Type {
+        TEXT,
         IMAGE;
     }
 }
