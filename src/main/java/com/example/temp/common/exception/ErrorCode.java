@@ -29,7 +29,10 @@ public enum ErrorCode {
     FOLLOW_ALREADY_RELATED(HttpStatus.BAD_REQUEST, "둘 사이에는 이미 관계가 존재합니다."),
     FOLLOW_STATUS_CHANGE_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "입력된 팔로우 상태로는 변경이 불가능합니다."),
     FOLLOW_NOT_PENDING(HttpStatus.BAD_REQUEST, "팔로우의 상태가 PENDING이 아니므로, 해당 요청을 수행할 수 없습니다."),
-    FOLLOW_INACTIVE(HttpStatus.BAD_REQUEST, "해당 Follow는 비활성화된 상태이기 때문에, 해당 요청을 수행할 수 없습니다.");
+    FOLLOW_INACTIVE(HttpStatus.BAD_REQUEST, "해당 Follow는 비활성화된 상태이기 때문에, 해당 요청을 수행할 수 없습니다."),
+
+    //게시글
+    CONTENT_TOO_LONG(HttpStatus.BAD_REQUEST, "게시글은 최대 2,000자 까지 가능합니다.");
 
     private final HttpStatus httpStatus;
     private final String message;
