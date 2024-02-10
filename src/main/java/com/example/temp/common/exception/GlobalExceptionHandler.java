@@ -1,7 +1,5 @@
 package com.example.temp.common.exception;
 
-import com.example.temp.common.exception.ApiException;
-import com.example.temp.common.exception.ErrorResponse;
 import com.example.temp.member.exception.NicknameDuplicatedException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;

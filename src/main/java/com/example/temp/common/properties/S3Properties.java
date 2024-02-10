@@ -7,7 +7,8 @@ public record S3Properties(
     String region,
     String endpoint,
     String bucket,
-    long presignedExpires
+    long presignedExpires,
+    long imgMaxContentLength
 ) {
 
 }
