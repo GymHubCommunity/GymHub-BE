@@ -21,3 +21,10 @@ refresh-cookie:
   secure: false
   max-age: 1000000
   same-site: None
+
+s3:
+  endpoint: http://localhost:4566
+  region: us-east-1
+  bucket: test
+  presigned-expires: 60
+  img-max-content-length: 10000

@@ -8,6 +8,7 @@ public enum ErrorCode {
 
     // 공통
     TEST(HttpStatus.BAD_REQUEST, "테스트용 예외 메시지입니다."),
+    EXTENSION_NOT_SUPPORTED(HttpStatus.BAD_REQUEST, "해당 확장자는 지원하지 않습니다"),
 
     // 인증
     AUTHENTICATED_FAIL(HttpStatus.UNAUTHORIZED, "인증되지 않은 사용자입니다."),
@@ -33,7 +34,11 @@ public enum ErrorCode {
     FOLLOW_INACTIVE(HttpStatus.BAD_REQUEST, "해당 Follow는 비활성화된 상태이기 때문에, 해당 요청을 수행할 수 없습니다."),
 
     //게시글
-    CONTENT_TOO_LONG(HttpStatus.BAD_REQUEST, "게시글은 최대 2,000자 까지 가능합니다.");
+    CONTENT_TOO_LONG(HttpStatus.BAD_REQUEST, "게시글은 최대 2,000자 까지 가능합니다."),
+
+    // 이미지
+    IMAGE_TOO_BIG(HttpStatus.BAD_REQUEST, "이미지의 크기가 너무 큽니다"),
+    IMAGE_NAME_DUPLICATED(HttpStatus.CONFLICT, "서버에서 생성한 이미지의 이름이 중복되었습니다. 다시 한 번 요청을 보내주세요.");
 
     private final HttpStatus httpStatus;
     private final String message;
