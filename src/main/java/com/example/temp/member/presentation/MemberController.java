@@ -8,6 +8,8 @@ import com.example.temp.member.domain.PrivacyPolicy;
 import com.example.temp.member.dto.request.MemberRegisterRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,6 +28,12 @@ public class MemberController {
         @RequestBody MemberRegisterRequest memberRegisterRequest) {
         MemberInfo response = memberService.register(userContext, memberRegisterRequest);
         return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("/{memberId}")
+    public ResponseEntity<Void> withdraw(@Login UserContext userContext, @PathVariable long memberId) {
+        memberService.withdraw(userContext, memberId);
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/account/privacy")

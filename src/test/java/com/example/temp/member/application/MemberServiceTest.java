@@ -1,5 +1,6 @@
 package com.example.temp.member.application;
 
+import static com.example.temp.common.exception.ErrorCode.NICKNAME_DUPLICATED;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.times;
@@ -11,13 +12,14 @@ import com.example.temp.common.dto.UserContext;
 import com.example.temp.common.entity.Email;
 import com.example.temp.common.exception.ApiException;
 import com.example.temp.common.exception.ErrorCode;
+import com.example.temp.follow.domain.Follow;
 import com.example.temp.member.domain.FollowStrategy;
 import com.example.temp.member.domain.Member;
 import com.example.temp.member.domain.PrivacyPolicy;
-import com.example.temp.member.dto.request.MemberRegisterRequest;
-import com.example.temp.member.exception.NicknameDuplicatedException;
 import com.example.temp.member.domain.nickname.Nickname;
 import com.example.temp.member.domain.nickname.NicknameGenerator;
+import com.example.temp.member.dto.request.MemberRegisterRequest;
+import com.example.temp.member.exception.NicknameDuplicatedException;
 import com.example.temp.oauth.OAuthProviderType;
 import com.example.temp.oauth.OAuthResponse;
 import com.example.temp.oauth.OAuthUserInfo;
@@ -147,7 +149,7 @@ class MemberServiceTest {
     }
 
     @Test
-    @DisplayName("회원을 저장한다")
+    @DisplayName("회원가입한다.")
     void registerSuccess() throws Exception {
         // given
         Member member = saveNotInitializedMember(Nickname.create("닉넴"));
@@ -165,6 +167,21 @@ class MemberServiceTest {
         assertThat(result.id()).isEqualTo(member.getId());
         assertThat(result.profileUrl()).isEqualTo(changedProfileUrl);
         assertThat(result.nickname()).isEqualTo(changedNickname);
+    }
+
+    @Test
+    @DisplayName("회원가입 시 다른 회원과 중복된 닉네임으로는 가입이 불가능하다.")
+    void registerFailDuplicatedNickname() throws Exception {
+        // given
+        Nickname nickname = Nickname.create("닉넴");
+        saveRegisteredMember(nickname);
+        Member member = saveNotInitializedMember(Nickname.create("randomValue"));
+        MemberRegisterRequest request = new MemberRegisterRequest("profile", nickname.getValue());
+
+        // when & then
+        assertThatThrownBy(() -> memberService.register(UserContext.from(member), request))
+            .isInstanceOf(ApiException.class)
+            .hasMessageContaining(NICKNAME_DUPLICATED.getMessage());
     }
 
     @Test
@@ -194,6 +211,67 @@ class MemberServiceTest {
             .isInstanceOf(ApiException.class)
             .hasMessageContaining(ErrorCode.AUTHENTICATED_FAIL.getMessage());
     }
+
+    @Test
+    @DisplayName("서비스를 탈퇴한다.")
+    void withdraw() throws Exception {
+        // given
+        Member member = saveRegisteredMember(Nickname.create("nick"));
+
+        // when
+        memberService.withdraw(UserContext.from(member), member.getId());
+
+        // then
+        assertThat(member.isDeleted()).isTrue();
+    }
+
+    @Test
+    @DisplayName("자신의 계정만 탈퇴할 수 있다.")
+    void withdrawFailNotAuthz() throws Exception {
+        // given
+        Member anotherMember = saveRegisteredMember(Nickname.create("nick"));
+        Member loginMember = saveRegisteredMember(Nickname.create("nick2"));
+
+        // when & then
+        assertThatThrownBy(() -> memberService.withdraw(UserContext.from(loginMember), anotherMember.getId()))
+            .isInstanceOf(ApiException.class)
+            .hasMessageContaining(ErrorCode.AUTHORIZED_FAIL.getMessage());
+    }
+
+    @Test
+    @DisplayName("회원이 탈퇴되었을 때, 연관된 팔로우가 전부 삭제된다.")
+    void deleteAllFollowWhenMemberWithdraw() throws Exception {
+        // given
+        Member member = saveRegisteredMember(Nickname.create("nick"));
+        Member follower = saveRegisteredMember(Nickname.create("follower"));
+        Member following = saveRegisteredMember(Nickname.create("following"));
+        Follow follow1 = saveFollow(follower, member);
+        Follow follow2 = saveFollow(member, following);
+        Follow notRelatedFollow = saveFollow(follower, following);
+
+        // when
+        memberService.withdraw(UserContext.from(member), member.getId());
+        em.flush();
+        em.clear();
+
+        // then
+        Member result = em.find(Member.class, member.getId());
+        assertThat(result.isDeleted()).isTrue();
+
+        assertThat(em.find(Follow.class, follow1.getId())).isNull();
+        assertThat(em.find(Follow.class, follow2.getId())).isNull();
+        assertThat(em.find(Follow.class, notRelatedFollow.getId())).isNotNull();
+    }
+
+    private Follow saveFollow(Member fromMember, Member toMember) {
+        Follow follow = Follow.builder()
+            .from(fromMember)
+            .to(toMember)
+            .build();
+        em.persist(follow);
+        return follow;
+    }
+
 
     @Test
     @DisplayName("존재하지 않는 회원은 계정 Privacy 상태를 바꿀 수 없다.")

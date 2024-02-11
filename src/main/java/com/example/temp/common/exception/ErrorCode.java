@@ -22,6 +22,7 @@ public enum ErrorCode {
     NICKNAME_TOO_LONG(HttpStatus.BAD_REQUEST, "닉네임의 길이가 너무 깁니다."),
     NICKNAME_TOO_SHORT(HttpStatus.BAD_REQUEST, "닉네임의 길이가 너무 짧습니다."),
     NICKNAME_PATTERN_MISMATCH(HttpStatus.BAD_REQUEST, "닉네임에 허용되지 않는 문자가 포함되었습니다."),
+    NICKNAME_DUPLICATED(HttpStatus.BAD_REQUEST, "닉네임이 중복되었습니다."),
 
     // 팔로우
     FOLLOW_NOT_FOUND(HttpStatus.NOT_FOUND, "두 회원 간에 팔로우 관계를 찾을 수 없습니다."),
