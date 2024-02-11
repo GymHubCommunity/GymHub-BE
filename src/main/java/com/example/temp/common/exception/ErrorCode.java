@@ -36,7 +36,8 @@ public enum ErrorCode {
     CONTENT_TOO_LONG(HttpStatus.BAD_REQUEST, "게시글은 최대 2,000자 까지 가능합니다."),
 
     // 이미지
-    IMAGE_TOO_BIG(HttpStatus.BAD_REQUEST, "이미지의 크기가 너무 큽니다");
+    IMAGE_TOO_BIG(HttpStatus.BAD_REQUEST, "이미지의 크기가 너무 큽니다"),
+    IMAGE_NAME_DUPLICATED(HttpStatus.CONFLICT, "서버에서 생성한 이미지의 이름이 중복되었습니다. 다시 한 번 요청을 보내주세요.");
 
     private final HttpStatus httpStatus;
     private final String message;

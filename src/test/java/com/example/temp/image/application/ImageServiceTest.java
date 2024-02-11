@@ -8,6 +8,7 @@ import com.example.temp.common.exception.ApiException;
 import com.example.temp.common.exception.ErrorCode;
 import com.example.temp.common.properties.S3Properties;
 import com.example.temp.common.utils.random.RandomGenerator;
+import com.example.temp.image.domain.ImageRepository;
 import com.example.temp.image.dto.request.PresignedUrlRequest;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -34,13 +35,16 @@ class ImageServiceTest {
     @Autowired
     RandomGenerator randomGenerator;
 
+    @Autowired
+    ImageRepository imageRepository;
+
     @BeforeEach
     void setUp() {
         s3Presigner = S3Presigner.builder()
             .region(Region.of(s3Properties.region()))
             .credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create("accessKey", "secretKey")))
             .build();
-        imageService = new ImageService(s3Presigner, s3Properties, randomGenerator);
+        imageService = new ImageService(s3Presigner, s3Properties, randomGenerator, imageRepository);
     }
 
     @Test
@@ -56,6 +60,8 @@ class ImageServiceTest {
 
         // then
         validateUrl(presignedUrl);
+        String path = presignedUrl.getPath().substring(1);
+        assertThat(imageRepository.existsByFileName(path)).isTrue();
     }
 
     /**
