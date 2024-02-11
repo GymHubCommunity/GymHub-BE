@@ -1,3 +1,8 @@
+spring:
+  sql:
+    init:
+      mode: never # 테스트를 돌릴 때 data.sql을 실행하지 않겠다.
+
 # Jwt 커스텀
 jwt:
   secret: ThisIsSecretThisIsSecretThisIsSecretThisIsSecretThisIsSecretThisIsSecretThisIsSecretThisIsSecret

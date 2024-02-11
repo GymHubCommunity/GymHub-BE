@@ -49,8 +49,8 @@ public class Member {
     @Column(nullable = false)
     private String profileUrl;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    @Enumerated
     private PrivacyPolicy privacyPolicy;
 
     @Enumerated(EnumType.STRING)
