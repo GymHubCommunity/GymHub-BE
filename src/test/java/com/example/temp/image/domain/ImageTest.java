@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 class ImageTest {
 
     @Test
-    @DisplayName("이미지를 생성한다.")
+    @DisplayName("presigned 요청 시 서버에 이미지를 생성한다.")
     void create() throws Exception {
         // given
         String fileName = "randomFileName";
@@ -18,6 +18,7 @@ class ImageTest {
 
         // then
         assertThat(image.getFileName()).isEqualTo(fileName);
+        assertThat(image.isUsed()).isFalse();
     }
 
 }
