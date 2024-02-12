@@ -37,7 +37,7 @@ public class PostService {
     private final ImageRepository imageRepository;
 
     @Transactional
-    public PostCreateResponse create(UserContext userContext, PostCreateRequest postCreateRequest,
+    public PostCreateResponse createPost(UserContext userContext, PostCreateRequest postCreateRequest,
         LocalDateTime registeredAt) {
         Member member = findMember(userContext);
         List<PostImage> postImages = createPostImages(postCreateRequest);

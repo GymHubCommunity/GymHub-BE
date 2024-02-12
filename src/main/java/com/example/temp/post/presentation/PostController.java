@@ -30,7 +30,7 @@ public class PostController {
     public ResponseEntity<PostCreateResponse> createPost(@Login UserContext userContext,
         @RequestBody PostCreateRequest postCreateRequest) {
         LocalDateTime registeredAt = LocalDateTime.now();
-        return ResponseEntity.ok(postService.create(userContext, postCreateRequest, registeredAt));
+        return ResponseEntity.ok(postService.createPost(userContext, postCreateRequest, registeredAt));
     }
 
     @GetMapping
