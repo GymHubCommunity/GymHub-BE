@@ -1,6 +1,5 @@
 package com.example.temp.member.domain;
 
-import com.example.temp.member.domain.nickname.Nickname;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -19,9 +18,9 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     Optional<Member> findById(@Param(value = "memberId") long memberId);
 
     @Query("SELECT CASE WHEN COUNT(m) > 0 THEN true ELSE false END FROM Member m"
-        + " WHERE m.nickname = :nickname"
+        + " WHERE m.nickname.value = :nickname"
         + " AND m.deleted = false")
-    boolean existsByNickname(@Param(value = "nickname") Nickname nickname);
+    boolean existsByNickname(@Param(value = "nickname") String nickname);
 
     @Query("SELECT m FROM Member m WHERE m.id = :memberId AND m.deleted = false")
     Optional<Member> findMemberIncludingUnregisteredById(@Param(value = "memberId") long memberId);

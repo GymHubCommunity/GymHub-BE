@@ -45,7 +45,7 @@ public class MemberService {
     public Member saveInitStatusMember(OAuthResponse oAuthResponse) {
         try {
             Nickname nickname = nicknameGenerator.generate();
-            if (memberRepository.existsByNickname(nickname)) {
+            if (memberRepository.existsByNickname(nickname.getValue())) {
                 throw new NicknameDuplicatedException();
             }
             Member member = oAuthResponse.toInitStatusMemberWith(nickname);
@@ -70,7 +70,7 @@ public class MemberService {
         Member member = memberRepository.findMemberIncludingUnregisteredById(userContext.id())
             .orElseThrow(() -> new ApiException(ErrorCode.AUTHENTICATED_FAIL));
         Nickname nickname = Nickname.create(request.nickname());
-        if (memberRepository.existsByNickname(nickname)) {
+        if (memberRepository.existsByNickname(nickname.getValue())) {
             throw new ApiException(ErrorCode.NICKNAME_DUPLICATED);
         }
         member.init(nickname, request.profileUrl());
