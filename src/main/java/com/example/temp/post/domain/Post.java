@@ -12,6 +12,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -34,14 +35,17 @@ public class Post extends BaseTimeEntity {
 
     @Embedded
     private Content content;
-    
+
     private String imageUrl;
 
+    private LocalDateTime registeredAt;
+
     @Builder
-    private Post(Member member, Content content, String imageUrl) {
+    private Post(Member member, Content content, String imageUrl, LocalDateTime registeredAt) {
         this.member = member;
         this.content = content;
         this.imageUrl = imageUrl;
+        this.registeredAt = registeredAt;
     }
 
     public String getContent() {
