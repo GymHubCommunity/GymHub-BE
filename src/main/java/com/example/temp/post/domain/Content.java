@@ -27,6 +27,12 @@ public class Content {
         this.value = value;
     }
 
+    public static Content create(String value) {
+        return Content.builder()
+            .value(value)
+            .build();
+    }
+
     private void validate(String value) {
         if (value.length() > MAX_CONTENT_LENGTH) {
             throw new ApiException(ErrorCode.CONTENT_TOO_LONG);
