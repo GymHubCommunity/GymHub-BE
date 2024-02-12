@@ -1,0 +1,20 @@
+version: "3.8"
+services:
+  localstack:
+    container_name: "localstack"
+    image: localstack/localstack
+    ports:
+      - "127.0.0.1:4566:4566"            # LocalStack Gateway
+      - "127.0.0.1:4510-4559:4510-4559"  # external services port range
+    environment:
+      - SERVICES=s3
+      - DEBUG=1
+      - DOCKER_SOCK=unix:///var/run/docker.sock
+      - DEFAULT_REGION=ap-northeast-2
+      - EDGE_PORT=4566
+      - DOCKER_HOST=unix:///var/run/docker.sock
+      - S3_SKIP_SIGNATURE_VALIDATION=0 # validate presigned request
+    volumes:
+      - './localstack:/var/lib/localstack'
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - "/etc/localtime:/etc/localtime:ro"  # docker time synchronized

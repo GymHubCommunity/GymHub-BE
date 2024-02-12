@@ -1,6 +1,7 @@
 # Custom
 /src/main/resources/application.yml
 .DS_Store
+.localstack
 
 HELP.md
 .gradle
