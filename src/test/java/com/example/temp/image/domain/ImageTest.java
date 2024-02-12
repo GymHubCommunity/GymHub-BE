@@ -17,7 +17,7 @@ class ImageTest {
         Image image = Image.create(fileName);
 
         // then
-        assertThat(image.getFileName()).isEqualTo(fileName);
+        assertThat(image.getUrl()).isEqualTo(fileName);
         assertThat(image.isUsed()).isFalse();
     }
 

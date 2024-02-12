@@ -23,7 +23,7 @@ public class Image {
     private Long id;
 
     @Column(unique = true, nullable = false)
-    private String fileName;
+    private String url;
 
     /**
      * 다른 엔티티(Post)에서 해당 이미지를 사용할 때 true 값을 갖습니다.
@@ -31,19 +31,19 @@ public class Image {
     private boolean used;
 
     @Builder
-    private Image(String fileName, boolean used) {
-        this.fileName = fileName;
+    private Image(String url, boolean used) {
+        this.url = url;
         this.used = used;
     }
 
     /**
      * 초기 상태 이미지를 생성합니다.
      *
-     * @param fileName
+     * @param url
      */
-    public static Image create(String fileName) {
+    public static Image create(String url) {
         return Image.builder()
-            .fileName(fileName)
+            .url(url)
             .used(false)
             .build();
     }
