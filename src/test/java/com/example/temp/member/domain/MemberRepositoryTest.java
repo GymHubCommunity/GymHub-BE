@@ -25,7 +25,7 @@ class MemberRepositoryTest {
     @DisplayName("해당 닉네임이 DB에 존재하면 true를 반환한다.")
     void existsByNicknameSuccess() throws Exception {
         Nickname nickname = Nickname.create("firstNick");
-        assertThat(memberRepository.existsByNickname(nickname)).isFalse();
+        assertThat(memberRepository.existsByNickname(nickname.getValue())).isFalse();
     }
 
     @Test
@@ -37,7 +37,7 @@ class MemberRepositoryTest {
         em.persist(member);
 
         // when & then
-        assertThat(memberRepository.existsByNickname(nickname)).isTrue();
+        assertThat(memberRepository.existsByNickname(nickname.getValue())).isTrue();
 
     }
 
