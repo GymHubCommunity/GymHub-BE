@@ -1,10 +1,13 @@
 package com.example.temp.post.application;
 
+import static com.example.temp.common.exception.ErrorCode.IMAGE_NOT_FOUND;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.groups.Tuple.tuple;
 
 import com.example.temp.common.dto.UserContext;
 import com.example.temp.common.entity.Email;
+import com.example.temp.common.exception.ApiException;
 import com.example.temp.follow.domain.Follow;
 import com.example.temp.follow.domain.FollowRepository;
 import com.example.temp.follow.domain.FollowStatus;
@@ -19,11 +22,15 @@ import com.example.temp.post.domain.Content;
 import com.example.temp.post.domain.Post;
 import com.example.temp.post.domain.PostImage;
 import com.example.temp.post.domain.PostRepository;
+import com.example.temp.post.dto.request.PostCreateRequest;
 import com.example.temp.post.dto.response.PagePostResponse;
+import com.example.temp.post.dto.response.PostCreateResponse;
 import com.example.temp.post.dto.response.PostElementResponse;
 import com.example.temp.post.dto.response.WriterInfo;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -140,6 +147,49 @@ class PostServiceTest {
                 tuple(WriterInfo.from(member3), "content2"),
                 tuple(WriterInfo.from(member2), "content1")
             );
+    }
+
+    @DisplayName("게시글을 정상적으로 작성할 수 있다.")
+    @Test
+    void createPost() {
+        //given
+        Member member = saveMember("email@test.com", "nick");
+        UserContext userContext = UserContext.from(member);
+        List<String> imageUrls = List.of("imageUrl1", "ImageUrl2");
+        List<String> savedImageUrls = saveImagesAndGetUrls(imageUrls);
+        PostCreateRequest request = new PostCreateRequest("content1", savedImageUrls);
+        LocalDateTime registeredAt = LocalDateTime.now();
+
+        //when
+        PostCreateResponse response = postService.createPost(userContext, request, registeredAt);
+
+        //then
+        assertThat(response).isNotNull();
+        assertThat(response.writerInfo().writerId()).isEqualTo(member.getId());
+        assertThat(response.content()).isEqualTo(request.content());
+        assertThat(response.postImages()).containsExactlyElementsOf(imageUrls);
+    }
+
+    private List<String> saveImagesAndGetUrls(List<String> imageUrls) {
+        imageUrls.forEach(this::saveImage);
+        return imageUrls;
+    }
+
+    @DisplayName("이미지 url로 해당 이미지를 찾지 못하면 예외를 발생시킨다.")
+    @Test
+    void createPostWithNonexistentImage() {
+        // Given
+        Member member = saveMember("email@test.com", "nick");
+        UserContext userContext = UserContext.from(member);
+
+        List<String> imageUrls = List.of("nonexistent_image");
+
+        PostCreateRequest request = new PostCreateRequest("content1", imageUrls);
+
+        // When & Then
+        assertThatThrownBy(() -> postService.createPost(userContext, request, LocalDateTime.now()))
+            .isInstanceOf(ApiException.class)
+            .hasMessage(IMAGE_NOT_FOUND.getMessage());
     }
 
     private Member saveMember(String email, String nickname) {
