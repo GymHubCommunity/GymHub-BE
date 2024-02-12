@@ -1,7 +1,9 @@
 package com.example.temp.post.domain;
 
 import com.example.temp.common.entity.BaseTimeEntity;
+import com.example.temp.image.domain.Image;
 import com.example.temp.member.domain.Member;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
@@ -11,8 +13,11 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -36,19 +41,28 @@ public class Post extends BaseTimeEntity {
     @Embedded
     private Content content;
 
-    private String imageUrl;
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PostImage> postImages = new ArrayList<>();
 
     private LocalDateTime registeredAt;
 
     @Builder
-    private Post(Member member, Content content, String imageUrl, LocalDateTime registeredAt) {
+    public Post(Member member, Content content, List<PostImage> postImages, LocalDateTime registeredAt) {
         this.member = member;
         this.content = content;
-        this.imageUrl = imageUrl;
+        this.postImages = postImages;
         this.registeredAt = registeredAt;
     }
 
     public String getContent() {
         return content.getValue();
+    }
+
+    public String getImageUrl() {
+        return postImages.stream()
+            .findFirst()
+            .map(PostImage::getImage)
+            .map(Image::getUrl)
+            .orElse(null);
     }
 }
