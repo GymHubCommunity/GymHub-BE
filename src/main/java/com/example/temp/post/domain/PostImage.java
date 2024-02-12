@@ -2,7 +2,6 @@ package com.example.temp.post.domain;
 
 import com.example.temp.common.entity.BaseTimeEntity;
 import com.example.temp.image.domain.Image;
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -46,5 +45,14 @@ public class PostImage extends BaseTimeEntity {
         return PostImage.builder()
             .image(image)
             .build();
+    }
+
+    //== 연관관계 편의 메소드 ==//
+    public void addPost(Post post) {
+        if (this.post != null) {
+            this.post.getPostImages().remove(this);
+        }
+        this.post = post;
+        post.getPostImages().add(this);
     }
 }

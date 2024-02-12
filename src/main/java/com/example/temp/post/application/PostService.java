@@ -19,7 +19,6 @@ import com.example.temp.post.dto.request.PostCreateRequest;
 import com.example.temp.post.dto.response.PagePostResponse;
 import com.example.temp.post.dto.response.PostCreateResponse;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -41,9 +40,8 @@ public class PostService {
     public PostCreateResponse createPost(UserContext userContext, PostCreateRequest postCreateRequest,
         LocalDateTime registeredAt) {
         Member member = findMember(userContext);
-        List<PostImage> postImages = createPostImages(postCreateRequest);
-
-        Post post = postCreateRequest.toEntity(member, registeredAt, postImages);
+        Post post = postCreateRequest.toEntity(member, registeredAt);
+        createPostImages(postCreateRequest.imageUrl(), post);
         Post savedPost = postRepository.save(post);
 
         return PostCreateResponse.from(savedPost);
@@ -61,22 +59,21 @@ public class PostService {
             .orElseThrow(() -> new ApiException(MEMBER_NOT_FOUND));
     }
 
-    private List<PostImage> createPostImages(PostCreateRequest postCreateRequest) {
-        if (isImageUrlEmpty(postCreateRequest)) {
-            return new ArrayList<>();
+    private void createPostImages(List<String> imageUrl, Post post) {
+        if (isImageUrlEmpty(imageUrl)) {
+            return;
         }
-
-        return postCreateRequest.imageUrl().stream()
+        imageUrl.stream()
             .map(this::getImageByUrl)
-            .map(image -> {
+            .forEach(image -> {
                 image.use();
-                return PostImage.createPostImage(image);
-            })
-            .toList();
+                PostImage postImage = PostImage.createPostImage(image);
+                postImage.addPost(post);
+            });
     }
 
-    private boolean isImageUrlEmpty(PostCreateRequest postCreateRequest) {
-        return postCreateRequest.imageUrl() == null || postCreateRequest.imageUrl().isEmpty();
+    private boolean isImageUrlEmpty(List<String> imageUrl) {
+        return imageUrl == null || imageUrl.isEmpty();
     }
 
     private Image getImageByUrl(String imageUrl) {
