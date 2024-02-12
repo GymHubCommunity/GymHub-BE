@@ -1,5 +1,6 @@
 package com.example.temp.post.domain;
 
+import com.example.temp.common.entity.BaseTimeEntity;
 import com.example.temp.image.domain.Image;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -21,7 +22,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "post_images")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
-public class PostImage {
+public class PostImage extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
