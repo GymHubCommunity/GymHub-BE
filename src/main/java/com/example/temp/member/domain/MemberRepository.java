@@ -21,7 +21,7 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     @Query("SELECT CASE WHEN COUNT(m) > 0 THEN true ELSE false END FROM Member m"
         + " WHERE m.nickname = :nickname"
         + " AND m.deleted = false")
-    boolean existsByNickname(Nickname nickname);
+    boolean existsByNickname(@Param(value = "nickname") Nickname nickname);
 
     @Query("SELECT m FROM Member m WHERE m.id = :memberId AND m.deleted = false")
     Optional<Member> findMemberIncludingUnregisteredById(@Param(value = "memberId") long memberId);
