@@ -8,7 +8,7 @@ import lombok.Builder;
 
 @Builder
 public record PostCreateResponse(
-    Long id,
+    Long postId,
     WriterInfo writerInfo,
     String content,
     List<String> postImages,
@@ -17,7 +17,7 @@ public record PostCreateResponse(
 
     public static PostCreateResponse from(Post savedPost) {
         return PostCreateResponse.builder()
-            .id(savedPost.getId())
+            .postId(savedPost.getId())
             .writerInfo(WriterInfo.from(savedPost.getMember()))
             .content(savedPost.getContent())
             .postImages(urlFromPostImage(savedPost))
