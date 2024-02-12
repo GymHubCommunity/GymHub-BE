@@ -47,4 +47,8 @@ public class Image {
             .used(false)
             .build();
     }
+
+    public void use() {
+        this.used = true;
+    }
 }
