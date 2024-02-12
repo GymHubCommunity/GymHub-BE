@@ -19,6 +19,7 @@ import com.example.temp.post.dto.request.PostCreateRequest;
 import com.example.temp.post.dto.response.PagePostResponse;
 import com.example.temp.post.dto.response.PostCreateResponse;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -61,6 +62,10 @@ public class PostService {
     }
 
     private List<PostImage> createPostImages(PostCreateRequest postCreateRequest) {
+        if (isImageUrlEmpty(postCreateRequest)) {
+            return new ArrayList<>();
+        }
+
         return postCreateRequest.imageUrl().stream()
             .map(this::getImageByUrl)
             .map(image -> {
@@ -68,6 +73,10 @@ public class PostService {
                 return PostImage.createPostImage(image);
             })
             .toList();
+    }
+
+    private boolean isImageUrlEmpty(PostCreateRequest postCreateRequest) {
+        return postCreateRequest.imageUrl() == null || postCreateRequest.imageUrl().isEmpty();
     }
 
     private Image getImageByUrl(String imageUrl) {

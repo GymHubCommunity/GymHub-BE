@@ -30,7 +30,6 @@ import com.example.temp.post.dto.response.WriterInfo;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -190,6 +189,26 @@ class PostServiceTest {
         assertThatThrownBy(() -> postService.createPost(userContext, request, LocalDateTime.now()))
             .isInstanceOf(ApiException.class)
             .hasMessage(IMAGE_NOT_FOUND.getMessage());
+    }
+
+    @DisplayName("이미지를 첨부하지 않아도 게시글을 작성할 수 있다.")
+    @Test
+    void createPostWithoutImage() {
+        //given
+        Member member = saveMember("email@test.com", "nick");
+        UserContext userContext = UserContext.from(member);
+        PostCreateRequest postCreateRequest = new PostCreateRequest("content", null);
+
+        //when
+        PostCreateResponse postCreateResponse = postService.createPost(userContext, postCreateRequest,
+            LocalDateTime.now());
+
+        //then
+        assertThat(postCreateResponse).isNotNull()
+            .satisfies(response -> {
+                assertThat(response.content()).isEqualTo("content");
+                assertThat(response.postImages()).isEmpty();
+            });
     }
 
     private Member saveMember(String email, String nickname) {
