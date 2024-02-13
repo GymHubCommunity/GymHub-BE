@@ -25,6 +25,8 @@ import lombok.NoArgsConstructor;
 @Getter
 public class Member {
 
+    public static final String DEFAULT_PROFILE = "defaultprofile";
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "member_id")
@@ -90,13 +92,17 @@ public class Member {
     }
 
     /**
-     * nickname과 profileUrl을 입력받아 회원가입 처리를 완료합니다. 공개 계정이며, EAGER 팔로우 전략을 갖습니다.
+     * nickname과 profileUrl을 입력받아 회원가입 처리를 완료합니다. 공개 계정이며, EAGER 팔로우 전략을 갖습니다. 만약 profileUrl을 입력받지 않았다면 DEFAULT_PROFILE로
+     * 회원을 등록합니다.
      *
      * @param nickname
-     * @param profileUrl
+     * @param profileUrl nullable
      * @throws ApiException MEMBER_ALREADY_REGISTER: 이미 가입이 완료된 회원이 해당 메서드를 호출했을 때 발생합니다.
      */
     public void init(Nickname nickname, String profileUrl) {
+        if (profileUrl == null) {
+            profileUrl = DEFAULT_PROFILE;
+        }
         if (registered) {
             throw new ApiException(ErrorCode.MEMBER_ALREADY_REGISTER);
         }
@@ -134,6 +140,10 @@ public class Member {
 
     public void delete() {
         this.deleted = true;
+    }
+
+    public void initWithDefaultProfile(Nickname nickname) {
+        init(nickname, DEFAULT_PROFILE);
     }
 }
 

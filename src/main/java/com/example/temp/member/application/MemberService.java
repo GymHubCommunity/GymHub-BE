@@ -57,7 +57,7 @@ public class MemberService {
     }
 
     /**
-     * 가입 처리가 완료되지 않은 회원을 가입시킵니다.
+     * 가입 처리가 완료되지 않은 회원을 가입시킵니다. profile url을 입력하지 않은 회원은 디폴트 이미지를 사용해 저장합니다.
      *
      * @param userContext 로그인한 사용자의 정보
      * @param request     회원 가입에 필요한 정보

@@ -170,6 +170,26 @@ class MemberServiceTest {
     }
 
     @Test
+    @DisplayName("프로필 이미지를 입력하지 않고 회원가입하면 디폴트 이미지로 회원가입 처리가 된다.")
+    void registerSuccessNotProfileUrl() throws Exception {
+        // given
+        Member member = saveNotInitializedMember(Nickname.create("닉넴"));
+        String changedNickname = "변경할닉네임";
+
+        // when
+        MemberInfo result = memberService.register(UserContext.from(member),
+            new MemberRegisterRequest(null, changedNickname));
+
+        // then
+        assertThat(member.getPrivacyPolicy()).isEqualTo(PrivacyPolicy.PUBLIC);
+        assertThat(member.getFollowStrategy()).isEqualTo(FollowStrategy.EAGER);
+        assertThat(result.registered()).isTrue();
+        assertThat(result.id()).isEqualTo(member.getId());
+        assertThat(result.profileUrl()).isNotNull();
+        assertThat(result.nickname()).isEqualTo(changedNickname);
+    }
+
+    @Test
     @DisplayName("회원가입 시 다른 회원과 중복된 닉네임으로는 가입이 불가능하다.")
     void registerFailDuplicatedNickname() throws Exception {
         // given
