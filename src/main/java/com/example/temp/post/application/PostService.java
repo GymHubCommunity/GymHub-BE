@@ -19,7 +19,9 @@ import com.example.temp.post.dto.request.PostCreateRequest;
 import com.example.temp.post.dto.response.PagePostResponse;
 import com.example.temp.post.dto.response.PostCreateResponse;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -49,21 +51,15 @@ public class PostService {
 
     public PagePostResponse findPostsFromFollowings(UserContext userContext, Pageable pageable) {
         Member member = findMember(userContext);
-        List<Member> followings = findFollowingFrom(member);
+        List<Member> followings = findFollowingOf(member);
         Page<Post> posts = postRepository.findByMemberInOrderByCreatedAtDesc(followings, pageable);
         return PagePostResponse.from(posts);
     }
 
-    private Member findMember(UserContext userContext) {
-        return memberRepository.findById(userContext.id())
-            .orElseThrow(() -> new ApiException(AUTHENTICATED_FAIL));
-    }
-
     private void createPostImages(List<String> imageUrl, Post post) {
-        if (isImageUrlEmpty(imageUrl)) {
-            return;
-        }
-        imageUrl.stream()
+        Optional.ofNullable(imageUrl)
+            .orElse(Collections.emptyList())
+            .stream()
             .map(this::getImageByUrl)
             .forEach(image -> {
                 image.use();
@@ -72,8 +68,9 @@ public class PostService {
             });
     }
 
-    private boolean isImageUrlEmpty(List<String> imageUrl) {
-        return imageUrl == null || imageUrl.isEmpty();
+    private Member findMember(UserContext userContext) {
+        return memberRepository.findById(userContext.id())
+            .orElseThrow(() -> new ApiException(AUTHENTICATED_FAIL));
     }
 
     private Image getImageByUrl(String imageUrl) {
@@ -83,7 +80,7 @@ public class PostService {
         return imageRepository.findByUrl(imageUrl);
     }
 
-    private List<Member> findFollowingFrom(Member member) {
+    private List<Member> findFollowingOf(Member member) {
         return followRepository.findAllByFromIdAndStatus(
                 member.getId(), FollowStatus.APPROVED).stream()
             .map(Follow::getTo)
