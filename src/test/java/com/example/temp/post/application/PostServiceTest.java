@@ -255,7 +255,6 @@ class PostServiceTest {
         imageUrls.stream()
             .map(url -> imageRepository.findByUrl(url))
             .forEach(image -> {
-                image.use();
                 PostImage postImage = PostImage.createPostImage(image);
                 postImage.addPost(post);
 

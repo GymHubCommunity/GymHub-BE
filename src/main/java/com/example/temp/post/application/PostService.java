@@ -78,8 +78,10 @@ public class PostService {
     }
 
     private Image getImageByUrl(String imageUrl) {
-        return imageRepository.findByUrl(imageUrl)
-            .orElseThrow(() -> new ApiException(IMAGE_NOT_FOUND));
+        if (!imageRepository.existsByUrl(imageUrl)) {
+            throw new ApiException(IMAGE_NOT_FOUND);
+        }
+        return imageRepository.findByUrl(imageUrl);
     }
 
     private List<Member> findFollowingOf(Member member) {
