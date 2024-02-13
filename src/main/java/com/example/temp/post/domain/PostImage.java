@@ -42,6 +42,7 @@ public class PostImage extends BaseTimeEntity {
     }
 
     public static PostImage createPostImage(Image image) {
+        image.use();
         return PostImage.builder()
             .image(image)
             .build();
