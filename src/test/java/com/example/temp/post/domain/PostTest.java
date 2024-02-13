@@ -19,13 +19,12 @@ class PostTest {
     @Test
     void getImageUrl() {
         // Given
-        List<PostImage> postImages = getPostImages(List.of("image1", "image2"));
         Post post = Post.builder()
             .member(getMember())
             .content(Content.create("content"))
-            .postImages(postImages)
             .registeredAt(LocalDateTime.now())
             .build();
+        List<PostImage> postImages = getPostImages(List.of("image1", "image2"), post);
 
         // When
         String imageUrl = post.getImageUrl();
@@ -44,11 +43,13 @@ class PostTest {
             .build();
     }
 
-    private List<PostImage> getPostImages(List<String> imageUrls) {
+    private List<PostImage> getPostImages(List<String> imageUrls, Post post) {
         return imageUrls.stream()
             .map(url -> {
                 Image image = Image.create(url);
-                return PostImage.createPostImage(image);
+                PostImage postImage = PostImage.createPostImage(image);
+                postImage.addPost(post);
+                return postImage;
             })
             .toList();
     }

@@ -44,6 +44,10 @@ class PostRepositoryTest {
         Member member2 = saveMember("email2@test.com", "nick2");
         Member member3 = saveMember("email3@test.com", "nick3");
 
+        saveImage("image1");
+        saveImage("image2");
+        saveImage("image3");
+
         savePost(member1, "내용1", List.of("image1"));
         savePost(member2, "내용2", List.of("image2"));
         savePost(member3, "내용3", List.of("image3"));
@@ -69,6 +73,8 @@ class PostRepositoryTest {
         Member member2 = saveMember("email2@test.com", "nick2");
         Member member3 = saveMember("email3@test.com", "nick3");
 
+        saveImage("image1");
+
         savePost(member3, "content", List.of("image1"));
 
         // When
@@ -89,6 +95,7 @@ class PostRepositoryTest {
         Member member2 = saveMember("email2@test.com", "nick2");
 
         for (int i = 0; i < 20; i++) {
+            saveImage("image" + i);
             savePost(member1, "content" + i, List.of("image" + i));
         }
 
@@ -108,6 +115,9 @@ class PostRepositoryTest {
         // Given
         Member member1 = saveMember("email1@test.com", "nick1");
         Member member2 = saveMember("email2@test.com", "nick2");
+
+        saveImage("image1");
+        saveImage("image2");
 
         savePost(member1, "내용1", List.of("image1"));
         savePost(member2, "내용2", List.of("image2"));
@@ -139,25 +149,27 @@ class PostRepositoryTest {
         return memberRepository.save(member);
     }
 
-    private Post savePost(Member member, String content, List<String> imageUrls) {
-        List<PostImage> postImages = imageUrls.stream()
-            .map(this::saveImage)
-            .map(PostImage::createPostImage)
-            .collect(Collectors.toList());
-
+    private void savePost(Member member, String content, List<String> imageUrls) {
         Post post = Post.builder()
             .member(member)
             .content(Content.builder()
                 .value(content)
                 .build())
-            .postImages(postImages)
             .build();
 
-        return postRepository.save(post);
+        imageUrls.stream()
+            .map(url -> imageRepository.findByUrl(url))
+            .forEach(image -> {
+                image.use();
+                PostImage postImage = PostImage.createPostImage(image);
+                postImage.addPost(post);
+
+            });
+        postRepository.save(post);
     }
 
-    private Image saveImage(String url) {
+    private void saveImage(String url) {
         Image image = Image.create(url);
-        return imageRepository.save(image);
+        imageRepository.save(image);
     }
 }

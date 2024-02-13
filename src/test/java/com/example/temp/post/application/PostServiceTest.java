@@ -29,15 +29,12 @@ import com.example.temp.post.dto.response.PostElementResponse;
 import com.example.temp.post.dto.response.WriterInfo;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.test.annotation.Commit;
-import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
@@ -70,6 +67,10 @@ class PostServiceTest {
         saveFollow(member1, member2);
         saveFollow(member1, member3);
 
+        saveImage("image1");
+        saveImage("image2");
+        saveImage("image3");
+
         savePost(member2, "content1", List.of("image1"));
         savePost(member3, "content2", List.of("image2"));
         savePost(member1, "content3", List.of("image3"));
@@ -97,6 +98,11 @@ class PostServiceTest {
 
         saveFollow(member1, member2);
         saveFollow(member1, member3);
+
+        saveImage("image1");
+        saveImage("image2");
+        saveImage("image3");
+        saveImage("image4");
 
         savePost(member2, "content1", List.of("image1"));
         savePost(member3, "content2", List.of("image2"));
@@ -126,6 +132,11 @@ class PostServiceTest {
 
         saveFollow(member1, member2);
         saveFollow(member1, member3);
+
+        saveImage("image1");
+        saveImage("image2");
+        saveImage("image3");
+        saveImage("image4");
 
         savePost(member2, "content1", List.of("image1"));
         savePost(member3, "content2", List.of("image2"));
@@ -233,25 +244,27 @@ class PostServiceTest {
         followRepository.save(follow);
     }
 
-    private Post savePost(Member member, String content, List<String> imageUrls) {
-        List<PostImage> postImages = imageUrls.stream()
-            .map(this::saveImage)
-            .map(PostImage::createPostImage)
-            .collect(Collectors.toList());
-
+    private void savePost(Member member, String content, List<String> imageUrls) {
         Post post = Post.builder()
             .member(member)
             .content(Content.builder()
                 .value(content)
                 .build())
-            .postImages(postImages)
             .build();
 
-        return postRepository.save(post);
+        imageUrls.stream()
+            .map(url -> imageRepository.findByUrl(url))
+            .forEach(image -> {
+                image.use();
+                PostImage postImage = PostImage.createPostImage(image);
+                postImage.addPost(post);
+
+            });
+        postRepository.save(post);
     }
 
-    private Image saveImage(String url) {
+    private void saveImage(String url) {
         Image image = Image.create(url);
-        return imageRepository.save(image);
+        imageRepository.save(image);
     }
 }

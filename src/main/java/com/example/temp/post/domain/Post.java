@@ -47,10 +47,9 @@ public class Post extends BaseTimeEntity {
     private LocalDateTime registeredAt;
 
     @Builder
-    public Post(Member member, Content content, List<PostImage> postImages, LocalDateTime registeredAt) {
+    public Post(Member member, Content content, LocalDateTime registeredAt) {
         this.member = member;
         this.content = content;
-        this.postImages = postImages;
         this.registeredAt = registeredAt;
     }
 
