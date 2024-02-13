@@ -57,15 +57,19 @@ public class PostService {
     }
 
     private void createPostImages(List<String> imageUrl, Post post) {
-        Optional.ofNullable(imageUrl)
-            .orElse(Collections.emptyList())
-            .stream()
+        List<String> url = Optional.ofNullable(imageUrl).orElse(Collections.emptyList());
+        url.stream()
             .map(this::getImageByUrl)
-            .forEach(image -> {
-                image.use();
-                PostImage postImage = PostImage.createPostImage(image);
-                postImage.addPost(post);
-            });
+            .map(this::createPostImage)
+            .forEach(postImage -> addPostImageToPost(postImage, post));
+    }
+
+    private PostImage createPostImage(Image image) {
+        return PostImage.createPostImage(image);
+    }
+
+    private void addPostImageToPost(PostImage postImage, Post post) {
+        postImage.addPost(post);
     }
 
     private Member findMember(UserContext userContext) {
@@ -74,10 +78,8 @@ public class PostService {
     }
 
     private Image getImageByUrl(String imageUrl) {
-        if (!imageRepository.existsByUrl(imageUrl)) {
-            throw new ApiException(IMAGE_NOT_FOUND);
-        }
-        return imageRepository.findByUrl(imageUrl);
+        return imageRepository.findByUrl(imageUrl)
+            .orElseThrow(() -> new ApiException(IMAGE_NOT_FOUND));
     }
 
     private List<Member> findFollowingOf(Member member) {
