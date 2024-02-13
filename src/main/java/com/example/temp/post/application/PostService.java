@@ -1,7 +1,7 @@
 package com.example.temp.post.application;
 
+import static com.example.temp.common.exception.ErrorCode.AUTHENTICATED_FAIL;
 import static com.example.temp.common.exception.ErrorCode.IMAGE_NOT_FOUND;
-import static com.example.temp.common.exception.ErrorCode.MEMBER_NOT_FOUND;
 
 import com.example.temp.common.dto.UserContext;
 import com.example.temp.common.exception.ApiException;
@@ -56,7 +56,7 @@ public class PostService {
 
     private Member findMember(UserContext userContext) {
         return memberRepository.findById(userContext.id())
-            .orElseThrow(() -> new ApiException(MEMBER_NOT_FOUND));
+            .orElseThrow(() -> new ApiException(AUTHENTICATED_FAIL));
     }
 
     private void createPostImages(List<String> imageUrl, Post post) {
