@@ -2,6 +2,7 @@
 /src/main/resources/application.yml
 .DS_Store
 .localstack
+localstack
 
 HELP.md
 .gradle
