@@ -38,10 +38,13 @@ public class Machine {
     }
 
     public static Machine create(String name, List<BodyPart> bodyParts) {
-        return Machine.builder()
+        Machine machine = Machine.builder()
             .name(name)
             .machineBodyParts(createMachineBodyParts(bodyParts))
             .build();
+        machine.getMachineBodyParts().stream()
+            .forEach(machineBodyPart -> machineBodyPart.setMachine(machine));
+        return machine;
     }
 
     private static List<MachineBodyPart> createMachineBodyParts(List<BodyPart> bodyParts) {
