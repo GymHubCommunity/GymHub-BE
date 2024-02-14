@@ -1,7 +1,9 @@
 package com.example.temp.admin.presentation;
 
+import com.example.temp.admin.dto.request.BodyPartCreateRequest;
 import com.example.temp.admin.dto.request.MachineCreateRequest;
 import com.example.temp.machine.application.MachineService;
+import com.example.temp.machine.dto.response.BodyPartCreateResponse;
 import com.example.temp.machine.dto.response.MachineCreateResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -18,7 +20,13 @@ public class AdminController {
 
     @PostMapping("/machines")
     public ResponseEntity<MachineCreateResponse> createMachine(MachineCreateRequest request) {
-        MachineCreateResponse response = machineService.create(request);
+        MachineCreateResponse response = machineService.createMachine(request);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/body_parts")
+    public ResponseEntity<BodyPartCreateResponse> createBodyPart(BodyPartCreateRequest request) {
+        BodyPartCreateResponse response = machineService.createBodyPart(request);
         return ResponseEntity.ok(response);
     }
 }

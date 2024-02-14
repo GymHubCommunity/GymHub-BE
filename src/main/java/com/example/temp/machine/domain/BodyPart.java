@@ -7,6 +7,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -24,4 +25,14 @@ public class BodyPart {
     @Column(nullable = false, unique = true)
     private String name;
 
+    @Builder
+    private BodyPart(String name) {
+        this.name = name;
+    }
+
+    public static BodyPart create(String name) {
+        return BodyPart.builder()
+            .name(name)
+            .build();
+    }
 }
