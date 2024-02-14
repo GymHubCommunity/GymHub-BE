@@ -25,7 +25,7 @@ import lombok.NoArgsConstructor;
 @Getter
 public class Member {
 
-    public static final String DEFAULT_PROFILE = "defaultprofile";
+    public static final String DEFAULT_PROFILE = "https://avatars.githubusercontent.com/u/87960006?v=4";
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -143,4 +143,3 @@ public class Member {
     }
 
 }
-
