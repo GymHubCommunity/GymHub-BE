@@ -20,6 +20,8 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class MachineService {
 
+    public static final int MAX_BODY_SIZE_PER_MACHINE = 1;
+
     private final MachineRepository machineRepository;
     private final BodyPartRepository bodyPartRepository;
 
@@ -32,7 +34,9 @@ public class MachineService {
             throw new ApiException(ErrorCode.MACHINE_MATCH_ONLY_ONE_BODY_PART);
         }
         List<BodyPart> bodyParts = bodyPartRepository.findAllByNameIn(request.bodyParts());
-        // 사이즈 안맞으면??
+        if (request.bodyParts().size() != bodyParts.size()) {
+            throw new ApiException(ErrorCode.MACHINE_MAPPED_INVALID_BODY_PART);
+        }
 
         Machine machine = Machine.create(request.name(), bodyParts);
         Machine savedMachine = machineRepository.save(machine);

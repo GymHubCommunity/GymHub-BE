@@ -100,6 +100,21 @@ class MachineServiceTest {
     }
 
     @Test
+    @DisplayName("머신은 존재하지 않는 신체 부위에 매핑할 수 없다.")
+    void machineMappedFailBodyPartNotFound() throws Exception {
+        // given
+        String name = "벤치프레스";
+        String notExistBodyPartValue = "등ㅇ";
+        MachineCreateRequest request = new MachineCreateRequest(name,
+            List.of(notExistBodyPartValue));
+
+        // when & then
+        assertThatThrownBy(() -> machineService.createMachine(request))
+            .isInstanceOf(ApiException.class)
+            .hasMessageContaining(ErrorCode.MACHINE_MAPPED_INVALID_BODY_PART.getMessage());
+    }
+
+    @Test
     @DisplayName("이미 등록된 운동기구를 또 등록할 수 없다.")
     void createMachineFailDuplicatedName() throws Exception {
         // given
