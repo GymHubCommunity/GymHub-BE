@@ -46,7 +46,8 @@ public enum ErrorCode {
 
     // 신체 부위 & 운동 기구
     BODY_PART_ALREADY_REGISTER(HttpStatus.BAD_REQUEST, "이미 등록된 신체 부위입니다"),
-    MACHINE_ALREADY_REGISTER(HttpStatus.BAD_REQUEST, "이미 등록된 운동 기구입니다");
+    MACHINE_ALREADY_REGISTER(HttpStatus.BAD_REQUEST, "이미 등록된 운동 기구입니다"),
+    MACHINE_MATCH_ONLY_ONE_BODY_PART(HttpStatus.BAD_REQUEST, "운동기구는 하나의 신체 부위에만 매핑할 수 있습니다");
 
     private final HttpStatus httpStatus;
     private final String message;

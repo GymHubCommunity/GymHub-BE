@@ -84,6 +84,22 @@ class MachineServiceTest {
     }
 
     @Test
+    @DisplayName("운동 기구는 한 개가 넘는 신체 부위에 매핑할 수 없다.")
+    void machineMappedOnlyOneBodyPart() throws Exception {
+        // given
+        String name = "벤치프레스";
+        BodyPart bodyPart1 = saveBodyPart("등");
+        BodyPart bodyPart2 = saveBodyPart("어깨");
+        MachineCreateRequest request = new MachineCreateRequest(name,
+            List.of(bodyPart1.getName(), bodyPart2.getName()));
+
+        // when & then
+        assertThatThrownBy(() -> machineService.createMachine(request))
+            .isInstanceOf(ApiException.class)
+            .hasMessageContaining(ErrorCode.MACHINE_MATCH_ONLY_ONE_BODY_PART.getMessage());
+    }
+
+    @Test
     @DisplayName("이미 등록된 운동기구를 또 등록할 수 없다.")
     void createMachineFailDuplicatedName() throws Exception {
         // given

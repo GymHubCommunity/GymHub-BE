@@ -28,6 +28,9 @@ public class MachineService {
         if (machineRepository.existsByName(request.name())) {
             throw new ApiException(ErrorCode.MACHINE_ALREADY_REGISTER);
         }
+        if (request.bodyParts().size() > MAX_BODY_SIZE_PER_MACHINE) {
+            throw new ApiException(ErrorCode.MACHINE_MATCH_ONLY_ONE_BODY_PART);
+        }
         List<BodyPart> bodyParts = bodyPartRepository.findAllByNameIn(request.bodyParts());
         // 사이즈 안맞으면??
 
