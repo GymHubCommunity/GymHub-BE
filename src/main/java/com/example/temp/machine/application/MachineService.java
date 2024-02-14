@@ -2,6 +2,8 @@ package com.example.temp.machine.application;
 
 import com.example.temp.admin.dto.request.BodyPartCreateRequest;
 import com.example.temp.admin.dto.request.MachineCreateRequest;
+import com.example.temp.common.exception.ApiException;
+import com.example.temp.common.exception.ErrorCode;
 import com.example.temp.machine.domain.BodyPart;
 import com.example.temp.machine.domain.BodyPartRepository;
 import com.example.temp.machine.domain.Machine;
@@ -33,6 +35,9 @@ public class MachineService {
 
     @Transactional
     public BodyPartCreateResponse createBodyPart(BodyPartCreateRequest request) {
+        if (bodyPartRepository.existsByName(request.name())) {
+            throw new ApiException(ErrorCode.BODY_PART_ALREADY_REGISTER);
+        }
         BodyPart bodyPart = BodyPart.create(request.name());
         BodyPart savedEntity = bodyPartRepository.save(bodyPart);
         return BodyPartCreateResponse.from(savedEntity);

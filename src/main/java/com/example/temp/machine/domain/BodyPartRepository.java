@@ -8,4 +8,6 @@ import org.springframework.stereotype.Repository;
 public interface BodyPartRepository extends JpaRepository<BodyPart, Long> {
 
     List<BodyPart> findAllByNameIn(List<String> names);
+
+    boolean existsByName(String name);
 }
