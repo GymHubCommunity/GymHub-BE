@@ -45,7 +45,8 @@ public enum ErrorCode {
     HASHTAG_PATTERN_MISMATCH(HttpStatus.BAD_REQUEST, "해시태그 형식에 맞지 않습니다."),
 
     // 신체 부위 & 운동 기구
-    BODY_PART_ALREADY_REGISTER(HttpStatus.BAD_REQUEST, "이미 등록된 신체 부위입니다");
+    BODY_PART_ALREADY_REGISTER(HttpStatus.BAD_REQUEST, "이미 등록된 신체 부위입니다"),
+    MACHINE_ALREADY_REGISTER(HttpStatus.BAD_REQUEST, "이미 등록된 운동 기구입니다");
 
     private final HttpStatus httpStatus;
     private final String message;

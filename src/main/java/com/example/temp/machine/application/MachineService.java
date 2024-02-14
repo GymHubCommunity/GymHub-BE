@@ -25,6 +25,9 @@ public class MachineService {
 
     @Transactional
     public MachineCreateResponse createMachine(MachineCreateRequest request) {
+        if (machineRepository.existsByName(request.name())) {
+            throw new ApiException(ErrorCode.MACHINE_ALREADY_REGISTER);
+        }
         List<BodyPart> bodyParts = bodyPartRepository.findAllByNameIn(request.bodyParts());
         // 사이즈 안맞으면??
 

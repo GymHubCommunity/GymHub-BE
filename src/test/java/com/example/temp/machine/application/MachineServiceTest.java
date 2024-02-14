@@ -1,6 +1,7 @@
 package com.example.temp.machine.application;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.example.temp.admin.dto.request.BodyPartCreateRequest;
 import com.example.temp.admin.dto.request.MachineCreateRequest;
@@ -80,6 +81,28 @@ class MachineServiceTest {
         assertThat(createdMachine.getName()).isEqualTo(name);
         assertThat(createdMachine.getMachineBodyParts()).hasSize(1);
         assertThat(createdMachine.getMachineBodyParts().get(0).getBodyPart().getName()).isEqualTo(bodyPart.getName());
+    }
+
+    @Test
+    @DisplayName("이미 등록된 운동기구를 또 등록할 수 없다.")
+    void createMachineFailDuplicatedName() throws Exception {
+        // given
+        String name = "벤치프레스";
+        saveMachine(name);
+        MachineCreateRequest request = new MachineCreateRequest(name, List.of("등"));
+
+        // when & then
+        assertThatThrownBy(() -> machineService.createMachine(request))
+            .isInstanceOf(ApiException.class)
+            .hasMessageContaining(ErrorCode.MACHINE_ALREADY_REGISTER.getMessage());
+    }
+
+    private Machine saveMachine(String name) {
+        Machine machine = Machine.builder()
+            .name(name)
+            .build();
+        em.persist(machine);
+        return machine;
     }
 
     private BodyPart saveBodyPart(String name) {
