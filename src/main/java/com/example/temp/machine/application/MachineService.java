@@ -1,12 +1,14 @@
 package com.example.temp.machine.application;
 
-import com.example.temp.machine.dto.request.MachineBulkCreateRequest;
-import com.example.temp.machine.dto.request.MachineCreateRequest;
 import com.example.temp.common.exception.ApiException;
 import com.example.temp.common.exception.ErrorCode;
 import com.example.temp.machine.domain.Machine;
 import com.example.temp.machine.domain.MachineRepository;
+import com.example.temp.machine.dto.request.MachineBulkCreateRequest;
+import com.example.temp.machine.dto.request.MachineCreateRequest;
+import com.example.temp.machine.dto.request.MachineSearchUsingBodyPartRequest;
 import com.example.temp.machine.dto.response.MachineCreateResponse;
+import com.example.temp.machine.dto.response.MachineInfo;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -41,4 +43,9 @@ public class MachineService {
             .toList();
     }
 
+    public List<MachineInfo> searchUsingBodyPart(MachineSearchUsingBodyPartRequest request) {
+        return machineRepository.findAllByBodyPart(request.bodyPart()).stream()
+            .map(MachineInfo::from)
+            .toList();
+    }
 }
