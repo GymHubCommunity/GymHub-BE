@@ -9,6 +9,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -29,4 +30,15 @@ public class MachineBodyPart {
     @ManyToOne(fetch = FetchType.LAZY)
     private BodyPart bodyPart;
 
+    @Builder
+    private MachineBodyPart(Machine machine, BodyPart bodyPart) {
+        this.machine = machine;
+        this.bodyPart = bodyPart;
+    }
+
+    public static MachineBodyPart create(BodyPart bodyPart) {
+        return MachineBodyPart.builder()
+            .bodyPart(bodyPart)
+            .build();
+    }
 }
