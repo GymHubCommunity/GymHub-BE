@@ -6,18 +6,20 @@ import lombok.Builder;
 
 @Builder
 public record PostElementResponse(
+    Long postId,
     WriterInfo writerInfo,
     String content,
     String imageUrl,
-    LocalDateTime createdAt
+    LocalDateTime registeredAt
 ) {
 
     public static PostElementResponse from(Post post) {
         return PostElementResponse.builder()
+            .postId(post.getId())
             .writerInfo(WriterInfo.from(post.getMember()))
             .content(post.getContent())
             .imageUrl(post.getImageUrl().orElse(null))
-            .createdAt(post.getCreatedAt())
+            .registeredAt(post.getRegisteredAt())
             .build();
     }
 }

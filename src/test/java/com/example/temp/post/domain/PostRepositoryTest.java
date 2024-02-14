@@ -11,8 +11,8 @@ import com.example.temp.member.domain.Member;
 import com.example.temp.member.domain.MemberRepository;
 import com.example.temp.member.domain.PrivacyPolicy;
 import com.example.temp.member.domain.nickname.Nickname;
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,7 +56,7 @@ class PostRepositoryTest {
         Pageable pageable = PageRequest.of(0, 10);
 
         // When
-        Page<Post> postsPage = postRepository.findByMemberInOrderByCreatedAtDesc(followMembers, pageable);
+        Page<Post> postsPage = postRepository.findByMemberInOrderByRegisteredAtDesc(followMembers, pageable);
         List<Post> posts = postsPage.getContent();
 
         // Then
@@ -79,7 +79,7 @@ class PostRepositoryTest {
 
         // When
         Pageable pageable = PageRequest.of(0, 10);
-        Page<Post> postsPage = postRepository.findByMemberInOrderByCreatedAtDesc(List.of(member1, member2), pageable);
+        Page<Post> postsPage = postRepository.findByMemberInOrderByRegisteredAtDesc(List.of(member1, member2), pageable);
 
         // Then
         assertThat(postsPage.getContent()).isEmpty();
@@ -101,7 +101,7 @@ class PostRepositoryTest {
 
         // When
         Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("createdAt").descending());
-        Page<Post> postsPage = postRepository.findByMemberInOrderByCreatedAtDesc(List.of(member1, member2), pageable);
+        Page<Post> postsPage = postRepository.findByMemberInOrderByRegisteredAtDesc(List.of(member1, member2), pageable);
 
         // Then
         assertThat(postsPage.getNumber()).isEqualTo(pageNumber);
@@ -126,7 +126,7 @@ class PostRepositoryTest {
         Pageable pageable = PageRequest.of(0, 10);
 
         // When
-        Page<Post> postsPage = postRepository.findByMemberInOrderByCreatedAtDesc(followMembers, pageable);
+        Page<Post> postsPage = postRepository.findByMemberInOrderByRegisteredAtDesc(followMembers, pageable);
         List<Post> posts = postsPage.getContent();
 
         // Then
@@ -155,6 +155,7 @@ class PostRepositoryTest {
             .content(Content.builder()
                 .value(content)
                 .build())
+            .registeredAt(LocalDateTime.now())
             .build();
 
         imageUrls.stream()

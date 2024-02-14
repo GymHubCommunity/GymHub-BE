@@ -250,6 +250,7 @@ class PostServiceTest {
             .content(Content.builder()
                 .value(content)
                 .build())
+            .registeredAt(LocalDateTime.now())
             .build();
 
         imageUrls.stream()
