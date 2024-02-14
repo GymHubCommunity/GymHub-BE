@@ -1,9 +1,8 @@
-package com.example.temp.admin.dto.request;
+package com.example.temp.machine.dto.request;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.example.temp.machine.domain.BodyPart;
-import com.example.temp.machine.dto.request.MachineCreateRequest;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

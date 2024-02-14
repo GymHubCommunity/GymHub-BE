@@ -22,7 +22,7 @@ public class MachineController {
     public ResponseEntity<MachineSearchUsingBodyPartResponse> searchUsingBodyPart(
         MachineSearchUsingBodyPartRequest request) {
         List<MachineInfo> machines = machineService.searchUsingBodyPart(request);
-        return ResponseEntity.ok(MachineSearchUsingBodyPartResponse.create(machines));
+        return ResponseEntity.ok(new MachineSearchUsingBodyPartResponse(machines));
     }
 
 }
