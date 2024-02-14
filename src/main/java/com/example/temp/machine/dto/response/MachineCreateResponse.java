@@ -6,6 +6,7 @@ import com.example.temp.machine.domain.MachineBodyPart;
 import java.util.List;
 
 public record MachineCreateResponse(
+    Long id,
     String name,
     List<String> bodyParts
 ) {
@@ -15,6 +16,6 @@ public record MachineCreateResponse(
             .map(MachineBodyPart::getBodyPart)
             .map(BodyPart::getName)
             .toList();
-        return new MachineCreateResponse(machine.getName(), bodyParts);
+        return new MachineCreateResponse(machine.getId(), machine.getName(), bodyParts);
     }
 }
