@@ -7,6 +7,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import java.util.Objects;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -16,17 +17,35 @@ import lombok.NoArgsConstructor;
 @Table(name = "hashtags")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
-public class HashTag extends BaseTimeEntity {
+public class Hashtag extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "hashtag_id")
     private Long id;
 
+    @Column(unique = true)
     private String name;
 
     @Builder
-    public HashTag(String name) {
+    public Hashtag(String name) {
         this.name = name;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || !(o instanceof Hashtag)) {
+            return false;
+        }
+        Hashtag hashTag = (Hashtag) o;
+        return Objects.equals(getName(), hashTag.getName());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getName());
     }
 }
