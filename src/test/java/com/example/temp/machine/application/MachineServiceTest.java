@@ -3,13 +3,16 @@ package com.example.temp.machine.application;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.example.temp.machine.domain.MachineBodyPart;
 import com.example.temp.machine.dto.request.MachineBulkCreateRequest;
 import com.example.temp.machine.dto.request.MachineCreateRequest;
 import com.example.temp.common.exception.ApiException;
 import com.example.temp.common.exception.ErrorCode;
 import com.example.temp.machine.domain.BodyPart;
 import com.example.temp.machine.domain.Machine;
+import com.example.temp.machine.dto.request.MachineSearchUsingBodyPartRequest;
 import com.example.temp.machine.dto.response.MachineCreateResponse;
+import com.example.temp.machine.dto.response.MachineInfo;
 import jakarta.persistence.EntityManager;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
@@ -99,6 +102,56 @@ class MachineServiceTest {
             .extracting("name")
             .contains("벤치프레스", "아령");
     }
+
+    @Test
+    @DisplayName("신체 부위에 해당하는 머신들을 가져온다.")
+    void searchUsingBodyPart() throws Exception {
+        // given
+        BodyPart keyword = BodyPart.SHOULDER;
+        Machine target = saveMachine("머신1", keyword);
+        saveMachine("머신2", BodyPart.CARDIO);
+        em.flush();
+        em.clear();
+
+        // when
+        List<MachineInfo> results = machineService.searchUsingBodyPart(
+            new MachineSearchUsingBodyPartRequest(keyword));
+
+        // then
+        assertThat(results).hasSize(1)
+            .extracting("name")
+            .contains(target.getName());
+    }
+
+    @Test
+    @DisplayName("신체 부위에 해당하는 머신이 없으면 비어있는 리스트를 반환한다.")
+    void searchUsingBodyPartThatResultIsEmpty() throws Exception {
+        // given
+        BodyPart keyword = BodyPart.BACK;
+        saveMachine("머신1", BodyPart.SHOULDER);
+        saveMachine("머신2", BodyPart.CARDIO);
+        em.flush();
+        em.clear();
+
+        // when
+        List<MachineInfo> results = machineService.searchUsingBodyPart(
+            new MachineSearchUsingBodyPartRequest(keyword));
+
+        // then
+        assertThat(results).isEmpty();
+    }
+
+    private Machine saveMachine(String name, BodyPart bodyPart) {
+        MachineBodyPart machineBodyPart = MachineBodyPart.create(bodyPart);
+        Machine machine = Machine.builder()
+            .name(name)
+            .machineBodyParts(List.of(machineBodyPart))
+            .build();
+        machineBodyPart.setMachine(machine);
+        em.persist(machine);
+        return machine;
+    }
+
 
     private Machine saveMachine(String name) {
         Machine machine = Machine.builder()
