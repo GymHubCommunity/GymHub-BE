@@ -1,8 +1,8 @@
 package com.example.temp.admin.dto.request;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
+import com.example.temp.machine.domain.BodyPart;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -14,7 +14,7 @@ class MachineCreateRequestTest {
     void createSuccess() throws Exception {
         // given
         String name = "name";
-        List<String> bodyParts = List.of("등", "배");
+        List<BodyPart> bodyParts = List.of(BodyPart.CARDIO, BodyPart.LEG);
 
         // when
         MachineCreateRequest result = new MachineCreateRequest(name, bodyParts);
@@ -22,7 +22,7 @@ class MachineCreateRequestTest {
         // then
         assertThat(result.name()).isEqualTo(name);
         assertThat(result.bodyParts()).hasSize(2)
-            .contains("등", "배");
+            .contains(BodyPart.CARDIO, BodyPart.LEG);
     }
 
 }

@@ -29,7 +29,6 @@ public class MachineBodyPart {
     @ManyToOne(fetch = FetchType.LAZY)
     private Machine machine;
 
-    @ManyToOne(fetch = FetchType.LAZY)
     private BodyPart bodyPart;
 
     @Builder

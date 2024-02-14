@@ -1,10 +1,8 @@
 package com.example.temp.admin.presentation;
 
-import com.example.temp.admin.dto.request.BodyPartCreateRequest;
 import com.example.temp.admin.dto.request.MachineBulkCreateRequest;
 import com.example.temp.admin.dto.request.MachineCreateRequest;
 import com.example.temp.machine.application.MachineService;
-import com.example.temp.machine.dto.response.BodyPartCreateResponse;
 import com.example.temp.machine.dto.response.MachineCreateResponse;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -29,12 +27,6 @@ public class AdminController {
     @PostMapping("/machines/bulk")
     public ResponseEntity<List<MachineCreateResponse>> createMachinesBulk(MachineBulkCreateRequest request) {
         List<MachineCreateResponse> response = machineService.createMachinesBulk(request);
-        return ResponseEntity.ok(response);
-    }
-
-    @PostMapping("/body_parts")
-    public ResponseEntity<BodyPartCreateResponse> createBodyPart(BodyPartCreateRequest request) {
-        BodyPartCreateResponse response = machineService.createBodyPart(request);
         return ResponseEntity.ok(response);
     }
 }

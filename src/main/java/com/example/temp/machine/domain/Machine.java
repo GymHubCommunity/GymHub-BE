@@ -42,7 +42,7 @@ public class Machine {
             .name(name)
             .machineBodyParts(createMachineBodyParts(bodyParts))
             .build();
-        machine.getMachineBodyParts().stream()
+        machine.getMachineBodyParts()
             .forEach(machineBodyPart -> machineBodyPart.setMachine(machine));
         return machine;
     }
