@@ -100,9 +100,8 @@ public class Member {
      * @throws ApiException MEMBER_ALREADY_REGISTER: 이미 가입이 완료된 회원이 해당 메서드를 호출했을 때 발생합니다.
      */
     public void init(Nickname nickname, String profileUrl) {
-        if (profileUrl == null) {
-            profileUrl = DEFAULT_PROFILE;
-        }
+        profileUrl = (profileUrl == null ? DEFAULT_PROFILE : profileUrl);
+
         if (registered) {
             throw new ApiException(ErrorCode.MEMBER_ALREADY_REGISTER);
         }
