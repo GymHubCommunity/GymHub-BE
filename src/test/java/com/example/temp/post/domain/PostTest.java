@@ -27,7 +27,7 @@ class PostTest {
         List<PostImage> postImages = getPostImages(List.of("image1", "image2"), post);
 
         // When
-        String imageUrl = post.getImageUrl();
+        String imageUrl = post.getImageUrl().orElse(null);
 
         // Then
         assertThat(imageUrl).isEqualTo("image1");

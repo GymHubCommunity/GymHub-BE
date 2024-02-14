@@ -19,6 +19,7 @@ import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -59,11 +60,11 @@ public class Post extends BaseTimeEntity {
         return content.getValue();
     }
 
-    public String getImageUrl() {
+    public Optional<String> getImageUrl() {
         return postImages.stream()
             .findFirst()
             .map(PostImage::getImage)
-            .map(Image::getUrl)
-            .orElse(null);
+            .map(Image::getUrl);
     }
+
 }
