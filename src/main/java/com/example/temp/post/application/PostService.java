@@ -51,7 +51,7 @@ public class PostService {
     public PagePostResponse findPostsFromFollowings(UserContext userContext, Pageable pageable) {
         Member member = findMember(userContext);
         List<Member> followings = findFollowingOf(member);
-        Page<Post> posts = postRepository.findByMemberInOrderByCreatedAtDesc(followings, pageable);
+        Page<Post> posts = postRepository.findByMemberInOrderByRegisteredAtDesc(followings, pageable);
         return PagePostResponse.from(posts);
     }
 
