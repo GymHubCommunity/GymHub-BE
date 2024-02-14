@@ -1,6 +1,7 @@
 package com.example.temp.machine.application;
 
 import com.example.temp.admin.dto.request.BodyPartCreateRequest;
+import com.example.temp.admin.dto.request.MachineBulkCreateRequest;
 import com.example.temp.admin.dto.request.MachineCreateRequest;
 import com.example.temp.common.exception.ApiException;
 import com.example.temp.common.exception.ErrorCode;
@@ -41,6 +42,13 @@ public class MachineService {
         Machine machine = Machine.create(request.name(), bodyParts);
         Machine savedMachine = machineRepository.save(machine);
         return MachineCreateResponse.from(savedMachine);
+    }
+
+    @Transactional
+    public List<MachineCreateResponse> createMachinesBulk(MachineBulkCreateRequest request) {
+        return request.machines().stream()
+            .map(this::createMachine)
+            .toList();
     }
 
     @Transactional

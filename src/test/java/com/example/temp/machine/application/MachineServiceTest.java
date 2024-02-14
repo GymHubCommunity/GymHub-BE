@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.example.temp.admin.dto.request.BodyPartCreateRequest;
+import com.example.temp.admin.dto.request.MachineBulkCreateRequest;
 import com.example.temp.admin.dto.request.MachineCreateRequest;
 import com.example.temp.common.exception.ApiException;
 import com.example.temp.common.exception.ErrorCode;
@@ -126,6 +127,27 @@ class MachineServiceTest {
         assertThatThrownBy(() -> machineService.createMachine(request))
             .isInstanceOf(ApiException.class)
             .hasMessageContaining(ErrorCode.MACHINE_ALREADY_REGISTER.getMessage());
+    }
+
+    @Test
+    @DisplayName("벌크로 운동기구를 등록한다.")
+    void createMachineBulk() throws Exception {
+        // given
+        BodyPart bodyPart = saveBodyPart("등");
+
+        MachineBulkCreateRequest request = new MachineBulkCreateRequest(List.of(
+            new MachineCreateRequest("벤치프레스", List.of(bodyPart.getName())),
+            new MachineCreateRequest("아령", List.of(bodyPart.getName()))
+        ));
+        // when
+        List<MachineCreateResponse> response = machineService.createMachinesBulk(request);
+
+        // then
+        em.flush();
+        em.clear();
+        assertThat(response).hasSize(2)
+            .extracting("name")
+            .contains("벤치프레스", "아령");
     }
 
     private Machine saveMachine(String name) {
