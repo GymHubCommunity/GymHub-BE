@@ -1,4 +1,4 @@
-package com.example.temp.admin.dto.request;
+package com.example.temp.machine.dto.request;
 
 import com.example.temp.machine.domain.BodyPart;
 import java.util.List;

@@ -2,6 +2,7 @@ package com.example.temp.admin.dto.request;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.example.temp.machine.dto.request.BodyPartCreateRequest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

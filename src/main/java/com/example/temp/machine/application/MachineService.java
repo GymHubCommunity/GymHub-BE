@@ -1,7 +1,7 @@
 package com.example.temp.machine.application;
 
-import com.example.temp.admin.dto.request.MachineBulkCreateRequest;
-import com.example.temp.admin.dto.request.MachineCreateRequest;
+import com.example.temp.machine.dto.request.MachineBulkCreateRequest;
+import com.example.temp.machine.dto.request.MachineCreateRequest;
 import com.example.temp.common.exception.ApiException;
 import com.example.temp.common.exception.ErrorCode;
 import com.example.temp.machine.domain.Machine;

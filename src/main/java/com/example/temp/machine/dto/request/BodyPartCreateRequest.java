@@ -1,4 +1,4 @@
-package com.example.temp.admin.dto.request;
+package com.example.temp.machine.dto.request;
 
 public record BodyPartCreateRequest(
     String name

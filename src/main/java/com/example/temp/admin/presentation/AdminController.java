@@ -1,7 +1,7 @@
 package com.example.temp.admin.presentation;
 
-import com.example.temp.admin.dto.request.MachineBulkCreateRequest;
-import com.example.temp.admin.dto.request.MachineCreateRequest;
+import com.example.temp.machine.dto.request.MachineBulkCreateRequest;
+import com.example.temp.machine.dto.request.MachineCreateRequest;
 import com.example.temp.machine.application.MachineService;
 import com.example.temp.machine.dto.response.MachineCreateResponse;
 import java.util.List;
@@ -29,4 +29,5 @@ public class AdminController {
         List<MachineCreateResponse> response = machineService.createMachinesBulk(request);
         return ResponseEntity.ok(response);
     }
+
 }
