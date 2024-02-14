@@ -21,7 +21,6 @@ import com.example.temp.post.dto.response.PostCreateResponse;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -57,7 +56,7 @@ public class PostService {
     }
 
     private void createPostImages(List<String> imageUrl, Post post) {
-        List<String> url = Optional.ofNullable(imageUrl).orElse(Collections.emptyList());
+        List<String> url = imageUrl != null ? imageUrl : Collections.emptyList();
         url.stream()
             .map(this::getImageByUrl)
             .map(this::createPostImage)
