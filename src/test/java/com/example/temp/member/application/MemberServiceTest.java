@@ -1,5 +1,6 @@
 package com.example.temp.member.application;
 
+import static com.example.temp.common.exception.ErrorCode.IMAGE_NOT_FOUND;
 import static com.example.temp.common.exception.ErrorCode.NICKNAME_DUPLICATED;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -13,6 +14,7 @@ import com.example.temp.common.entity.Email;
 import com.example.temp.common.exception.ApiException;
 import com.example.temp.common.exception.ErrorCode;
 import com.example.temp.follow.domain.Follow;
+import com.example.temp.image.domain.Image;
 import com.example.temp.member.domain.FollowStrategy;
 import com.example.temp.member.domain.Member;
 import com.example.temp.member.domain.PrivacyPolicy;
@@ -153,19 +155,52 @@ class MemberServiceTest {
     void registerSuccess() throws Exception {
         // given
         Member member = saveNotInitializedMember(Nickname.create("닉넴"));
-        String changedProfileUrl = "변경할프로필";
+        Image changedProfile = saveImage("https://changedurl");
         String changedNickname = "변경할닉네임";
 
         // when
         MemberInfo result = memberService.register(UserContext.from(member),
-            new MemberRegisterRequest(changedProfileUrl, changedNickname));
+            new MemberRegisterRequest(changedProfile.getUrl(), changedNickname));
 
         // then
         assertThat(member.getPrivacyPolicy()).isEqualTo(PrivacyPolicy.PUBLIC);
         assertThat(member.getFollowStrategy()).isEqualTo(FollowStrategy.EAGER);
         assertThat(result.registered()).isTrue();
         assertThat(result.id()).isEqualTo(member.getId());
-        assertThat(result.profileUrl()).isEqualTo(changedProfileUrl);
+        assertThat(result.profileUrl()).isEqualTo(changedProfile.getUrl());
+        assertThat(result.nickname()).isEqualTo(changedNickname);
+    }
+
+    @Test
+    @DisplayName("등록되지 않은 이미지로는 회원가입을 할 수 없다.")
+    void registerImageNotFound() throws Exception {
+        // given
+        Member member = saveNotInitializedMember(Nickname.create("닉넴"));
+        MemberRegisterRequest request = new MemberRegisterRequest("https://imageNotFound", "변경할닉네임");
+
+        // when & then
+        assertThatThrownBy(() -> memberService.register(UserContext.from(member), request))
+            .isInstanceOf(ApiException.class)
+            .hasMessageContaining(IMAGE_NOT_FOUND.getMessage());
+    }
+
+    @Test
+    @DisplayName("프로필 이미지를 입력하지 않고 회원가입하면 디폴트 이미지로 회원가입 처리가 된다.")
+    void registerSuccessNotProfileUrl() throws Exception {
+        // given
+        Member member = saveNotInitializedMember(Nickname.create("닉넴"));
+        String changedNickname = "변경할닉네임";
+
+        // when
+        MemberInfo result = memberService.register(UserContext.from(member),
+            new MemberRegisterRequest(null, changedNickname));
+
+        // then
+        assertThat(member.getPrivacyPolicy()).isEqualTo(PrivacyPolicy.PUBLIC);
+        assertThat(member.getFollowStrategy()).isEqualTo(FollowStrategy.EAGER);
+        assertThat(result.registered()).isTrue();
+        assertThat(result.id()).isEqualTo(member.getId());
+        assertThat(result.profileUrl()).isEqualTo(Member.DEFAULT_PROFILE);
         assertThat(result.nickname()).isEqualTo(changedNickname);
     }
 
@@ -189,12 +224,12 @@ class MemberServiceTest {
     void registerFailAlreadyRegistered() throws Exception {
         // given
         Member member = saveRegisteredMember(Nickname.create("닉넴"));
-        String changedProfileUrl = "변경하는프로필주소";
+        Image changedProfile = saveImage("https://changedurl");
         String changedNickname = "변경할닉네임";
 
         // when & then
         assertThatThrownBy(() -> memberService.register(UserContext.from(member),
-            new MemberRegisterRequest(changedProfileUrl, changedNickname)))
+            new MemberRegisterRequest(changedProfile.getUrl(), changedNickname)))
             .isInstanceOf(ApiException.class)
             .hasMessageContaining(ErrorCode.MEMBER_ALREADY_REGISTER.getMessage());
     }
@@ -261,6 +296,15 @@ class MemberServiceTest {
         assertThat(em.find(Follow.class, follow1.getId())).isNull();
         assertThat(em.find(Follow.class, follow2.getId())).isNull();
         assertThat(em.find(Follow.class, notRelatedFollow.getId())).isNotNull();
+    }
+
+
+    private Image saveImage(String url) {
+        Image image = Image.builder()
+            .url(url)
+            .build();
+        em.persist(image);
+        return image;
     }
 
     private Follow saveFollow(Member fromMember, Member toMember) {

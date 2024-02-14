@@ -8,6 +8,7 @@ import com.example.temp.member.domain.PrivacyPolicy;
 import com.example.temp.member.dto.request.MemberRegisterRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -25,7 +26,7 @@ public class MemberController {
 
     @PostMapping("/register")
     public ResponseEntity<MemberInfo> register(@Login UserContext userContext,
-        @RequestBody MemberRegisterRequest memberRegisterRequest) {
+        @RequestBody @Validated MemberRegisterRequest memberRegisterRequest) {
         MemberInfo response = memberService.register(userContext, memberRegisterRequest);
         return ResponseEntity.ok(response);
     }

@@ -4,6 +4,7 @@ import com.example.temp.auth.dto.response.MemberInfo;
 import com.example.temp.common.dto.UserContext;
 import com.example.temp.common.exception.ApiException;
 import com.example.temp.common.exception.ErrorCode;
+import com.example.temp.image.domain.ImageRepository;
 import com.example.temp.member.domain.Member;
 import com.example.temp.member.domain.MemberRepository;
 import com.example.temp.member.domain.PrivacyPolicy;
@@ -31,6 +32,7 @@ public class MemberService {
     private final MemberRepository memberRepository;
     private final NicknameGenerator nicknameGenerator;
     private final ApplicationEventPublisher eventPublisher;
+    private final ImageRepository imageRepository;
 
     /**
      * OAuthResponse과 nicknameGenerator에서 생성한 닉네임을 사용해 Member를 저장합니다. NicknameDuplicatedException 발생 시 최대 다섯 번 재시도를 하며
@@ -57,7 +59,7 @@ public class MemberService {
     }
 
     /**
-     * 가입 처리가 완료되지 않은 회원을 가입시킵니다.
+     * 가입 처리가 완료되지 않은 회원을 가입시킵니다. profile url을 입력하지 않은 회원은 디폴트 이미지를 사용해 저장합니다.
      *
      * @param userContext 로그인한 사용자의 정보
      * @param request     회원 가입에 필요한 정보
@@ -72,6 +74,9 @@ public class MemberService {
         Nickname nickname = Nickname.create(request.nickname());
         if (memberRepository.existsByNickname(nickname.getValue())) {
             throw new ApiException(ErrorCode.NICKNAME_DUPLICATED);
+        }
+        if (request.profileUrl() != null && !imageRepository.existsByUrl(request.profileUrl())) {
+            throw new ApiException(ErrorCode.IMAGE_NOT_FOUND);
         }
         member.init(nickname, request.profileUrl());
         return MemberInfo.of(member);

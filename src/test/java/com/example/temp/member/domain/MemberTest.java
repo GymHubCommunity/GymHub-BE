@@ -39,6 +39,27 @@ class MemberTest {
     }
 
     @Test
+    @DisplayName("회원을 초기화할 때, 프로필 이미지를 입력하지 않으면 디폴트 이미지를 가진 회원이 생성된다.")
+    void initNotProfileUrl() throws Exception {
+        // given
+        Nickname changedNickname = Nickname.create("변경할닉넴");
+        String changedProfileUrl = null;
+        Member member = Member.builder()
+            .registered(false)
+            .build();
+
+        // when
+        member.init(changedNickname, changedProfileUrl);
+
+        // then
+        assertThat(member.getProfileUrl()).isEqualTo(Member.DEFAULT_PROFILE);
+        assertThat(member.isRegistered()).isTrue();
+        assertThat(member.getPrivacyPolicy()).isEqualTo(PUBLIC);
+        assertThat(member.getFollowStrategy()).isEqualTo(EAGER);
+        assertThat(member.getNickname()).isEqualTo(changedNickname);
+    }
+
+    @Test
     @DisplayName("초기화되어있던 회원은 초기화할 수 없다")
     void initFailAlreadyInit() throws Exception {
         // given
