@@ -23,7 +23,7 @@ public class MachineService {
 
     @Transactional
     public MachineCreateResponse createMachine(MachineCreateRequest request) {
-        List<BodyPart> bodyParts = bodyPartRepository.findAllByNames(request.bodyParts());
+        List<BodyPart> bodyParts = bodyPartRepository.findAllByNameIn(request.bodyParts());
         // 사이즈 안맞으면??
 
         Machine machine = Machine.create(request.name(), bodyParts);

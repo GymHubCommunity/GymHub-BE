@@ -7,5 +7,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface BodyPartRepository extends JpaRepository<BodyPart, Long> {
 
-    List<BodyPart> findAllByNames(List<String> bodyParts);
+    List<BodyPart> findAllByNameIn(List<String> names);
 }
