@@ -61,7 +61,7 @@ class ImageServiceTest {
         // then
         validateUrl(presignedUrl);
         String path = presignedUrl.getPath().substring(1);
-        assertThat(imageRepository.existsByFileName(path)).isTrue();
+        assertThat(imageRepository.existsByUrl(path)).isTrue();
     }
 
     /**

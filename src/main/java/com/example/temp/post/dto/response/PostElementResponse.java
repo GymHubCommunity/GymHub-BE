@@ -16,7 +16,7 @@ public record PostElementResponse(
         return PostElementResponse.builder()
             .writerInfo(WriterInfo.from(post.getMember()))
             .content(post.getContent())
-            .imageUrl(post.getImageUrl())
+            .imageUrl(post.getImageUrl().orElse(null))
             .createdAt(post.getCreatedAt())
             .build();
     }
