@@ -14,7 +14,9 @@ public class MachineService {
 
     private final MachineRepository machineRepository;
 
+    @Transactional
     public MachineCreateResponse create(MachineCreateRequest request) {
+
         return null;
     }
 }
