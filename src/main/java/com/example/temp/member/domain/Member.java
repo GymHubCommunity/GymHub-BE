@@ -142,8 +142,5 @@ public class Member {
         this.deleted = true;
     }
 
-    public void initWithDefaultProfile(Nickname nickname) {
-        init(nickname, DEFAULT_PROFILE);
-    }
 }
 
