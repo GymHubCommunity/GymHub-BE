@@ -47,6 +47,9 @@ public class Post extends BaseTimeEntity {
     @OrderBy("createdAt ASC")
     private List<PostImage> postImages = new ArrayList<>();
 
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
+    private List<PostHashtag> postHashtags = new ArrayList<>();
+
     private LocalDateTime registeredAt;
 
     @Builder
