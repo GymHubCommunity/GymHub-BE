@@ -47,20 +47,24 @@ public class ImageService {
             PresignedPutObjectRequest presignedRequest = s3Presigner.presignPutObject(r ->
                 r.signatureDuration(Duration.ofSeconds(s3Properties.presignedExpires()))
                     .putObjectRequest(createPutObjectRequest(contentLength, fileName)));
-
-            return presignedRequest.url();
+            URL url = presignedRequest.url();
+            saveImageUrl(url);
+            return url;
         } catch (DataIntegrityViolationException e) {
             throw new ApiException(ErrorCode.IMAGE_NAME_DUPLICATED);
         }
 
     }
 
+    private void saveImageUrl(URL url) {
+        String imageUrl = url.getHost() + url.getPath();
+        imageRepository.save(Image.create(imageUrl));
+    }
+
     private String generateFileName(Long memberId) {
         String randomId = randomGenerator.generateWithSeed(String.valueOf(memberId), RANDOM_SIZE_ABOUT_ID);
         String uuid = randomGenerator.generate();
-        String fileName = randomId + DELIMITER + uuid;
-        imageRepository.save(Image.create(fileName));
-        return fileName;
+        return randomId + DELIMITER + uuid;
     }
 
     private void validateExtension(String extValue) {
