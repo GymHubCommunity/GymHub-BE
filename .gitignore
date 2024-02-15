@@ -3,6 +3,7 @@
 .DS_Store
 .localstack
 localstack
+keystore
 
 HELP.md
 .gradle
