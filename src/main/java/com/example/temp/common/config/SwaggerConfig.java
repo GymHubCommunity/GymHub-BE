@@ -9,12 +9,11 @@ import io.swagger.v3.oas.models.security.SecurityScheme;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @OpenAPIDefinition
 @Configuration
-@Profile("local")
-public class SwaggerConfig implements WebMvcConfigurer {
+@Profile({"local", "dev"})
+public class SwaggerConfig {
 
     @Bean
     public OpenAPI customOpenAPI() {
