@@ -60,8 +60,8 @@ class ImageServiceTest {
 
         // then
         validateUrl(presignedUrl);
-        String path = presignedUrl.getPath().substring(1);
-        assertThat(imageRepository.existsByUrl(path)).isTrue();
+        String imageUrl = presignedUrl.getHost() + presignedUrl.getPath();
+        assertThat(imageRepository.existsByUrl(imageUrl)).isTrue();
     }
 
     /**
@@ -122,5 +122,4 @@ class ImageServiceTest {
             .isInstanceOf(ApiException.class)
             .hasMessageContaining(ErrorCode.EXTENSION_NOT_SUPPORTED.getMessage());
     }
-
 }
