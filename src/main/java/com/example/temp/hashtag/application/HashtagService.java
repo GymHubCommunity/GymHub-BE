@@ -17,11 +17,11 @@ public class HashtagService {
     @Transactional
     public List<Hashtag> saveHashtag(List<String> names) {
         return names.stream()
-            .map(this::saveOrFind)
+            .map(this::findOrElseSave)
             .toList();
     }
 
-    private Hashtag saveOrFind(String name) {
+    private Hashtag findOrElseSave(String name) {
         return hashtagRepository
             .findByName(name)
             .orElseGet(() -> hashtagRepository.save(Hashtag.builder()
