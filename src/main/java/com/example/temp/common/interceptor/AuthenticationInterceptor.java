@@ -9,6 +9,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
+import software.amazon.awssdk.utils.StringUtils;
 
 @RequiredArgsConstructor
 @Component
@@ -22,6 +23,9 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
         throws Exception {
+        if (StringUtils.equals(request.getMethod(), "OPTIONS")) {
+            return true;
+        }
         String accessTokenBeforeProcessing = request.getHeader(HttpHeaders.AUTHORIZATION);
         if (accessTokenBeforeProcessing == null || !accessTokenBeforeProcessing.startsWith(BEARER)) {
             response.setStatus(HttpStatus.UNAUTHORIZED.value());
