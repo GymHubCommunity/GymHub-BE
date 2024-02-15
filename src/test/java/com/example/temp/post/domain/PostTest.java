@@ -48,7 +48,7 @@ class PostTest {
             .map(url -> {
                 Image image = Image.create(url);
                 PostImage postImage = PostImage.createPostImage(image);
-                postImage.addPost(post);
+                postImage.relate(post);
                 return postImage;
             })
             .toList();

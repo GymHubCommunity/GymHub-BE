@@ -8,11 +8,14 @@ import com.example.temp.common.exception.ApiException;
 import com.example.temp.follow.domain.Follow;
 import com.example.temp.follow.domain.FollowRepository;
 import com.example.temp.follow.domain.FollowStatus;
+import com.example.temp.hashtag.application.HashtagService;
+import com.example.temp.hashtag.domain.Hashtag;
 import com.example.temp.image.domain.Image;
 import com.example.temp.image.domain.ImageRepository;
 import com.example.temp.member.domain.Member;
 import com.example.temp.member.domain.MemberRepository;
 import com.example.temp.post.domain.Post;
+import com.example.temp.post.domain.PostHashtag;
 import com.example.temp.post.domain.PostImage;
 import com.example.temp.post.domain.PostRepository;
 import com.example.temp.post.dto.request.PostCreateRequest;
@@ -36,13 +39,17 @@ public class PostService {
     private final MemberRepository memberRepository;
     private final FollowRepository followRepository;
     private final ImageRepository imageRepository;
+    private final HashtagService hashtagService;
 
     @Transactional
     public PostCreateResponse createPost(UserContext userContext, PostCreateRequest postCreateRequest,
         LocalDateTime registeredAt) {
         Member member = findMember(userContext);
         Post post = postCreateRequest.toEntity(member, registeredAt);
-        createPostImages(postCreateRequest.imageUrl(), post);
+
+        createPostImages(postCreateRequest.imageUrls(), post);
+        createPostHashtags(postCreateRequest.hashTags(), post);
+
         Post savedPost = postRepository.save(post);
 
         return PostCreateResponse.from(savedPost);
@@ -55,6 +62,11 @@ public class PostService {
         return PagePostResponse.from(posts);
     }
 
+    private Member findMember(UserContext userContext) {
+        return memberRepository.findById(userContext.id())
+            .orElseThrow(() -> new ApiException(AUTHENTICATED_FAIL));
+    }
+
     private void createPostImages(List<String> imageUrl, Post post) {
         List<String> url = imageUrl != null ? imageUrl : Collections.emptyList();
         url.stream()
@@ -63,24 +75,26 @@ public class PostService {
             .forEach(postImage -> addPostImageToPost(postImage, post));
     }
 
-    private PostImage createPostImage(Image image) {
-        return PostImage.createPostImage(image);
-    }
-
-    private void addPostImageToPost(PostImage postImage, Post post) {
-        postImage.addPost(post);
-    }
-
-    private Member findMember(UserContext userContext) {
-        return memberRepository.findById(userContext.id())
-            .orElseThrow(() -> new ApiException(AUTHENTICATED_FAIL));
-    }
-
     private Image getImageByUrl(String imageUrl) {
         if (!imageRepository.existsByUrl(imageUrl)) {
             throw new ApiException(IMAGE_NOT_FOUND);
         }
         return imageRepository.findByUrl(imageUrl);
+    }
+
+    private PostImage createPostImage(Image image) {
+        return PostImage.createPostImage(image);
+    }
+
+    private void addPostImageToPost(PostImage postImage, Post post) {
+        postImage.relate(post);
+    }
+
+    private void createPostHashtags(List<String> hashtags, Post post) {
+        List<Hashtag> savedHashtags = hashtagService.saveHashtag(hashtags);
+        savedHashtags.stream()
+            .map(PostHashtag::createPostHashtag)
+            .forEach(postHashtag -> postHashtag.relatePost(post));
     }
 
     private List<Member> findFollowingOf(Member member) {

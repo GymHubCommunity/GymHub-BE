@@ -11,6 +11,8 @@ import com.example.temp.common.exception.ApiException;
 import com.example.temp.follow.domain.Follow;
 import com.example.temp.follow.domain.FollowRepository;
 import com.example.temp.follow.domain.FollowStatus;
+import com.example.temp.hashtag.domain.Hashtag;
+import com.example.temp.hashtag.domain.HashtagRepository;
 import com.example.temp.image.domain.Image;
 import com.example.temp.image.domain.ImageRepository;
 import com.example.temp.member.domain.FollowStrategy;
@@ -28,6 +30,7 @@ import com.example.temp.post.dto.response.PostCreateResponse;
 import com.example.temp.post.dto.response.PostElementResponse;
 import com.example.temp.post.dto.response.WriterInfo;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -52,6 +55,9 @@ class PostServiceTest {
 
     @Autowired
     private ImageRepository imageRepository;
+
+    @Autowired
+    private HashtagRepository hashtagRepository;
 
     @Autowired
     private FollowRepository followRepository;
@@ -169,7 +175,10 @@ class PostServiceTest {
         UserContext userContext = UserContext.from(member);
         List<String> imageUrls = List.of("imageUrl1", "ImageUrl2");
         List<String> savedImageUrls = saveImagesAndGetUrls(imageUrls);
-        PostCreateRequest request = new PostCreateRequest("content1", savedImageUrls);
+        List<String> hashtags = List.of("#hashtag1", "#hashtag2");
+        List<String> savedHashtags = saveHashtagAndGet(hashtags);
+
+        PostCreateRequest request = new PostCreateRequest("content1", savedImageUrls, savedHashtags);
         LocalDateTime registeredAt = LocalDateTime.now();
 
         //when
@@ -182,11 +191,6 @@ class PostServiceTest {
         assertThat(response.postImages()).containsExactlyElementsOf(imageUrls);
     }
 
-    private List<String> saveImagesAndGetUrls(List<String> imageUrls) {
-        imageUrls.forEach(this::saveImage);
-        return imageUrls;
-    }
-
     @DisplayName("이미지 url로 해당 이미지를 찾지 못하면 예외를 발생시킨다.")
     @Test
     void createPostWithNonexistentImage() {
@@ -196,7 +200,7 @@ class PostServiceTest {
 
         List<String> imageUrls = List.of("nonexistent_image");
 
-        PostCreateRequest request = new PostCreateRequest("content1", imageUrls);
+        PostCreateRequest request = new PostCreateRequest("content1", imageUrls, new ArrayList<>());
 
         // When & Then
         assertThatThrownBy(() -> postService.createPost(userContext, request, LocalDateTime.now()))
@@ -210,7 +214,7 @@ class PostServiceTest {
         //given
         Member member = saveMember("email@test.com", "nick");
         UserContext userContext = UserContext.from(member);
-        PostCreateRequest postCreateRequest = new PostCreateRequest("content", null);
+        PostCreateRequest postCreateRequest = new PostCreateRequest("content", null, new ArrayList<>());
 
         //when
         PostCreateResponse postCreateResponse = postService.createPost(userContext, postCreateRequest,
@@ -257,14 +261,31 @@ class PostServiceTest {
             .map(url -> imageRepository.findByUrl(url))
             .forEach(image -> {
                 PostImage postImage = PostImage.createPostImage(image);
-                postImage.addPost(post);
+                postImage.relate(post);
 
             });
         postRepository.save(post);
     }
 
+    private List<String> saveImagesAndGetUrls(List<String> imageUrls) {
+        imageUrls.forEach(this::saveImage);
+        return imageUrls;
+    }
+
+    private List<String> saveHashtagAndGet(List<String> names) {
+        names.forEach(this::saveHashtag);
+        return names;
+    }
+
     private void saveImage(String url) {
         Image image = Image.create(url);
         imageRepository.save(image);
+    }
+
+    private void saveHashtag(String name) {
+        Hashtag hashtag = Hashtag.builder()
+            .name(name)
+            .build();
+        hashtagRepository.save(hashtag);
     }
 }

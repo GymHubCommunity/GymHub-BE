@@ -163,7 +163,7 @@ class PostRepositoryTest {
             .forEach(image -> {
                 image.use();
                 PostImage postImage = PostImage.createPostImage(image);
-                postImage.addPost(post);
+                postImage.relate(post);
 
             });
         postRepository.save(post);

@@ -1,7 +1,6 @@
 package com.example.temp.post.domain;
 
-import com.example.temp.common.entity.BaseTimeEntity;
-import com.example.temp.image.domain.Image;
+import com.example.temp.hashtag.domain.Hashtag;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -10,7 +9,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -18,42 +16,41 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "post_images")
+@Table(name = "post_hashtags")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
-public class PostImage extends BaseTimeEntity {
+public class PostHashtag {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "post_image_id")
+    @Column(name = "post_hashtag_id")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id")
     private Post post;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "image_id")
-    private Image image;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "hashtag_id")
+    private Hashtag hashtag;
 
     @Builder
-    private PostImage(Image image) {
-        this.image = image;
+    private PostHashtag(Hashtag hashtag) {
+        this.hashtag = hashtag;
     }
 
-    public static PostImage createPostImage(Image image) {
-        image.use();
-        return PostImage.builder()
-            .image(image)
+    public static PostHashtag createPostHashtag(Hashtag hashtag) {
+        return PostHashtag.builder()
+            .hashtag(hashtag)
             .build();
     }
 
-    //== 연관관계 편의 메소드 ==//
-    public void relate(Post post) {
+    //== 연관관계 편의 메서드 ==//
+    public void relatePost(Post post) {
         if (this.post != null) {
-            this.post.getPostImages().remove(this);
+            this.post.getPostHashtags().remove(this);
         }
         this.post = post;
-        post.getPostImages().add(this);
+        post.getPostHashtags().add(this);
     }
 }
