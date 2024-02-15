@@ -3,9 +3,13 @@ package com.example.temp.hashtag.domain;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.example.temp.common.exception.ApiException;
+import com.example.temp.common.exception.ErrorCode;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 class HashtagTest {
 
@@ -26,25 +30,22 @@ class HashtagTest {
     }
 
     @DisplayName("해시태그는 반드시 #으로 시작해야 한다.")
-    @Test
-    void validateNotPassCase1() {
+    @ParameterizedTest
+    @ValueSource(strings = {"해시태그", "hashtag", "hash#tag", "hashtag#"})
+    void validateNotPassCase1(String hashtag) {
         //when, then
-        assertThatThrownBy(() -> createHashtag("해시태그"))
-            .isInstanceOf(IllegalArgumentException.class)
-            .hasMessage("지원하지 않는 해시태그 형식입니다.");
+        assertThatThrownBy(() -> createHashtag(hashtag))
+            .isInstanceOf(ApiException.class)
+            .hasMessage(ErrorCode.HASHTAG_PATTERN_MISMATCH.getMessage());
     }
 
     @DisplayName("해시태그에는 +, -, @ 같은 특수문자는 들어올 수 없다.")
-    @Test
-    void validateNotPassCase2() {
-        //when, then
-        assertThatThrownBy(() -> createHashtag("#해시태그+"))
-            .isInstanceOf(IllegalArgumentException.class)
-            .hasMessage("지원하지 않는 해시태그 형식입니다.");
-
-        assertThatThrownBy(() -> createHashtag("#해%시태그@"))
-            .isInstanceOf(IllegalArgumentException.class)
-            .hasMessage("지원하지 않는 해시태그 형식입니다.");
+    @ParameterizedTest
+    @ValueSource(strings = {"#해시태그+", "#해%시태그@", "@@@", "ahsh2@haah"})
+    void validateNotPassCase2(String hashtag) {
+        assertThatThrownBy(() -> createHashtag(hashtag))
+            .isInstanceOf(ApiException.class)
+            .hasMessage(ErrorCode.HASHTAG_PATTERN_MISMATCH.getMessage());
     }
 
     private Hashtag createHashtag(String name) {
