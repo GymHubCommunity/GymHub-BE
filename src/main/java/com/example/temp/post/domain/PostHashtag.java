@@ -46,7 +46,7 @@ public class PostHashtag {
     }
 
     //== 연관관계 편의 메서드 ==//
-    public void addPost(Post post) {
+    public void relatePost(Post post) {
         if (this.post != null) {
             this.post.getPostHashtags().remove(this);
         }

@@ -261,7 +261,7 @@ class PostServiceTest {
             .map(url -> imageRepository.findByUrl(url))
             .forEach(image -> {
                 PostImage postImage = PostImage.createPostImage(image);
-                postImage.addPost(post);
+                postImage.relate(post);
 
             });
         postRepository.save(post);

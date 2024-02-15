@@ -87,14 +87,14 @@ public class PostService {
     }
 
     private void addPostImageToPost(PostImage postImage, Post post) {
-        postImage.addPost(post);
+        postImage.relate(post);
     }
 
     private void createPostHashtags(List<String> hashtags, Post post) {
         List<Hashtag> savedHashtags = hashtagService.saveHashtag(hashtags);
         savedHashtags.stream()
             .map(PostHashtag::createPostHashtag)
-            .forEach(postHashtag -> postHashtag.addPost(post));
+            .forEach(postHashtag -> postHashtag.relatePost(post));
     }
 
     private List<Member> findFollowingOf(Member member) {

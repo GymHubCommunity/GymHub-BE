@@ -49,7 +49,7 @@ public class PostImage extends BaseTimeEntity {
     }
 
     //== 연관관계 편의 메소드 ==//
-    public void addPost(Post post) {
+    public void relate(Post post) {
         if (this.post != null) {
             this.post.getPostImages().remove(this);
         }
