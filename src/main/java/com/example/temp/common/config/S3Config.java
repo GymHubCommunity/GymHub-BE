@@ -34,7 +34,7 @@ public class S3Config {
      * 로컬 환경에서는 S3를 에뮬레이팅합니다. 해당 환경에서는 Credentials가 필요 없어 test, test라는 값을 넣어 사용합니다.
      */
     @Bean
-    @Profile("local")
+    @Profile("!prod")
     @SuppressWarnings("java:S6437")
     public AwsCredentialsProvider localAwsCredentialsProvider() {
         return StaticCredentialsProvider.create(AwsBasicCredentials.create("test", "test"));
@@ -44,7 +44,7 @@ public class S3Config {
      * 로컬 환경에서 S3를 대신해서 LocalStack을 사용중입니다. LocalStack은 s3와 경로가 다르다는 문제가 있어 별도의 프로필로 관리합니다.
      */
     @Bean
-    @Profile("local")
+    @Profile("!prod")
     public S3Configuration localS3Configuration() {
         return S3Configuration.builder()
             .pathStyleAccessEnabled(true)
@@ -52,13 +52,13 @@ public class S3Config {
     }
 
     @Bean
-    @Profile("!local")
+    @Profile("prod")
     public AwsCredentialsProvider prodAwsCredentialsProvider() {
         return InstanceProfileCredentialsProvider.create();
     }
 
     @Bean
-    @Profile("!local")
+    @Profile("prod")
     public S3Configuration prodS3Configuration() {
         return S3Configuration.builder()
             .build();
