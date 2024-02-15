@@ -19,7 +19,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "hashtags")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
-@EqualsAndHashCode(callSuper = true)
+@EqualsAndHashCode
 public class Hashtag extends BaseTimeEntity {
 
     private static final String HASHTAG_REGEX = "^#[\\w가-힣]+$";
