@@ -35,7 +35,7 @@ public class Hashtag extends BaseTimeEntity {
     }
 
     private void validate(String name) {
-        if (name.matches("^#[\\w가-힣]+$")) {
+        if (!name.matches("^#[\\w가-힣]+$")) {
             throw new IllegalArgumentException("지원하지 않는 해시태그 형식입니다.");
         }
     }
