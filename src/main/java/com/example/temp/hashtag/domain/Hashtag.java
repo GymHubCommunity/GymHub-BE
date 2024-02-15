@@ -30,6 +30,13 @@ public class Hashtag extends BaseTimeEntity {
 
     @Builder
     public Hashtag(String name) {
+        validate(name);
         this.name = name;
+    }
+
+    private void validate(String name) {
+        if (name.matches("^#[\\w가-힣]+$")) {
+            throw new IllegalArgumentException("지원하지 않는 해시태그 형식입니다.");
+        }
     }
 }
