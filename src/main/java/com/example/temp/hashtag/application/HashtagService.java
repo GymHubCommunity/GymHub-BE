@@ -2,7 +2,6 @@ package com.example.temp.hashtag.application;
 
 import com.example.temp.hashtag.domain.Hashtag;
 import com.example.temp.hashtag.domain.HashtagRepository;
-import com.example.temp.post.domain.Post;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -16,7 +15,7 @@ public class HashtagService {
     private final HashtagRepository hashtagRepository;
 
     @Transactional
-    public List<Hashtag> saveHashtag(List<String> names, Post post) {
+    public List<Hashtag> saveHashtag(List<String> names) {
         return names.stream()
             .map(this::saveOrFind)
             .toList();
