@@ -10,7 +10,9 @@ import java.util.List;
 public record PostCreateRequest(
     String content,
     @Nullable
-    List<String> imageUrl
+    List<String> imageUrls,
+    @Nullable
+    List<String> hashTags
 ) {
 
     public Post toEntity(Member member, LocalDateTime registeredAt) {
