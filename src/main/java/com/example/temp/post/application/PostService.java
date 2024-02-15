@@ -8,11 +8,14 @@ import com.example.temp.common.exception.ApiException;
 import com.example.temp.follow.domain.Follow;
 import com.example.temp.follow.domain.FollowRepository;
 import com.example.temp.follow.domain.FollowStatus;
+import com.example.temp.hashtag.application.HashtagService;
+import com.example.temp.hashtag.domain.Hashtag;
 import com.example.temp.image.domain.Image;
 import com.example.temp.image.domain.ImageRepository;
 import com.example.temp.member.domain.Member;
 import com.example.temp.member.domain.MemberRepository;
 import com.example.temp.post.domain.Post;
+import com.example.temp.post.domain.PostHashtag;
 import com.example.temp.post.domain.PostImage;
 import com.example.temp.post.domain.PostRepository;
 import com.example.temp.post.dto.request.PostCreateRequest;
@@ -36,16 +39,25 @@ public class PostService {
     private final MemberRepository memberRepository;
     private final FollowRepository followRepository;
     private final ImageRepository imageRepository;
+    private final HashtagService hashtagService;
 
     @Transactional
     public PostCreateResponse createPost(UserContext userContext, PostCreateRequest postCreateRequest,
         LocalDateTime registeredAt) {
         Member member = findMember(userContext);
         Post post = postCreateRequest.toEntity(member, registeredAt);
-        createPostImages(postCreateRequest.imageUrl(), post);
+        createPostImages(postCreateRequest.imageUrls(), post);
+        createPostHashtags(postCreateRequest.hashTags(), post);
         Post savedPost = postRepository.save(post);
 
         return PostCreateResponse.from(savedPost);
+    }
+
+    private void createPostHashtags(List<String> hashtags, Post post) {
+        List<Hashtag> savedHashtags = hashtagService.saveHashtag(hashtags, post);
+        savedHashtags.stream()
+            .map(PostHashtag::createPostHashtag)
+            .forEach(postHashtag -> postHashtag.addPost(post));
     }
 
     public PagePostResponse findPostsFromFollowings(UserContext userContext, Pageable pageable) {
