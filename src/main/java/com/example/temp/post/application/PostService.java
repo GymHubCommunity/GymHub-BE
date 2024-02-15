@@ -46,18 +46,13 @@ public class PostService {
         LocalDateTime registeredAt) {
         Member member = findMember(userContext);
         Post post = postCreateRequest.toEntity(member, registeredAt);
+
         createPostImages(postCreateRequest.imageUrls(), post);
         createPostHashtags(postCreateRequest.hashTags(), post);
+
         Post savedPost = postRepository.save(post);
 
         return PostCreateResponse.from(savedPost);
-    }
-
-    private void createPostHashtags(List<String> hashtags, Post post) {
-        List<Hashtag> savedHashtags = hashtagService.saveHashtag(hashtags, post);
-        savedHashtags.stream()
-            .map(PostHashtag::createPostHashtag)
-            .forEach(postHashtag -> postHashtag.addPost(post));
     }
 
     public PagePostResponse findPostsFromFollowings(UserContext userContext, Pageable pageable) {
@@ -65,6 +60,11 @@ public class PostService {
         List<Member> followings = findFollowingOf(member);
         Page<Post> posts = postRepository.findByMemberInOrderByRegisteredAtDesc(followings, pageable);
         return PagePostResponse.from(posts);
+    }
+
+    private Member findMember(UserContext userContext) {
+        return memberRepository.findById(userContext.id())
+            .orElseThrow(() -> new ApiException(AUTHENTICATED_FAIL));
     }
 
     private void createPostImages(List<String> imageUrl, Post post) {
@@ -75,6 +75,13 @@ public class PostService {
             .forEach(postImage -> addPostImageToPost(postImage, post));
     }
 
+    private Image getImageByUrl(String imageUrl) {
+        if (!imageRepository.existsByUrl(imageUrl)) {
+            throw new ApiException(IMAGE_NOT_FOUND);
+        }
+        return imageRepository.findByUrl(imageUrl);
+    }
+
     private PostImage createPostImage(Image image) {
         return PostImage.createPostImage(image);
     }
@@ -83,16 +90,11 @@ public class PostService {
         postImage.addPost(post);
     }
 
-    private Member findMember(UserContext userContext) {
-        return memberRepository.findById(userContext.id())
-            .orElseThrow(() -> new ApiException(AUTHENTICATED_FAIL));
-    }
-
-    private Image getImageByUrl(String imageUrl) {
-        if (!imageRepository.existsByUrl(imageUrl)) {
-            throw new ApiException(IMAGE_NOT_FOUND);
-        }
-        return imageRepository.findByUrl(imageUrl);
+    private void createPostHashtags(List<String> hashtags, Post post) {
+        List<Hashtag> savedHashtags = hashtagService.saveHashtag(hashtags);
+        savedHashtags.stream()
+            .map(PostHashtag::createPostHashtag)
+            .forEach(postHashtag -> postHashtag.addPost(post));
     }
 
     private List<Member> findFollowingOf(Member member) {
