@@ -35,8 +35,22 @@ public class PostHashtag {
     private Hashtag hashtag;
 
     @Builder
-    private PostHashtag(Post post, Hashtag hashtag) {
-        this.post = post;
+    private PostHashtag(Hashtag hashtag) {
         this.hashtag = hashtag;
+    }
+
+    public static PostHashtag createPostHashtag(Hashtag hashtag) {
+        return PostHashtag.builder()
+            .hashtag(hashtag)
+            .build();
+    }
+
+    //== 연관관계 편의 메서드 ==//
+    public void addPost(Post post) {
+        if (this.post != null) {
+            this.post.getPostHashtags().remove(this);
+        }
+        this.post = post;
+        post.getPostHashtags().add(this);
     }
 }
