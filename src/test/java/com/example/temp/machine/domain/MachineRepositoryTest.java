@@ -63,7 +63,7 @@ class MachineRepositoryTest {
             .name(name)
             .machineBodyParts(List.of(machineBodyPart))
             .build();
-        machineBodyPart.setMachine(machine);
+        machineBodyPart.relate(machine);
 
         machineRepository.save(machine);
         return machine;

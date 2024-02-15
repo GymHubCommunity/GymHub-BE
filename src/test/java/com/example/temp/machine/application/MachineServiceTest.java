@@ -145,9 +145,8 @@ class MachineServiceTest {
         MachineBodyPart machineBodyPart = MachineBodyPart.create(bodyPart);
         Machine machine = Machine.builder()
             .name(name)
-            .machineBodyParts(List.of(machineBodyPart))
             .build();
-        machineBodyPart.setMachine(machine);
+        machineBodyPart.relate(machine);
         em.persist(machine);
         return machine;
     }

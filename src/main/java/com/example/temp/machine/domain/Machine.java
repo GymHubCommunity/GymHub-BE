@@ -8,6 +8,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -29,21 +30,23 @@ public class Machine {
     private String name;
 
     @OneToMany(mappedBy = "machine", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<MachineBodyPart> machineBodyParts;
+    private List<MachineBodyPart> machineBodyParts = new ArrayList<>();
 
     @Builder
     private Machine(String name, List<MachineBodyPart> machineBodyParts) {
         this.name = name;
-        this.machineBodyParts = machineBodyParts;
+        if (machineBodyParts != null) {
+            this.machineBodyParts = new ArrayList<>();
+            this.machineBodyParts.addAll(machineBodyParts);
+        }
     }
 
     public static Machine create(String name, List<BodyPart> bodyParts) {
         Machine machine = Machine.builder()
             .name(name)
-            .machineBodyParts(createMachineBodyParts(bodyParts))
             .build();
-        machine.getMachineBodyParts()
-            .forEach(machineBodyPart -> machineBodyPart.setMachine(machine));
+        createMachineBodyParts(bodyParts)
+            .forEach(machineBodyPart -> machineBodyPart.relate(machine));
         return machine;
     }
 

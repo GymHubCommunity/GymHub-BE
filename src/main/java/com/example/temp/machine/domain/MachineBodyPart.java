@@ -25,7 +25,6 @@ public class MachineBodyPart {
     @Column(name = "machine_bodypart_id")
     private Long id;
 
-    @Setter
     @ManyToOne(fetch = FetchType.LAZY)
     private Machine machine;
 
@@ -41,5 +40,16 @@ public class MachineBodyPart {
         return MachineBodyPart.builder()
             .bodyPart(bodyPart)
             .build();
+    }
+
+    /**
+     * 연관관계 편의 메서드
+     */
+    public void relate(Machine machine) {
+        if (this.machine != null) {
+            this.machine.getMachineBodyParts().remove(this);
+        }
+        this.machine = machine;
+        this.machine.getMachineBodyParts().add(this);
     }
 }
