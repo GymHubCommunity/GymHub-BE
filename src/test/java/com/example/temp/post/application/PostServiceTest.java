@@ -27,11 +27,14 @@ import com.example.temp.post.domain.PostRepository;
 import com.example.temp.post.dto.request.PostCreateRequest;
 import com.example.temp.post.dto.response.PagePostResponse;
 import com.example.temp.post.dto.response.PostCreateResponse;
+import com.example.temp.post.dto.response.PostDetailResponse;
 import com.example.temp.post.dto.response.PostElementResponse;
 import com.example.temp.post.dto.response.WriterInfo;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -226,6 +229,47 @@ class PostServiceTest {
                 assertThat(response.content()).isEqualTo("content");
                 assertThat(response.postImages()).isEmpty();
             });
+    }
+
+    @DisplayName("게시글아이디로 정상적으로 조회할 수 있다.")
+    @Test
+    void findPostById() {
+        // Given
+        Member member = saveMember("email@test.com", "nick");
+        UserContext userContext = UserContext.from(member);
+        List<String> imageUrls = List.of("imageUrl1", "imageUrl2");
+        List<String> savedImageUrls = saveImagesAndGetUrls(imageUrls);
+        List<String> hashtags = List.of("#hashtag1", "#hashtag2");
+        List<String> savedHashtags = saveHashtagAndGet(hashtags);
+        PostCreateRequest request = new PostCreateRequest("content1", savedImageUrls, savedHashtags);
+        PostCreateResponse savedPost = postService.createPost(userContext, request, LocalDateTime.now());
+
+        // When
+        PostDetailResponse response = postService.findPost(savedPost.postId(), userContext);
+
+        // Then
+        assertThat(response).isNotNull()
+            .extracting("postId", "writerInfo", "content", "imageUrls", "hashtags")
+            .containsExactly(savedPost.postId(), WriterInfo.from(member), "content1", savedImageUrls, savedHashtags);
+    }
+
+    @DisplayName("이미지와 해시태그가 없는 게시글을 조회할 수 있다.")
+    @Test
+    void findPostNotContainsImageAndHashtag() {
+        // Given
+        Member member = saveMember("email@test.com", "nick");
+        UserContext userContext = UserContext.from(member);
+        List<String> emptyList = Collections.emptyList();
+        PostCreateRequest request = new PostCreateRequest("content1", emptyList, emptyList);
+        PostCreateResponse savedPost = postService.createPost(userContext, request, LocalDateTime.now());
+
+        // When
+        PostDetailResponse response = postService.findPost(savedPost.postId(), userContext);
+
+        // Then
+        assertThat(response).isNotNull()
+            .extracting("postId", "writerInfo", "content", "imageUrls", "hashtags")
+            .containsExactly(savedPost.postId(), WriterInfo.from(member), "content1", emptyList, emptyList);
     }
 
     private Member saveMember(String email, String nickname) {
