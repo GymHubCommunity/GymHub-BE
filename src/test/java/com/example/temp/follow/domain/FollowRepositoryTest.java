@@ -16,6 +16,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
 import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
@@ -131,6 +133,66 @@ class FollowRepositoryTest {
         // then
         assertThat(result).hasSize(2)
             .contains(follow1, follow2);
+    }
+
+    @Test
+    @DisplayName("fromId와 status가 일치하는 Follow 페이지 목록을 조회한다")
+    void findAllByFromIdAndStatusUsingPage() throws Exception {
+        // given
+        Member fromMember = saveMember();
+        Member toMember1 = saveMember();
+        Member toMember2 = saveMember();
+        FollowStatus targetStatus = FollowStatus.PENDING;
+        Follow follow1 = saveFollow(fromMember, toMember1, targetStatus);
+        Follow follow2 = saveFollow(fromMember, toMember2, targetStatus);
+
+        // when
+        Slice<Follow> result = followRepository.findAllByFromIdAndStatus(fromMember.getId(), targetStatus,
+            PageRequest.of(0, 1));
+
+        // then
+        assertThat(result).hasSize(1)
+            .contains(follow1);
+    }
+
+    @Test
+    @DisplayName("페이지 요청 시, 일치하는 fromId와 status가 없으면 비어있는 결과를 반환한다.")
+    void findAllByFromIdAndStatusUsingPageWhenEmpty() throws Exception {
+        // given
+        Member fromMember = saveMember();
+        Member toMember = saveMember();
+        Member target = saveMember();
+        FollowStatus targetStatus = FollowStatus.PENDING;
+        saveFollow(fromMember, toMember, targetStatus);
+
+        // when
+        Slice<Follow> result = followRepository.findAllByFromIdAndStatus(target.getId(), targetStatus,
+            PageRequest.of(0, 10));
+
+        // then
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    @DisplayName("팔로우 페이지 요청시, 페이지 구간에 포함되지 않은 값은 결과에 포함되지 않는다.")
+    void findAllByFromIdAndStatusUsingPageNotIn() throws Exception {
+        // given
+        Member fromMember = saveMember();
+        Member toMember1 = saveMember();
+        Member toMember2 = saveMember();
+        Member toMember3 = saveMember();
+        FollowStatus targetStatus = FollowStatus.PENDING;
+        saveFollow(fromMember, toMember1, targetStatus);
+        saveFollow(fromMember, toMember2, targetStatus);
+        Follow follow = saveFollow(fromMember, toMember3, targetStatus);
+
+        // when
+        Slice<Follow> result = followRepository.findAllByFromIdAndStatus(fromMember.getId(), targetStatus,
+            PageRequest.of(1, 2));
+
+        // then
+        assertThat(result).hasSize(1)
+            .containsExactly(follow);
     }
 
     @Test

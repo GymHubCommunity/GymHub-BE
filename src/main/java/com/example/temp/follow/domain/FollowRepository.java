@@ -2,6 +2,8 @@ package com.example.temp.follow.domain;
 
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -14,6 +16,10 @@ public interface FollowRepository extends JpaRepository<Follow, Long> {
 
     @Query("SELECT f FROM Follow f JOIN FETCH f.to WHERE f.from.id = :fromId AND f.status = :status")
     List<Follow> findAllByFromIdAndStatus(@Param("fromId") long fromId, @Param("status") FollowStatus status);
+
+    @Query("SELECT f FROM Follow f JOIN FETCH f.to WHERE f.from.id = :fromId AND f.status = :status")
+    Slice<Follow> findAllByFromIdAndStatus(@Param("fromId") long fromId,
+        @Param("status") FollowStatus status, Pageable pageable);
 
     @Query("SELECT f FROM Follow f JOIN FETCH f.from WHERE f.to.id = :toId AND f.status = :status")
     List<Follow> findAllByToIdAndStatus(@Param("toId") long toId, @Param("status") FollowStatus status);
