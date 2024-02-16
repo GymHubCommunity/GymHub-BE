@@ -17,6 +17,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -146,12 +147,13 @@ class FollowRepositoryTest {
         Follow follow1 = saveFollow(fromMember, toMember1, targetStatus);
         Follow follow2 = saveFollow(fromMember, toMember2, targetStatus);
 
+        Pageable pageable = PageRequest.ofSize(2);
         // when
-        Slice<Follow> result = followRepository.findAllByFromIdAndStatus(fromMember.getId(), targetStatus,
-            PageRequest.of(0, 10));
+        Slice<Follow> result = followRepository.findAllByFromIdAndStatus(
+            fromMember.getId(), targetStatus, -1, pageable);
 
         // then
-        assertThat(result).hasSize(2)
+        assertThat(result).hasSize((int) pageable.getPageSize())
             .containsExactly(follow1, follow2);
     }
 
@@ -165,9 +167,11 @@ class FollowRepositoryTest {
         FollowStatus targetStatus = FollowStatus.PENDING;
         saveFollow(fromMember, toMember, targetStatus);
 
+        Pageable pageable = PageRequest.ofSize(2);
+
         // when
         Slice<Follow> result = followRepository.findAllByFromIdAndStatus(target.getId(), targetStatus,
-            PageRequest.of(0, 10));
+            -1, pageable);
 
         // then
         assertThat(result).isEmpty();
@@ -180,19 +184,19 @@ class FollowRepositoryTest {
         Member fromMember = saveMember();
         Member toMember1 = saveMember();
         Member toMember2 = saveMember();
-        Member toMember3 = saveMember();
         FollowStatus targetStatus = FollowStatus.PENDING;
+
         saveFollow(fromMember, toMember1, targetStatus);
-        saveFollow(fromMember, toMember2, targetStatus);
-        Follow follow = saveFollow(fromMember, toMember3, targetStatus);
+        Follow follow = saveFollow(fromMember, toMember2, targetStatus);
+
+        Pageable pageable = PageRequest.ofSize(2);
 
         // when
         Slice<Follow> result = followRepository.findAllByFromIdAndStatus(fromMember.getId(), targetStatus,
-            PageRequest.of(1, 2));
+            follow.getId(), pageable);
 
         // then
-        assertThat(result).hasSize(1)
-            .containsExactly(follow);
+        assertThat(result).isEmpty();
     }
 
     @Test
@@ -206,9 +210,11 @@ class FollowRepositoryTest {
         Follow follow1 = saveFollow(fromMember1, toMember, targetStatus);
         Follow follow2 = saveFollow(fromMember2, toMember, targetStatus);
 
+        Pageable pageable = PageRequest.ofSize(2);
+
         // when
-        Slice<Follow> result = followRepository.findAllByToIdAndStatus(toMember.getId(), targetStatus,
-            PageRequest.of(0, 10));
+        Slice<Follow> result = followRepository.findAllByToIdAndStatus(
+            toMember.getId(), targetStatus, -1, pageable);
 
         // then
         assertThat(result).hasSize(2)
@@ -220,14 +226,17 @@ class FollowRepositoryTest {
     void findAllByToIdAndStatusUsingPageWhenEmpty() throws Exception {
         // given
         Member target = saveMember();
-        FollowStatus targetStatus = FollowStatus.PENDING;
         Member fromMember = saveMember();
         Member toMember = saveMember();
+
+        FollowStatus targetStatus = FollowStatus.PENDING;
         saveFollow(fromMember, toMember, targetStatus);
 
+        Pageable pageable = PageRequest.ofSize(2);
+
         // when
-        Slice<Follow> result = followRepository.findAllByToIdAndStatus(target.getId(), targetStatus,
-            PageRequest.of(0, 10));
+        Slice<Follow> result = followRepository.findAllByToIdAndStatus(
+            target.getId(), targetStatus, -1, pageable);
 
         // then
         assertThat(result).isEmpty();
@@ -239,20 +248,19 @@ class FollowRepositoryTest {
         // given
         Member fromMember1 = saveMember();
         Member fromMember2 = saveMember();
-        Member fromMember3 = saveMember();
         Member toMember = saveMember();
         FollowStatus targetStatus = FollowStatus.PENDING;
         saveFollow(fromMember1, toMember, targetStatus);
-        saveFollow(fromMember2, toMember, targetStatus);
-        Follow follow = saveFollow(fromMember3, toMember, targetStatus);
+        Follow follow = saveFollow(fromMember2, toMember, targetStatus);
+
+        Pageable pageable = PageRequest.ofSize(2);
 
         // when
         Slice<Follow> result = followRepository.findAllByToIdAndStatus(toMember.getId(), targetStatus,
-            PageRequest.of(1, 2));
+            follow.getId(), pageable);
 
         // then
-        assertThat(result).hasSize(1)
-            .containsExactly(follow);
+        assertThat(result).isEmpty();
     }
 
     @Test

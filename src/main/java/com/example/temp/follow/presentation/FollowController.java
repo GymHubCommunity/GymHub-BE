@@ -6,7 +6,7 @@ import com.example.temp.follow.application.FollowService;
 import com.example.temp.follow.dto.response.FollowInfoResult;
 import com.example.temp.follow.dto.response.FollowResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,15 +23,15 @@ public class FollowController {
 
     @GetMapping("/members/{memberId}/followings")
     public ResponseEntity<FollowInfoResult> getFollowings(@Login UserContext userContext, @PathVariable Long memberId,
-        @RequestParam Pageable pageable) {
-        FollowInfoResult result = followService.getFollowings(userContext, memberId, pageable);
+        @RequestParam(defaultValue = "-1") Long lastId, @RequestParam int size) {
+        FollowInfoResult result = followService.getFollowings(userContext, memberId, lastId, PageRequest.ofSize(size));
         return ResponseEntity.ok(result);
     }
 
     @GetMapping("/members/{memberId}/followers")
     public ResponseEntity<FollowInfoResult> getFollowers(@Login UserContext userContext, @PathVariable Long memberId,
-        @RequestParam Pageable pageable) {
-        FollowInfoResult result = followService.getFollowers(userContext, memberId, pageable);
+        @RequestParam(defaultValue = "-1") Long lastId, @RequestParam int size) {
+        FollowInfoResult result = followService.getFollowers(userContext, memberId, lastId, PageRequest.ofSize(size));
         return ResponseEntity.ok(result);
     }
 

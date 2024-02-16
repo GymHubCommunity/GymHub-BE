@@ -39,18 +39,19 @@ public class FollowService {
      *
      * @param userContext 로그인한 사용자의 정보
      * @param targetId    팔로잉 목록을 보려고 하는 대상의 ID
+     * @param lastId      이전에 조회했던 마지막 팔로우 엔티티의 아이디
      * @param pageable
      * @return FollowInfo 객체 리스트를 반환합니다. 각 FollowInfo 객체는 팔로잉 대상의 정보와 팔로우 ID를 포함하고 있습니다.
      * @throws ApiException AUTHORIZED_FAIL: 팔로잉 목록을 볼 권한이 없을 때 발생합니다.
      */
-    public FollowInfoResult getFollowings(UserContext userContext, long targetId, Pageable pageable) {
+    public FollowInfoResult getFollowings(UserContext userContext, Long targetId, long lastId, Pageable pageable) {
         Member target = memberRepository.findById(targetId)
             .orElseThrow(() -> new ApiException(MEMBER_NOT_FOUND));
         if (!target.isPublicAccount()) {
             validateViewAuthorization(targetId, userContext.id());
         }
         Slice<Follow> follows = followRepository.findAllByFromIdAndStatus(targetId, FollowStatus.APPROVED,
-            pageable);
+            lastId, pageable);
         return FollowInfoResult.createFollowingsResult(follows);
     }
 
@@ -60,18 +61,19 @@ public class FollowService {
      *
      * @param userContext 로그인한 사용자의 정보
      * @param targetId    팔로워 목록을 보려고 하는 대상의 ID
+     * @param lastId      이전에 조회했던 마지막 팔로우 엔티티의 아이디
      * @param pageable
      * @return FollowInfo 객체 리스트를 반환합니다. 각 FollowInfo 객체는 팔로워 대상의 정보와 팔로우 ID를 포함하고 있습니다.
      * @throws ApiException AUTHORIZED_FAIL: 팔로워 목록을 볼 권한이 없을 때 발생합니다.
      */
-    public FollowInfoResult getFollowers(UserContext userContext, long targetId, Pageable pageable) {
+    public FollowInfoResult getFollowers(UserContext userContext, long targetId, long lastId, Pageable pageable) {
         Member target = memberRepository.findById(targetId)
             .orElseThrow(() -> new ApiException(MEMBER_NOT_FOUND));
         if (!target.isPublicAccount()) {
             validateViewAuthorization(targetId, userContext.id());
         }
-        Slice<Follow> follows = followRepository.findAllByToIdAndStatus(targetId, FollowStatus.APPROVED,
-            pageable);
+        Slice<Follow> follows = followRepository.findAllByToIdAndStatus(targetId,
+            FollowStatus.APPROVED, lastId, pageable);
         return FollowInfoResult.createFollowersResult(follows);
     }
 
