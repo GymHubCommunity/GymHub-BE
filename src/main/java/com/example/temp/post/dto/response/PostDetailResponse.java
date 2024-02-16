@@ -11,7 +11,7 @@ public record PostDetailResponse(
     Long postId,
     WriterInfo writerInfo,
     String content,
-    List<String> imageUrl,
+    List<String> imageUrls,
     List<String> hashtags,
     LocalDateTime registeredAt
 ) {
@@ -21,7 +21,7 @@ public record PostDetailResponse(
             .postId(post.getId())
             .writerInfo(WriterInfo.from(post.getMember()))
             .content(post.getContent())
-            .imageUrl(getImageUrls(post))
+            .imageUrls(getImageUrls(post))
             .hashtags(getHashtags(post))
             .registeredAt(post.getRegisteredAt())
             .build();
@@ -37,7 +37,7 @@ public record PostDetailResponse(
     private static List<String> getHashtags(Post post) {
         return post.getPostHashtags().isEmpty() ? Collections.emptyList() :
             post.getPostHashtags().stream()
-                .map(hashtag -> hashtag.getHashtag().getName())
+                .map(postHashtag -> postHashtag.getHashtag().getName())
                 .toList();
     }
 }
