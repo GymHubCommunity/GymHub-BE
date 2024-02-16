@@ -13,8 +13,8 @@ import org.springframework.data.domain.SliceImpl;
 class FollowInfoResultTest {
 
     @Test
-    @DisplayName("생성 테스트")
-    void create() throws Exception {
+    @DisplayName("Following 목록 생성 테스트")
+    void createFollowings() throws Exception {
         // given
         Member member1 = Member.builder().build();
         Member member2 = Member.builder().build();
@@ -25,7 +25,27 @@ class FollowInfoResultTest {
         Slice<Follow> slice = new SliceImpl<>(List.of(follow1, follow2));
 
         // when
-        FollowInfoResult result = FollowInfoResult.from(slice);
+        FollowInfoResult result = FollowInfoResult.createFollowingsResult(slice);
+
+        // then
+        assertThat(result.followInfos()).hasSize(2);
+        assertThat(result.hasNext()).isFalse();
+    }
+
+    @Test
+    @DisplayName("Follower 목록 생성 테스트")
+    void createFollowers() throws Exception {
+        // given
+        Member member1 = Member.builder().build();
+        Member member2 = Member.builder().build();
+
+        Follow follow1 = createFollow(member1, member2);
+        Follow follow2 = createFollow(member2, member1);
+
+        Slice<Follow> slice = new SliceImpl<>(List.of(follow1, follow2));
+
+        // when
+        FollowInfoResult result = FollowInfoResult.createFollowersResult(slice);
 
         // then
         assertThat(result.followInfos()).hasSize(2);

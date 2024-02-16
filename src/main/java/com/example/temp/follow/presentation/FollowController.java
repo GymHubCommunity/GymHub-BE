@@ -3,11 +3,8 @@ package com.example.temp.follow.presentation;
 import com.example.temp.common.annotation.Login;
 import com.example.temp.common.dto.UserContext;
 import com.example.temp.follow.application.FollowService;
-import com.example.temp.follow.dto.response.FollowInfo;
 import com.example.temp.follow.dto.response.FollowInfoResult;
-import com.example.temp.follow.dto.response.FollowInfos;
 import com.example.temp.follow.dto.response.FollowResponse;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -32,9 +29,10 @@ public class FollowController {
     }
 
     @GetMapping("/members/{memberId}/followers")
-    public ResponseEntity<FollowInfos> getFollowers(@Login UserContext userContext, @PathVariable Long memberId) {
-        List<FollowInfo> followInfos = followService.getFollowers(userContext, memberId);
-        return ResponseEntity.ok(FollowInfos.from(followInfos));
+    public ResponseEntity<FollowInfoResult> getFollowers(@Login UserContext userContext, @PathVariable Long memberId,
+        @RequestParam Pageable pageable) {
+        FollowInfoResult result = followService.getFollowers(userContext, memberId, pageable);
+        return ResponseEntity.ok(result);
     }
 
     @PostMapping("/members/{memberId}/follow")

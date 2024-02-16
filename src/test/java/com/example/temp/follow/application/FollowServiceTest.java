@@ -8,7 +8,6 @@ import static com.example.temp.common.exception.ErrorCode.FOLLOW_NOT_PENDING;
 import static com.example.temp.common.exception.ErrorCode.FOLLOW_SELF_FAIL;
 import static com.example.temp.common.exception.ErrorCode.MEMBER_NOT_FOUND;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
@@ -27,7 +26,6 @@ import com.example.temp.member.domain.nickname.Nickname;
 import jakarta.persistence.EntityManager;
 import java.util.ArrayList;
 import java.util.List;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -360,9 +358,8 @@ class FollowServiceTest {
         Member anotherMember = saveMember();
 
         // when & then
-        assertThatCode(
-            () -> followService.getFollowings(UserContext.from(anotherMember), publicAccountMember.getId(), pageable))
-            .doesNotThrowAnyException();
+        assertDoesNotThrow(
+            () -> followService.getFollowings(UserContext.from(anotherMember), publicAccountMember.getId(), pageable));
     }
 
     @Test
@@ -431,7 +428,7 @@ class FollowServiceTest {
 
 
     @Test
-    @DisplayName("특정 사용자가 팔로우한 사람들을 전부 보여준다.")
+    @DisplayName("특정 사용자를 팔로우한 사람들을 전부 보여준다.")
     void getFollowersSuccess() throws Exception {
         // given
         Member target = saveMember();
@@ -446,12 +443,14 @@ class FollowServiceTest {
         em.clear();
 
         // when
-        List<FollowInfo> infos = followService.getFollowers(UserContext.from(target), target.getId(), pageable);
+        FollowInfoResult result = followService.getFollowers(UserContext.from(target), target.getId(), pageable);
 
         // then
+        List<FollowInfo> infos = result.followInfos();
         assertThat(infos).hasSize(approvedCnt)
             .containsAnyElementsOf(targetFollowInfos);
         assertThat(infos.get(0).memberId()).isNotEqualTo(target.getId());
+
     }
 
     @Test
@@ -476,10 +475,10 @@ class FollowServiceTest {
         saveTargetFollowers(FollowStatus.APPROVED, target, members, idx, approvedCnt);
 
         // when
-        List<FollowInfo> infos = followService.getFollowers(UserContext.from(target), target.getId(), pageable);
+        FollowInfoResult result = followService.getFollowers(UserContext.from(target), target.getId(), pageable);
 
         // then
-        assertThat(infos).hasSize(approvedCnt);
+        assertThat(result.followInfos()).hasSize(approvedCnt);
     }
 
     @Test
@@ -492,9 +491,8 @@ class FollowServiceTest {
         Member anotherMember = saveMember();
 
         // when & then
-        assertThatCode(() -> followService.getFollowers(UserContext.from(anotherMember), publicAccountMember.getId(),
-            pageable))
-            .doesNotThrowAnyException();
+        assertDoesNotThrow(
+            () -> followService.getFollowers(UserContext.from(anotherMember), publicAccountMember.getId(), pageable));
     }
 
     @Test
@@ -508,9 +506,40 @@ class FollowServiceTest {
         saveFollow(anotherMember, privateMember, FollowStatus.APPROVED);
 
         // when & then
-        assertThatCode(() -> followService.getFollowers(UserContext.from(anotherMember), privateMember.getId(),
-            pageable))
-            .doesNotThrowAnyException();
+        assertDoesNotThrow(() -> followService.getFollowers(UserContext.from(anotherMember), privateMember.getId(),
+            pageable));
+    }
+
+    @Test
+    @DisplayName("팔로우한 사람들을 페이지로 가져올 때, 마지막 데이터가 포함되었는지 확인한다.")
+    void getFollowersThatIsLast() throws Exception {
+        // given
+        Pageable pageable = PageRequest.of(0, 100);
+        Member member = saveMember();
+
+        // when
+        FollowInfoResult result = followService.getFollowers(UserContext.from(member), member.getId(), pageable);
+
+        // then
+        assertThat(result.hasNext()).isFalse();
+    }
+
+    @Test
+    @DisplayName("팔로우한 사람들을 페이지로 가져올 때, 마지막 데이터가 포함되지 않았는지 확인한다.")
+    void getFollowersThatHasNext() throws Exception {
+        // given
+        Pageable pageable = PageRequest.of(0, 1);
+        Member member = saveMember();
+        Member other1 = saveMember();
+        Member other2 = saveMember();
+        saveFollow(other1, member, FollowStatus.APPROVED);
+        saveFollow(other2, member, FollowStatus.APPROVED);
+
+        // when
+        FollowInfoResult result = followService.getFollowers(UserContext.from(member), member.getId(), pageable);
+
+        // then
+        assertThat(result.hasNext()).isTrue();
     }
 
     @Test
