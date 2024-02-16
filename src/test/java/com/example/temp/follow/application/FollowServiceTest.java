@@ -10,6 +10,7 @@ import static com.example.temp.common.exception.ErrorCode.MEMBER_NOT_FOUND;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import com.example.temp.common.dto.UserContext;
 import com.example.temp.common.entity.Email;
@@ -17,6 +18,7 @@ import com.example.temp.common.exception.ApiException;
 import com.example.temp.follow.domain.Follow;
 import com.example.temp.follow.domain.FollowStatus;
 import com.example.temp.follow.dto.response.FollowInfo;
+import com.example.temp.follow.dto.response.FollowInfoResult;
 import com.example.temp.follow.dto.response.FollowResponse;
 import com.example.temp.member.domain.FollowStrategy;
 import com.example.temp.member.domain.Member;
@@ -25,12 +27,15 @@ import com.example.temp.member.domain.nickname.Nickname;
 import jakarta.persistence.EntityManager;
 import java.util.ArrayList;
 import java.util.List;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
@@ -44,6 +49,8 @@ class FollowServiceTest {
     EntityManager em;
 
     long notExistMemberId = 999_999_999L;
+
+    Pageable pageable = PageRequest.of(0, 100);
 
 
     /**
@@ -306,9 +313,10 @@ class FollowServiceTest {
             .toList();
 
         // when
-        List<FollowInfo> infos = followService.getFollowings(UserContext.from(target), target.getId());
+        FollowInfoResult result = followService.getFollowings(UserContext.from(target), target.getId(), pageable);
 
         // then
+        List<FollowInfo> infos = result.followInfos();
         assertThat(infos).hasSize(followingCnt)
             .containsAnyElementsOf(targetFollowInfos);
         assertThat(infos.get(0).memberId()).isNotEqualTo(target.getId());
@@ -336,10 +344,10 @@ class FollowServiceTest {
         saveTargetFollowings(FollowStatus.APPROVED, target, members, idx, approvedCnt);
 
         // when
-        List<FollowInfo> infos = followService.getFollowings(UserContext.from(target), target.getId());
+        FollowInfoResult result = followService.getFollowings(UserContext.from(target), target.getId(), pageable);
 
         // then
-        assertThat(infos).hasSize(approvedCnt);
+        assertThat(result.followInfos()).hasSize(approvedCnt);
     }
 
     @Test
@@ -352,8 +360,41 @@ class FollowServiceTest {
         Member anotherMember = saveMember();
 
         // when & then
-        assertThatCode(() -> followService.getFollowings(UserContext.from(anotherMember), publicAccountMember.getId()))
+        assertThatCode(
+            () -> followService.getFollowings(UserContext.from(anotherMember), publicAccountMember.getId(), pageable))
             .doesNotThrowAnyException();
+    }
+
+    @Test
+    @DisplayName("팔로잉한 사람들을 페이지로 가져올 때, 마지막 데이터가 포함되었는지 확인한다.")
+    void getFollowingThatIsLast() throws Exception {
+        // given
+        Pageable pageable = PageRequest.of(0, 100);
+        Member member = saveMember();
+
+        // when
+        FollowInfoResult result = followService.getFollowings(UserContext.from(member), member.getId(), pageable);
+
+        // then
+        assertThat(result.hasNext()).isFalse();
+    }
+
+    @Test
+    @DisplayName("팔로잉한 사람들을 페이지로 가져올 때, 마지막 데이터가 포함되지 않았는지 확인한다.")
+    void getFollowingThatHasNext() throws Exception {
+        // given
+        Pageable pageable = PageRequest.of(0, 1);
+        Member member = saveMember();
+        Member other1 = saveMember();
+        Member other2 = saveMember();
+        saveFollow(member, other1, FollowStatus.APPROVED);
+        saveFollow(member, other2, FollowStatus.APPROVED);
+
+        // when
+        FollowInfoResult result = followService.getFollowings(UserContext.from(member), member.getId(), pageable);
+
+        // then
+        assertThat(result.hasNext()).isTrue();
     }
 
     @Test
@@ -367,8 +408,8 @@ class FollowServiceTest {
         saveFollow(anotherMember, privateMember, FollowStatus.APPROVED);
 
         // when & then
-        assertThatCode(() -> followService.getFollowings(UserContext.from(anotherMember), privateMember.getId()))
-            .doesNotThrowAnyException();
+        assertDoesNotThrow(
+            () -> followService.getFollowings(UserContext.from(anotherMember), privateMember.getId(), pageable));
     }
 
     @Test
@@ -382,7 +423,8 @@ class FollowServiceTest {
         saveFollow(anotherMember, privateMember, FollowStatus.PENDING);
 
         // when & then
-        assertThatThrownBy(() -> followService.getFollowings(UserContext.from(anotherMember), privateMember.getId()))
+        assertThatThrownBy(
+            () -> followService.getFollowings(UserContext.from(anotherMember), privateMember.getId(), pageable))
             .isInstanceOf(ApiException.class)
             .hasMessageContaining(AUTHORIZED_FAIL.getMessage());
     }
@@ -404,7 +446,7 @@ class FollowServiceTest {
         em.clear();
 
         // when
-        List<FollowInfo> infos = followService.getFollowers(UserContext.from(target), target.getId());
+        List<FollowInfo> infos = followService.getFollowers(UserContext.from(target), target.getId(), pageable);
 
         // then
         assertThat(infos).hasSize(approvedCnt)
@@ -434,7 +476,7 @@ class FollowServiceTest {
         saveTargetFollowers(FollowStatus.APPROVED, target, members, idx, approvedCnt);
 
         // when
-        List<FollowInfo> infos = followService.getFollowers(UserContext.from(target), target.getId());
+        List<FollowInfo> infos = followService.getFollowers(UserContext.from(target), target.getId(), pageable);
 
         // then
         assertThat(infos).hasSize(approvedCnt);
@@ -450,7 +492,8 @@ class FollowServiceTest {
         Member anotherMember = saveMember();
 
         // when & then
-        assertThatCode(() -> followService.getFollowers(UserContext.from(anotherMember), publicAccountMember.getId()))
+        assertThatCode(() -> followService.getFollowers(UserContext.from(anotherMember), publicAccountMember.getId(),
+            pageable))
             .doesNotThrowAnyException();
     }
 
@@ -465,7 +508,8 @@ class FollowServiceTest {
         saveFollow(anotherMember, privateMember, FollowStatus.APPROVED);
 
         // when & then
-        assertThatCode(() -> followService.getFollowers(UserContext.from(anotherMember), privateMember.getId()))
+        assertThatCode(() -> followService.getFollowers(UserContext.from(anotherMember), privateMember.getId(),
+            pageable))
             .doesNotThrowAnyException();
     }
 
@@ -480,7 +524,8 @@ class FollowServiceTest {
         saveFollow(privateMember, anotherMember, FollowStatus.PENDING);
 
         // when & then
-        assertThatThrownBy(() -> followService.getFollowers(UserContext.from(anotherMember), privateMember.getId()))
+        assertThatThrownBy(() -> followService.getFollowers(UserContext.from(anotherMember), privateMember.getId(),
+            pageable))
             .isInstanceOf(ApiException.class)
             .hasMessageContaining(AUTHORIZED_FAIL.getMessage());
     }

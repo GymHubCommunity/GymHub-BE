@@ -1,0 +1,42 @@
+package com.example.temp.follow.dto.response;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+import com.example.temp.follow.domain.Follow;
+import com.example.temp.member.domain.Member;
+import java.util.List;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.SliceImpl;
+
+class FollowInfoResultTest {
+
+    @Test
+    @DisplayName("생성 테스트")
+    void create() throws Exception {
+        // given
+        Member member1 = Member.builder().build();
+        Member member2 = Member.builder().build();
+
+        Follow follow1 = createFollow(member1, member2);
+        Follow follow2 = createFollow(member2, member1);
+
+        Slice<Follow> slice = new SliceImpl<>(List.of(follow1, follow2));
+
+        // when
+        FollowInfoResult result = FollowInfoResult.from(slice);
+
+        // then
+        assertThat(result.followInfos()).hasSize(2);
+        assertThat(result.hasNext()).isFalse();
+    }
+
+    private static Follow createFollow(Member member1, Member member2) {
+        return Follow.builder()
+            .from(member1)
+            .to(member2)
+            .build();
+    }
+
+}
