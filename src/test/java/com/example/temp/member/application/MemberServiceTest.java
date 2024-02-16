@@ -14,6 +14,7 @@ import com.example.temp.common.entity.Email;
 import com.example.temp.common.exception.ApiException;
 import com.example.temp.common.exception.ErrorCode;
 import com.example.temp.follow.domain.Follow;
+import com.example.temp.follow.domain.FollowStatus;
 import com.example.temp.image.domain.Image;
 import com.example.temp.member.domain.FollowStrategy;
 import com.example.temp.member.domain.Member;
@@ -311,6 +312,7 @@ class MemberServiceTest {
         Follow follow = Follow.builder()
             .from(fromMember)
             .to(toMember)
+            .status(FollowStatus.APPROVED)
             .build();
         em.persist(follow);
         return follow;

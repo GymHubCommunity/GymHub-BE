@@ -35,14 +35,15 @@ public class Follow {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "from_id")
+    @JoinColumn(name = "from_id", nullable = false)
     private Member from;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "to_id")
+    @JoinColumn(name = "to_id", nullable = false)
     private Member to;
 
     @Enumerated(value = EnumType.STRING)
+    @Column(nullable = false)
     private FollowStatus status;
 
     @Builder

@@ -39,10 +39,7 @@ class FollowRepositoryTest {
         Member fromMember = saveMember();
         Member toMember = saveMember();
 
-        Follow follow = Follow.builder()
-            .from(fromMember)
-            .to(toMember)
-            .build();
+        Follow follow = saveFollow(fromMember, toMember);
         em.persist(follow);
 
         // when
@@ -60,12 +57,7 @@ class FollowRepositoryTest {
         // given
         Member fromMember = saveMember();
         Member toMember = saveMember();
-
-        Follow follow = Follow.builder()
-            .from(fromMember)
-            .to(toMember)
-            .build();
-        em.persist(follow);
+        saveFollow(fromMember, toMember);
 
         // when
         Optional<Follow> resultOpt = followRepository.findByFromIdAndToId(fromMember.getId(), notExistId);
@@ -80,13 +72,7 @@ class FollowRepositoryTest {
         // given
         Member executor = saveMember();
         Member target = saveMember();
-
-        Follow follow = Follow.builder()
-            .from(executor)
-            .to(target)
-            .status(FollowStatus.APPROVED)
-            .build();
-        em.persist(follow);
+        saveFollow(executor, target);
 
         // when
         boolean result = followRepository.checkExecutorFollowsTarget(executor.getId(), target.getId());
@@ -98,17 +84,11 @@ class FollowRepositoryTest {
     @ParameterizedTest
     @DisplayName("executor가 target에 대해 팔로우가 SUCCESS 이외의 상태라면 false를 반환한다")
     @ValueSource(strings = {"PENDING", "REJECTED", "CANCELED"})
-    void checkExecutorFollowTargetFalse1(String statusStr) throws Exception {
+    void checkExecutorFollowTargetFalse1(String statusValue) throws Exception {
         // given
         Member executor = saveMember();
         Member target = saveMember();
-
-        Follow follow = Follow.builder()
-            .from(executor)
-            .to(target)
-            .status(FollowStatus.valueOf(statusStr))
-            .build();
-        em.persist(follow);
+        saveFollow(executor, target, FollowStatus.valueOf(statusValue));
 
         // when
         boolean result = followRepository.checkExecutorFollowsTarget(executor.getId(), target.getId());
@@ -125,12 +105,7 @@ class FollowRepositoryTest {
         Member target = saveMember();
         Member anotherMember = saveMember();
 
-        Follow follow = Follow.builder()
-            .from(executor)
-            .to(anotherMember)
-            .status(FollowStatus.APPROVED)
-            .build();
-        em.persist(follow);
+        saveFollow(executor, anotherMember);
 
         // when
         boolean result = followRepository.checkExecutorFollowsTarget(executor.getId(), target.getId());
@@ -217,10 +192,16 @@ class FollowRepositoryTest {
             .contains(related1, related2);
     }
 
-    private Follow saveFollow(Member fromMember, Member toMember1, FollowStatus status) {
+
+    private Follow saveFollow(Member fromMember, Member toMember) {
+        return saveFollow(fromMember, toMember, FollowStatus.APPROVED);
+    }
+
+
+    private Follow saveFollow(Member fromMember, Member toMember, FollowStatus status) {
         Follow follow = Follow.builder()
             .from(fromMember)
-            .to(toMember1)
+            .to(toMember)
             .status(status)
             .build();
         em.persist(follow);
