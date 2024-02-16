@@ -148,11 +148,11 @@ class FollowRepositoryTest {
 
         // when
         Slice<Follow> result = followRepository.findAllByFromIdAndStatus(fromMember.getId(), targetStatus,
-            PageRequest.of(0, 1));
+            PageRequest.of(0, 10));
 
         // then
-        assertThat(result).hasSize(1)
-            .contains(follow1);
+        assertThat(result).hasSize(2)
+            .containsExactly(follow1, follow2);
     }
 
     @Test
@@ -174,7 +174,7 @@ class FollowRepositoryTest {
     }
 
     @Test
-    @DisplayName("팔로우 페이지 요청시, 페이지 구간에 포함되지 않은 값은 결과에 포함되지 않는다.")
+    @DisplayName("fromId를 사용해 팔로우 페이지 요청시, 페이지 구간에 포함되지 않은 값은 결과에 포함되지 않는다.")
     void findAllByFromIdAndStatusUsingPageNotIn() throws Exception {
         // given
         Member fromMember = saveMember();
@@ -188,6 +188,66 @@ class FollowRepositoryTest {
 
         // when
         Slice<Follow> result = followRepository.findAllByFromIdAndStatus(fromMember.getId(), targetStatus,
+            PageRequest.of(1, 2));
+
+        // then
+        assertThat(result).hasSize(1)
+            .containsExactly(follow);
+    }
+
+    @Test
+    @DisplayName("toId와 status가 일치하는 Follow 페이지 목록을 조회한다")
+    void findAllByToIdAndStatusUsingPage() throws Exception {
+        // given
+        Member fromMember1 = saveMember();
+        Member fromMember2 = saveMember();
+        Member toMember = saveMember();
+        FollowStatus targetStatus = FollowStatus.PENDING;
+        Follow follow1 = saveFollow(fromMember1, toMember, targetStatus);
+        Follow follow2 = saveFollow(fromMember2, toMember, targetStatus);
+
+        // when
+        Slice<Follow> result = followRepository.findAllByToIdAndStatus(toMember.getId(), targetStatus,
+            PageRequest.of(0, 10));
+
+        // then
+        assertThat(result).hasSize(2)
+            .containsExactly(follow1, follow2);
+    }
+
+    @Test
+    @DisplayName("페이지 요청 시, 일치하는 toId와 status가 없으면 비어있는 결과를 반환한다.")
+    void findAllByToIdAndStatusUsingPageWhenEmpty() throws Exception {
+        // given
+        Member target = saveMember();
+        FollowStatus targetStatus = FollowStatus.PENDING;
+        Member fromMember = saveMember();
+        Member toMember = saveMember();
+        saveFollow(fromMember, toMember, targetStatus);
+
+        // when
+        Slice<Follow> result = followRepository.findAllByToIdAndStatus(target.getId(), targetStatus,
+            PageRequest.of(0, 10));
+
+        // then
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    @DisplayName("toId를 사용해 팔로우 페이지 요청시, 페이지 구간에 포함되지 않은 값은 결과에 포함되지 않는다.")
+    void findAllByToIdAndStatusUsingPageNotIn() throws Exception {
+        // given
+        Member fromMember1 = saveMember();
+        Member fromMember2 = saveMember();
+        Member fromMember3 = saveMember();
+        Member toMember = saveMember();
+        FollowStatus targetStatus = FollowStatus.PENDING;
+        saveFollow(fromMember1, toMember, targetStatus);
+        saveFollow(fromMember2, toMember, targetStatus);
+        Follow follow = saveFollow(fromMember3, toMember, targetStatus);
+
+        // when
+        Slice<Follow> result = followRepository.findAllByToIdAndStatus(toMember.getId(), targetStatus,
             PageRequest.of(1, 2));
 
         // then

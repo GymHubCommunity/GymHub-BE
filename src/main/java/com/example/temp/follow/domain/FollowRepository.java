@@ -24,6 +24,11 @@ public interface FollowRepository extends JpaRepository<Follow, Long> {
     @Query("SELECT f FROM Follow f JOIN FETCH f.from WHERE f.to.id = :toId AND f.status = :status")
     List<Follow> findAllByToIdAndStatus(@Param("toId") long toId, @Param("status") FollowStatus status);
 
+    @Query("SELECT f FROM Follow f JOIN FETCH f.from WHERE f.to.id = :toId AND f.status = :status")
+    Slice<Follow> findAllByToIdAndStatus(@Param("toId") long toId,
+        @Param("status") FollowStatus status, Pageable pageable);
+
+
     @Query("SELECT CASE WHEN COUNT(f) > 0 THEN true ELSE false END FROM Follow f"
         + " WHERE f.from.id = :executorId AND f.to.id = :targetId AND f.status = 'APPROVED'")
     boolean checkExecutorFollowsTarget(@Param("executorId") long executorId, @Param("targetId") long targetId);
