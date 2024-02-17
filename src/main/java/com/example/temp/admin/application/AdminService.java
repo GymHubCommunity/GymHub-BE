@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class AdminService {
 
     private final AdminRepository adminRepository;
+    private final BCryptPasswordEncoder passwordEncoder;
 
     public void login(AdminLoginRequest request) {
     }
