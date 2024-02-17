@@ -3,10 +3,10 @@ package com.example.temp.admin.presentation;
 import com.example.temp.admin.application.AdminService;
 import com.example.temp.admin.dto.request.AdminLoginRequest;
 import com.example.temp.admin.dto.request.AdminRegisterRequest;
-import com.example.temp.machine.dto.request.MachineBulkCreateRequest;
-import com.example.temp.machine.dto.request.MachineCreateRequest;
 import com.example.temp.machine.application.MachineService;
+import com.example.temp.machine.dto.request.MachineBulkCreateRequest;
 import com.example.temp.machine.dto.response.MachineCreateResponse;
+import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -32,7 +32,7 @@ public class AdminController {
 
     @PostMapping("/register")
     public ResponseEntity<Void> register(@RequestBody AdminRegisterRequest request) {
-        adminService.register(request);
+        adminService.register(request, LocalDateTime.now());
         return ResponseEntity.ok().build();
     }
 

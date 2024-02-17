@@ -1,5 +1,8 @@
 package com.example.temp.admin.dto.request;
 
-public record AdminRegisterRequest() {
+public record AdminRegisterRequest(
+    String username,
+    String pwd
+) {
 
 }

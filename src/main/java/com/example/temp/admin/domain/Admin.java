@@ -27,17 +27,20 @@ public class Admin extends BaseTimeEntity {
     @Column(nullable = false, unique = true, length = 32)
     private String username;
 
-    @Column(nullable = false, length = 64)
+    @Column(nullable = false)
     private String password;
 
     @Column(nullable = false)
     private LocalDateTime lastLogin;
 
+    private boolean activate;
+
     @Builder
-    private Admin(String username, String password, LocalDateTime lastLogin) {
+    private Admin(String username, String password, LocalDateTime lastLogin, boolean activate) {
         this.username = username;
         this.password = password;
         this.lastLogin = lastLogin;
+        this.activate = activate;
     }
 
 }
