@@ -25,6 +25,9 @@ repositories {
 
 dependencies {
 
+    // Security 의존성 (암호화에 사용)
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+
     // AWS S3 의존성
     implementation 'software.amazon.awssdk:s3:2.23.19'
 
