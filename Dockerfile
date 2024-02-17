@@ -1,17 +1,24 @@
-FROM gradle:8.5-jdk17 AS build
-
+# 빌드 스테이지
+FROM amazoncorretto:17.0.10-alpine AS builder
 WORKDIR /app
 
-COPY . /app
+# Gradle Wrapper 복사
+COPY gradlew .
+COPY gradle gradle
+RUN chmod +x ./gradlew
 
-RUN gradle clean build --no-daemon
+# 의존성 파일 복사 및 다운로드
+COPY build.gradle .
+COPY settings.gradle .
 
-FROM amazoncorretto:17.0.10-alpine3.19
+RUN ./gradlew --no-daemon dependencies
 
-WORKDIR /app
+# 소스코드 복사 및 애플리케이션 빌드
+COPY . .
+RUN ./gradlew --nodaemon clean build
 
-COPY --from=build /app/build/libs/*.jar /app/gymhub.jar
-
-EXPOSE 8080
+# 실행 스테이지
+FROM amazoncorretto:17.0.10-alpine
+COPY --from=builder /app/build/libs/*.jar /app/gymhub.jar
 ENTRYPOINT ["java"]
-CMD ["-jar", "gymhub.jar"]
+CMD ["-jar", "/app/gymhub.jar"]
