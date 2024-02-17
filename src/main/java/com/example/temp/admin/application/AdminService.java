@@ -40,6 +40,9 @@ public class AdminService {
     @Transactional
     public long register(AdminRegisterRequest request, LocalDateTime now) {
         validatePwd(request.pwd());
+        if (adminRepository.existsByUsername(request.username())) {
+            throw new ApiException(ErrorCode.ADMIN_USERNAME_DUPLICATED);
+        }
         Admin admin = request.toEntityWithEncoderAndTime(passwordEncoder, now);
         adminRepository.save(admin);
         return admin.getId();

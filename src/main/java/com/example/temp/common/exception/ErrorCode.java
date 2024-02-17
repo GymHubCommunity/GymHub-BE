@@ -23,6 +23,7 @@ public enum ErrorCode {
     ADMIN_PWD_INVALID(HttpStatus.BAD_REQUEST, "비밀번호는 영문자, 숫자, 특수문자(! @ # $ % ^ & * - + = )가 포함되어야 합니다."),
     ADMIN_LOGIN_FAIL(HttpStatus.BAD_REQUEST, "아이디 또는 비밀번호가 잘못되었습니다."),
     ADMIN_PENDING(HttpStatus.UNAUTHORIZED, "아직 권한이 부여되지 않았습니다."),
+    ADMIN_USERNAME_DUPLICATED(HttpStatus.BAD_REQUEST, "닉네임이 중복되었습니다."),
 
     // 닉네임
     NICKNAME_TOO_LONG(HttpStatus.BAD_REQUEST, "닉네임의 길이가 너무 깁니다."),

@@ -56,6 +56,24 @@ class AdminServiceTest {
     }
 
     @Test
+    @DisplayName("중복된 아이디로 어드민을 가입할 수 없다.")
+    void registerFailDupUsername() throws Exception {
+        // given
+        LocalDateTime now = LocalDateTime.now();
+        String username = "kim12";
+        String rawPwd = "raw@12";
+        AdminRegisterRequest request = new AdminRegisterRequest(username, rawPwd);
+
+        createInactivateAdmin(username, passwordEncoder.encode("pwd@12"), now);
+
+        // when & then
+        assertThatThrownBy(() -> adminService.register(request, now))
+            .isInstanceOf(ApiException.class)
+            .hasMessageContaining(ErrorCode.ADMIN_USERNAME_DUPLICATED.getMessage());
+
+    }
+
+    @Test
     @DisplayName("어드민의 비밀번호는 4자리 이상이어야 한다.")
     void registerFailPwdTooShort() throws Exception {
         // given
