@@ -60,22 +60,11 @@ public class JwtTokenManager implements TokenManager, TokenParser {
     }
 
     /**
-     * 입력받은 id를 사용해 Access Token, Refresh Token을 발급합니다.
+     * 입력받은 id와 Role을 사용해 Access Token, Refresh Token을 발급합니다.
      *
      * @param id
      * @return
      */
-    @Override
-    public TokenInfo issue(Long id) {
-        LocalDateTime now = LocalDateTime.now(clock);
-        String accessToken = makeToken(String.valueOf(id), properties.accessTokenExpires(), now);
-        String refreshToken = makeToken(String.valueOf(id), properties.refreshTokenExpires(), now);
-        return TokenInfo.builder()
-            .accessToken(accessToken)
-            .refreshToken(refreshToken)
-            .build();
-    }
-
     @Override
     public TokenInfo issueWithRole(long id, Role role) {
         LocalDateTime now = LocalDateTime.now(clock);
@@ -91,7 +80,7 @@ public class JwtTokenManager implements TokenManager, TokenParser {
         LocalDateTime expiresDateTime = now.plusSeconds(expires);
         return Jwts.builder()
             .subject(sub)
-            .claim("role", role.name())
+            .claim("role", role)
             .expiration(Timestamp.valueOf(expiresDateTime))
             .signWith(key)
             .compact();
@@ -120,7 +109,8 @@ public class JwtTokenManager implements TokenManager, TokenParser {
         Jws<Claims> claimsJws = parseToJwsClaims(refreshToken);
         Claims claims = claimsJws.getPayload();
         long id = Long.parseLong(claims.getSubject());
-        return issue(id);
+        String roleValue = claims.get("role", String.class);
+        return issueWithRole(id, Role.valueOf(roleValue));
     }
 
     private Jws<Claims> parseToJwsClaims(String token) {

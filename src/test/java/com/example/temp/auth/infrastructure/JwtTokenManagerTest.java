@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
+import com.example.temp.auth.domain.Role;
 import com.example.temp.common.dto.UserContext;
 import com.example.temp.auth.dto.response.TokenInfo;
 import com.example.temp.auth.exception.TokenInvalidException;
@@ -71,14 +72,14 @@ class JwtTokenManagerTest {
     void createTokenInfo() throws Exception {
         // given
         long memberId = 1L;
-
+        Role role = Role.NORMAL;
         // when
-        TokenInfo tokenInfo = jwtTokenManager.issue(memberId);
+        TokenInfo tokenInfo = jwtTokenManager.issueWithRole(memberId, role);
 
         // then
-        validateToken(tokenInfo.accessToken(), memberId,
+        validateToken(tokenInfo.accessToken(), memberId, role,
             fixedMachineTime.plusSeconds(jwtProperties.accessTokenExpires()));
-        validateToken(tokenInfo.refreshToken(), memberId,
+        validateToken(tokenInfo.refreshToken(), memberId, role,
             fixedMachineTime.plusSeconds(jwtProperties.refreshTokenExpires()));
     }
 
@@ -88,15 +89,16 @@ class JwtTokenManagerTest {
         // given
         long memberId = 1L;
         Date future = Date.from(fixedMachineTime.plusSeconds(100000L));
-        String refreshToken = createToken(future, memberId);
+        Role role = Role.NORMAL;
+        String refreshToken = createToken(future, memberId, role);
 
         // when
         TokenInfo tokenInfo = jwtTokenManager.reIssue(refreshToken);
 
         // then
-        validateToken(tokenInfo.accessToken(), memberId,
+        validateToken(tokenInfo.accessToken(), memberId, role,
             fixedMachineTime.plusSeconds(jwtProperties.accessTokenExpires()));
-        validateToken(tokenInfo.refreshToken(), memberId,
+        validateToken(tokenInfo.refreshToken(), memberId, role,
             fixedMachineTime.plusSeconds(jwtProperties.refreshTokenExpires()));
     }
 
@@ -105,8 +107,9 @@ class JwtTokenManagerTest {
     void reIssueFailExpiredRefreshToken() throws Exception {
         // given
         long memberId = 1L;
+        Role role = Role.ADMIN;
         Date past = Date.from(fixedMachineTime.minusSeconds(100000L));
-        String refreshToken = createToken(past, memberId);
+        String refreshToken = createToken(past, memberId, role);
 
         // when & then
         assertThatThrownBy(() -> jwtTokenManager.reIssue(refreshToken))
@@ -135,8 +138,9 @@ class JwtTokenManagerTest {
     void parse() throws Exception {
         // given
         long memberId = 1L;
+        Role role = Role.NORMAL;
         Date future = Date.from(fixedMachineTime.plusSeconds(100000L));
-        String token = createToken(future, memberId);
+        String token = createToken(future, memberId, role);
 
         // when
         long result = jwtTokenManager.parse(token);
@@ -150,8 +154,9 @@ class JwtTokenManagerTest {
     void parsedClaims() throws Exception {
         // given
         long memberId = 1L;
+        Role role = Role.NORMAL;
         Date future = Date.from(fixedMachineTime.plusSeconds(100000L));
-        String token = createToken(future, memberId);
+        String token = createToken(future, memberId, role);
 
         // when
         UserContext userContext = jwtTokenManager.parsedClaims(token);
@@ -160,9 +165,10 @@ class JwtTokenManagerTest {
         assertThat(userContext.id()).isEqualTo(memberId);
     }
 
-    private String createToken(Date expired, long subject) {
+    private String createToken(Date expired, long subject, Role role) {
         return Jwts.builder()
             .subject(String.valueOf(subject))
+            .claim("role", role)
             .expiration(expired)
             .signWith(key)
             .compact();
@@ -171,12 +177,13 @@ class JwtTokenManagerTest {
     /**
      * token의 subject와 expiration이 일치하는지 검증하는 메서드입니다.
      */
-    private void validateToken(String token, long subject, Instant comparedMachineTime) {
+    private void validateToken(String token, long subject, Role role, Instant comparedMachineTime) {
         comparedMachineTime = removeNanoSecond(comparedMachineTime);
         Jws<Claims> claimsJws = parser.parseSignedClaims(token);
         Claims claims = claimsJws.getPayload();
 
         assertThat(claims.getSubject()).isEqualTo(String.valueOf(subject));
+        assertThat(claims.get("role")).isEqualTo(role.name());
 
         Instant expiration = claims.getExpiration().toInstant();
         assertThat(expiration).isEqualTo(comparedMachineTime);
