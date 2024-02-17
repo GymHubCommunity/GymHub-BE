@@ -43,7 +43,7 @@ public class PostController {
     }
 
     @GetMapping("/{postId}")
-    public ResponseEntity<PostDetailResponse> getPost(@PathVariable Long postId, UserContext userContext) {
+    public ResponseEntity<PostDetailResponse> getPost(@PathVariable Long postId, @Login UserContext userContext) {
         return ResponseEntity.ok(postService.findPost(postId, userContext));
     }
 }

@@ -28,16 +28,14 @@ public record PostDetailResponse(
     }
 
     private static List<String> getImageUrls(Post post) {
-        return post.getPostImages().isEmpty() ? Collections.emptyList() :
-            post.getPostImages().stream()
-                .map(postImage -> postImage.getImage().getUrl())
-                .toList();
+        return post.getPostImages().stream()
+            .map(postImage -> postImage.getImage().getUrl())
+            .toList();
     }
 
     private static List<String> getHashtags(Post post) {
-        return post.getPostHashtags().isEmpty() ? Collections.emptyList() :
-            post.getPostHashtags().stream()
-                .map(postHashtag -> postHashtag.getHashtag().getName())
-                .toList();
+        return post.getPostHashtags().stream()
+            .map(postHashtag -> postHashtag.getHashtag().getName())
+            .toList();
     }
 }
