@@ -33,6 +33,9 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
         }
         String accessToken = accessTokenBeforeProcessing.substring(BEARER.length());
         UserContext userContext = tokenParser.parsedClaims(accessToken);
+        if (!userContext.isNormal()) {
+            return false;
+        }
         request.setAttribute(MEMBER_INFO, userContext);
         return true;
     }

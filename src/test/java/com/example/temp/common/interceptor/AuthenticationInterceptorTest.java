@@ -8,6 +8,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.example.temp.auth.domain.Role;
 import com.example.temp.common.dto.UserContext;
 import com.example.temp.auth.infrastructure.TokenParser;
 import jakarta.servlet.http.HttpServletRequest;
@@ -42,6 +43,7 @@ class AuthenticationInterceptorTest {
         authenticationInterceptor = new AuthenticationInterceptor(tokenParser);
         userContext = UserContext.builder()
             .id(1L)
+            .role(Role.NORMAL)
             .build();
     }
 
@@ -97,6 +99,47 @@ class AuthenticationInterceptorTest {
         verify(response, times(1)).setStatus(HttpStatus.UNAUTHORIZED.value());
         verify(request, never()).setAttribute(anyString(), anyLong());
         verify(tokenParser, never()).parse(anyString());
+    }
+
+    @Test
+    @DisplayName("어드민은 AuthenticationInterceptor를 통과할 수 없다.")
+    void preHandleFailBecauseUserIsAdmin() throws Exception {
+        UserContext adminContext = UserContext.builder()
+            .role(Role.ADMIN)
+            .id(1L)
+            .build();
+
+        String token = "token";
+        when(request.getHeader(HttpHeaders.AUTHORIZATION))
+            .thenReturn("Bearer " + token);
+        when(tokenParser.parsedClaims(token))
+            .thenReturn(adminContext);
+
+        // when
+        boolean result = authenticationInterceptor.preHandle(request, response, null);
+
+        // then
+        assertThat(result).isFalse();
+        verify(request, never()).setAttribute("memberInfo", userContext);
+
+    }
+
+    @Test
+    @DisplayName("Http Method가 OPTIONS일 때, AuthenticationInterceptor를 통과한다")
+    void preHandleSuccessThatMethodIsOptions() throws Exception {
+        UserContext adminContext = UserContext.builder()
+            .role(Role.ADMIN)
+            .id(1L)
+            .build();
+
+        when(request.getMethod())
+            .thenReturn("OPTIONS");
+
+        // when
+        boolean result = authenticationInterceptor.preHandle(request, response, null);
+
+        // then
+        assertThat(result).isTrue();
     }
 
 }

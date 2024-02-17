@@ -12,4 +12,8 @@ public record UserContext(
     public static UserContext fromMember(Member fromMember) {
         return new UserContext(fromMember.getId(), Role.NORMAL);
     }
+
+    public boolean isNormal() {
+        return role == Role.NORMAL;
+    }
 }
