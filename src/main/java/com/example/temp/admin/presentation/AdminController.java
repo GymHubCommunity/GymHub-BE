@@ -11,6 +11,7 @@ import com.example.temp.auth.infrastructure.TokenManager;
 import com.example.temp.auth.presentation.RefreshCookieProperties;
 import com.example.temp.machine.application.MachineService;
 import com.example.temp.machine.dto.request.MachineBulkCreateRequest;
+import com.example.temp.machine.dto.request.MachineCreateRequest;
 import com.example.temp.machine.dto.response.MachineCreateResponse;
 import jakarta.servlet.http.HttpServletResponse;
 import java.time.LocalDateTime;
@@ -63,8 +64,14 @@ public class AdminController {
     }
 
     @PostMapping("/machines/bulk")
-    public ResponseEntity<List<MachineCreateResponse>> createMachinesBulk(MachineBulkCreateRequest request) {
+    public ResponseEntity<List<MachineCreateResponse>> createMachinesBulk(@RequestBody MachineBulkCreateRequest request) {
         List<MachineCreateResponse> response = machineService.createMachinesBulk(request);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/machines")
+    public ResponseEntity<MachineCreateResponse> createMachine(MachineCreateRequest request) {
+        MachineCreateResponse response = machineService.createMachine(request);
         return ResponseEntity.ok(response);
     }
 
