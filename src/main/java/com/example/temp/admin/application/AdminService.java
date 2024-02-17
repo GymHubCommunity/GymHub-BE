@@ -30,6 +30,9 @@ public class AdminService {
         if (!isSamePwd) {
             throw new ApiException(ErrorCode.ADMIN_LOGIN_FAIL);
         }
+        if (!admin.isActivate()) {
+            throw new ApiException(ErrorCode.ADMIN_PENDING);
+        }
         admin.login(now);
         return admin.getId();
     }

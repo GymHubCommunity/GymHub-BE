@@ -34,6 +34,7 @@ public class AdminInterceptor implements HandlerInterceptor {
         String accessToken = accessTokenBeforeProcessing.substring(BEARER.length());
         UserContext userContext = tokenParser.parsedClaims(accessToken);
         if (!userContext.isAdmin()) {
+            response.setStatus(HttpStatus.UNAUTHORIZED.value());
             return false;
         }
         request.setAttribute(MEMBER_INFO, userContext);

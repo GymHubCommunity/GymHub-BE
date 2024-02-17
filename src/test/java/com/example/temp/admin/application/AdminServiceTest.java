@@ -2,7 +2,6 @@ package com.example.temp.admin.application;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import com.example.temp.admin.domain.Admin;
 import com.example.temp.admin.dto.request.AdminLoginRequest;
@@ -129,10 +128,31 @@ class AdminServiceTest {
         LocalDateTime now = LocalDateTime.now();
         AdminLoginRequest request = new AdminLoginRequest(username, rawPwd);
 
-        // when & then
+        // when
         long loginAdminId = adminService.login(request, now);
+
+        // then
         Admin loginAdmin = em.find(Admin.class, loginAdminId);
         assertThat(loginAdmin.getLastLogin()).isEqualTo(now);
+    }
+
+    @Test
+    @DisplayName("아직 활성화되지 않은 어드민은 로그인이 불가능하다.")
+    void loginFailInactivate() throws Exception {
+        // given
+        String username = "username";
+        String rawPwd = "rawPwd";
+        String encodedPwd = passwordEncoder.encode(rawPwd);
+        LocalDateTime past = LocalDateTime.of(2010, 1, 1, 1, 1);
+        Admin admin = createInactivateAdmin(username, encodedPwd, past);
+
+        LocalDateTime now = LocalDateTime.now();
+        AdminLoginRequest request = new AdminLoginRequest(username, rawPwd);
+
+        // when & then
+        assertThatThrownBy(() -> adminService.login(request, now))
+            .isInstanceOf(ApiException.class)
+            .hasMessageContaining(ErrorCode.ADMIN_PENDING.getMessage());
     }
 
     @Test
