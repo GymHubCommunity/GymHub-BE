@@ -23,7 +23,7 @@ public class AdminService {
     private final BCryptPasswordEncoder passwordEncoder;
 
     @Transactional
-    public void login(AdminLoginRequest request, LocalDateTime now) {
+    public long login(AdminLoginRequest request, LocalDateTime now) {
         Admin admin = adminRepository.findByUsername(request.username())
             .orElseThrow(() -> new ApiException(ErrorCode.ADMIN_LOGIN_FAIL));
         boolean isSamePwd = passwordEncoder.matches(request.pwd(), admin.getPassword());
@@ -31,6 +31,7 @@ public class AdminService {
             throw new ApiException(ErrorCode.ADMIN_LOGIN_FAIL);
         }
         admin.login(now);
+        return admin.getId();
     }
 
     @Transactional

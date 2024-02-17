@@ -130,8 +130,8 @@ class AdminServiceTest {
         AdminLoginRequest request = new AdminLoginRequest(username, rawPwd);
 
         // when & then
-        assertDoesNotThrow(() -> adminService.login(request, now));
-        Admin loginAdmin = em.find(Admin.class, admin.getId());
+        long loginAdminId = adminService.login(request, now);
+        Admin loginAdmin = em.find(Admin.class, loginAdminId);
         assertThat(loginAdmin.getLastLogin()).isEqualTo(now);
     }
 
