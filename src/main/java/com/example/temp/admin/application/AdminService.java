@@ -17,6 +17,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class AdminService {
 
     public static final int PWD_MIN_LENGTH = 4;
+
+    @SuppressWarnings("java:S2068")
     public static final String PWD_REGEX = "^(?=.*\\d)(?=.*[a-zA-Z])(?=.*[!@#$%^&*\\-+=]).*$";
 
     private final AdminRepository adminRepository;
