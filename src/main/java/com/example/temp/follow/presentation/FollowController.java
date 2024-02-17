@@ -3,16 +3,16 @@ package com.example.temp.follow.presentation;
 import com.example.temp.common.annotation.Login;
 import com.example.temp.common.dto.UserContext;
 import com.example.temp.follow.application.FollowService;
-import com.example.temp.follow.dto.response.FollowInfo;
-import com.example.temp.follow.dto.response.FollowInfos;
+import com.example.temp.follow.dto.response.FollowInfoResult;
 import com.example.temp.follow.dto.response.FollowResponse;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -22,15 +22,17 @@ public class FollowController {
     private final FollowService followService;
 
     @GetMapping("/members/{memberId}/followings")
-    public ResponseEntity<FollowInfos> getFollowings(@Login UserContext userContext, @PathVariable Long memberId) {
-        List<FollowInfo> followInfos = followService.getFollowings(userContext, memberId);
-        return ResponseEntity.ok(FollowInfos.from(followInfos));
+    public ResponseEntity<FollowInfoResult> getFollowings(@Login UserContext userContext, @PathVariable Long memberId,
+        @RequestParam(defaultValue = "-1") Long lastId, @RequestParam int size) {
+        FollowInfoResult result = followService.getFollowings(userContext, memberId, lastId, PageRequest.ofSize(size));
+        return ResponseEntity.ok(result);
     }
 
     @GetMapping("/members/{memberId}/followers")
-    public ResponseEntity<FollowInfos> getFollowers(@Login UserContext userContext, @PathVariable Long memberId) {
-        List<FollowInfo> followInfos = followService.getFollowers(userContext, memberId);
-        return ResponseEntity.ok(FollowInfos.from(followInfos));
+    public ResponseEntity<FollowInfoResult> getFollowers(@Login UserContext userContext, @PathVariable Long memberId,
+        @RequestParam(defaultValue = "-1") Long lastId, @RequestParam int size) {
+        FollowInfoResult result = followService.getFollowers(userContext, memberId, lastId, PageRequest.ofSize(size));
+        return ResponseEntity.ok(result);
     }
 
     @PostMapping("/members/{memberId}/follow")

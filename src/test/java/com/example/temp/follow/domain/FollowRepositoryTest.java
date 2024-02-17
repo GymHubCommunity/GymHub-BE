@@ -16,6 +16,9 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
@@ -39,10 +42,7 @@ class FollowRepositoryTest {
         Member fromMember = saveMember();
         Member toMember = saveMember();
 
-        Follow follow = Follow.builder()
-            .from(fromMember)
-            .to(toMember)
-            .build();
+        Follow follow = saveFollow(fromMember, toMember);
         em.persist(follow);
 
         // when
@@ -60,12 +60,7 @@ class FollowRepositoryTest {
         // given
         Member fromMember = saveMember();
         Member toMember = saveMember();
-
-        Follow follow = Follow.builder()
-            .from(fromMember)
-            .to(toMember)
-            .build();
-        em.persist(follow);
+        saveFollow(fromMember, toMember);
 
         // when
         Optional<Follow> resultOpt = followRepository.findByFromIdAndToId(fromMember.getId(), notExistId);
@@ -80,13 +75,7 @@ class FollowRepositoryTest {
         // given
         Member executor = saveMember();
         Member target = saveMember();
-
-        Follow follow = Follow.builder()
-            .from(executor)
-            .to(target)
-            .status(FollowStatus.APPROVED)
-            .build();
-        em.persist(follow);
+        saveFollow(executor, target);
 
         // when
         boolean result = followRepository.checkExecutorFollowsTarget(executor.getId(), target.getId());
@@ -98,17 +87,11 @@ class FollowRepositoryTest {
     @ParameterizedTest
     @DisplayName("executor가 target에 대해 팔로우가 SUCCESS 이외의 상태라면 false를 반환한다")
     @ValueSource(strings = {"PENDING", "REJECTED", "CANCELED"})
-    void checkExecutorFollowTargetFalse1(String statusStr) throws Exception {
+    void checkExecutorFollowTargetFalse1(String statusValue) throws Exception {
         // given
         Member executor = saveMember();
         Member target = saveMember();
-
-        Follow follow = Follow.builder()
-            .from(executor)
-            .to(target)
-            .status(FollowStatus.valueOf(statusStr))
-            .build();
-        em.persist(follow);
+        saveFollow(executor, target, FollowStatus.valueOf(statusValue));
 
         // when
         boolean result = followRepository.checkExecutorFollowsTarget(executor.getId(), target.getId());
@@ -125,12 +108,7 @@ class FollowRepositoryTest {
         Member target = saveMember();
         Member anotherMember = saveMember();
 
-        Follow follow = Follow.builder()
-            .from(executor)
-            .to(anotherMember)
-            .status(FollowStatus.APPROVED)
-            .build();
-        em.persist(follow);
+        saveFollow(executor, anotherMember);
 
         // when
         boolean result = followRepository.checkExecutorFollowsTarget(executor.getId(), target.getId());
@@ -156,6 +134,133 @@ class FollowRepositoryTest {
         // then
         assertThat(result).hasSize(2)
             .contains(follow1, follow2);
+    }
+
+    @Test
+    @DisplayName("fromId와 status가 일치하는 Follow 페이지 목록을 조회한다")
+    void findAllByFromIdAndStatusUsingPage() throws Exception {
+        // given
+        Member fromMember = saveMember();
+        Member toMember1 = saveMember();
+        Member toMember2 = saveMember();
+        FollowStatus targetStatus = FollowStatus.PENDING;
+        Follow follow1 = saveFollow(fromMember, toMember1, targetStatus);
+        Follow follow2 = saveFollow(fromMember, toMember2, targetStatus);
+
+        Pageable pageable = PageRequest.ofSize(2);
+        // when
+        Slice<Follow> result = followRepository.findAllByFromIdAndStatus(
+            fromMember.getId(), targetStatus, -1, pageable);
+
+        // then
+        assertThat(result).hasSize((int) pageable.getPageSize())
+            .containsExactly(follow1, follow2);
+    }
+
+    @Test
+    @DisplayName("페이지 요청 시, 일치하는 fromId와 status가 없으면 비어있는 결과를 반환한다.")
+    void findAllByFromIdAndStatusUsingPageWhenEmpty() throws Exception {
+        // given
+        Member fromMember = saveMember();
+        Member toMember = saveMember();
+        Member target = saveMember();
+        FollowStatus targetStatus = FollowStatus.PENDING;
+        saveFollow(fromMember, toMember, targetStatus);
+
+        Pageable pageable = PageRequest.ofSize(2);
+
+        // when
+        Slice<Follow> result = followRepository.findAllByFromIdAndStatus(target.getId(), targetStatus,
+            -1, pageable);
+
+        // then
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    @DisplayName("fromId를 사용해 팔로우 페이지 요청시, 페이지 구간에 포함되지 않은 값은 결과에 포함되지 않는다.")
+    void findAllByFromIdAndStatusUsingPageNotIn() throws Exception {
+        // given
+        Member fromMember = saveMember();
+        Member toMember1 = saveMember();
+        Member toMember2 = saveMember();
+        FollowStatus targetStatus = FollowStatus.PENDING;
+
+        saveFollow(fromMember, toMember1, targetStatus);
+        Follow follow = saveFollow(fromMember, toMember2, targetStatus);
+
+        Pageable pageable = PageRequest.ofSize(2);
+
+        // when
+        Slice<Follow> result = followRepository.findAllByFromIdAndStatus(fromMember.getId(), targetStatus,
+            follow.getId(), pageable);
+
+        // then
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    @DisplayName("toId와 status가 일치하는 Follow 페이지 목록을 조회한다")
+    void findAllByToIdAndStatusUsingPage() throws Exception {
+        // given
+        Member fromMember1 = saveMember();
+        Member fromMember2 = saveMember();
+        Member toMember = saveMember();
+        FollowStatus targetStatus = FollowStatus.PENDING;
+        Follow follow1 = saveFollow(fromMember1, toMember, targetStatus);
+        Follow follow2 = saveFollow(fromMember2, toMember, targetStatus);
+
+        Pageable pageable = PageRequest.ofSize(2);
+
+        // when
+        Slice<Follow> result = followRepository.findAllByToIdAndStatus(
+            toMember.getId(), targetStatus, -1, pageable);
+
+        // then
+        assertThat(result).hasSize(2)
+            .containsExactly(follow1, follow2);
+    }
+
+    @Test
+    @DisplayName("페이지 요청 시, 일치하는 toId와 status가 없으면 비어있는 결과를 반환한다.")
+    void findAllByToIdAndStatusUsingPageWhenEmpty() throws Exception {
+        // given
+        Member target = saveMember();
+        Member fromMember = saveMember();
+        Member toMember = saveMember();
+
+        FollowStatus targetStatus = FollowStatus.PENDING;
+        saveFollow(fromMember, toMember, targetStatus);
+
+        Pageable pageable = PageRequest.ofSize(2);
+
+        // when
+        Slice<Follow> result = followRepository.findAllByToIdAndStatus(
+            target.getId(), targetStatus, -1, pageable);
+
+        // then
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    @DisplayName("toId를 사용해 팔로우 페이지 요청시, 페이지 구간에 포함되지 않은 값은 결과에 포함되지 않는다.")
+    void findAllByToIdAndStatusUsingPageNotIn() throws Exception {
+        // given
+        Member fromMember1 = saveMember();
+        Member fromMember2 = saveMember();
+        Member toMember = saveMember();
+        FollowStatus targetStatus = FollowStatus.PENDING;
+        saveFollow(fromMember1, toMember, targetStatus);
+        Follow follow = saveFollow(fromMember2, toMember, targetStatus);
+
+        Pageable pageable = PageRequest.ofSize(2);
+
+        // when
+        Slice<Follow> result = followRepository.findAllByToIdAndStatus(toMember.getId(), targetStatus,
+            follow.getId(), pageable);
+
+        // then
+        assertThat(result).isEmpty();
     }
 
     @Test
@@ -217,10 +322,16 @@ class FollowRepositoryTest {
             .contains(related1, related2);
     }
 
-    private Follow saveFollow(Member fromMember, Member toMember1, FollowStatus status) {
+
+    private Follow saveFollow(Member fromMember, Member toMember) {
+        return saveFollow(fromMember, toMember, FollowStatus.APPROVED);
+    }
+
+
+    private Follow saveFollow(Member fromMember, Member toMember, FollowStatus status) {
         Follow follow = Follow.builder()
             .from(fromMember)
-            .to(toMember1)
+            .to(toMember)
             .status(status)
             .build();
         em.persist(follow);

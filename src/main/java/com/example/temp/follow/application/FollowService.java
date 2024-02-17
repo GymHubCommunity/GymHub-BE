@@ -11,7 +11,7 @@ import com.example.temp.common.exception.ApiException;
 import com.example.temp.follow.domain.Follow;
 import com.example.temp.follow.domain.FollowRepository;
 import com.example.temp.follow.domain.FollowStatus;
-import com.example.temp.follow.dto.response.FollowInfo;
+import com.example.temp.follow.dto.response.FollowInfoResult;
 import com.example.temp.follow.dto.response.FollowResponse;
 import com.example.temp.member.domain.Member;
 import com.example.temp.member.domain.MemberRepository;
@@ -20,6 +20,8 @@ import java.util.List;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.event.EventListener;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,41 +34,47 @@ public class FollowService {
     private final MemberRepository memberRepository;
 
     /**
-     * targetId를 팔로우하고 있는 사람들의 목록을 보여줍니다. Target이 비공개 계정일 때는 자기 자신과 Target을 팔로우하고 있는 사람들만이 실행할 수 있습니다.
+     * targetId를 팔로우하고 있는 사람들의 목록과 마지막 데이터가 포함되었는지 여부를 보여줍니다. Target이 비공개 계정일 때는 자기 자신과 Target을 팔로우하고 있는 사람들만이 실행할 수
+     * 있습니다.
      *
      * @param userContext 로그인한 사용자의 정보
      * @param targetId    팔로잉 목록을 보려고 하는 대상의 ID
+     * @param lastId      이전에 조회했던 마지막 팔로우 엔티티의 아이디
+     * @param pageable
      * @return FollowInfo 객체 리스트를 반환합니다. 각 FollowInfo 객체는 팔로잉 대상의 정보와 팔로우 ID를 포함하고 있습니다.
      * @throws ApiException AUTHORIZED_FAIL: 팔로잉 목록을 볼 권한이 없을 때 발생합니다.
      */
-    public List<FollowInfo> getFollowings(UserContext userContext, long targetId) {
+    public FollowInfoResult getFollowings(UserContext userContext, Long targetId, long lastId, Pageable pageable) {
         Member target = memberRepository.findById(targetId)
             .orElseThrow(() -> new ApiException(MEMBER_NOT_FOUND));
         if (!target.isPublicAccount()) {
             validateViewAuthorization(targetId, userContext.id());
         }
-        return followRepository.findAllByFromIdAndStatus(targetId, FollowStatus.APPROVED).stream()
-            .map(follow -> FollowInfo.of(follow.getTo(), follow.getId()))
-            .toList();
+        Slice<Follow> follows = followRepository.findAllByFromIdAndStatus(targetId, FollowStatus.APPROVED,
+            lastId, pageable);
+        return FollowInfoResult.createFollowingsResult(follows);
     }
 
     /**
-     * Target이 팔로우하고 있는 사람들의 목록을 보여줍니다. Target이 비공개 계정일 때는 자기 자신과 Target을 팔로우하고 있는 사람들만이 실행할 수 있습니다.
+     * Target이 팔로우하고 있는 사람들의 목록과 마지막 데이터가 포함되었는지 여부를 보여줍니다. Target이 비공개 계정일 때는 자기 자신과 Target을 팔로우하고 있는 사람들만이 실행할 수
+     * 있습니다.
      *
      * @param userContext 로그인한 사용자의 정보
      * @param targetId    팔로워 목록을 보려고 하는 대상의 ID
+     * @param lastId      이전에 조회했던 마지막 팔로우 엔티티의 아이디
+     * @param pageable
      * @return FollowInfo 객체 리스트를 반환합니다. 각 FollowInfo 객체는 팔로워 대상의 정보와 팔로우 ID를 포함하고 있습니다.
      * @throws ApiException AUTHORIZED_FAIL: 팔로워 목록을 볼 권한이 없을 때 발생합니다.
      */
-    public List<FollowInfo> getFollowers(UserContext userContext, long targetId) {
+    public FollowInfoResult getFollowers(UserContext userContext, long targetId, long lastId, Pageable pageable) {
         Member target = memberRepository.findById(targetId)
             .orElseThrow(() -> new ApiException(MEMBER_NOT_FOUND));
         if (!target.isPublicAccount()) {
             validateViewAuthorization(targetId, userContext.id());
         }
-        return followRepository.findAllByToIdAndStatus(targetId, FollowStatus.APPROVED).stream()
-            .map(follow -> FollowInfo.of(follow.getFrom(), follow.getId()))
-            .toList();
+        Slice<Follow> follows = followRepository.findAllByToIdAndStatus(targetId,
+            FollowStatus.APPROVED, lastId, pageable);
+        return FollowInfoResult.createFollowersResult(follows);
     }
 
     private void validateViewAuthorization(long targetId, long executorId) {
