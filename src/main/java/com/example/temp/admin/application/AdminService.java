@@ -22,6 +22,7 @@ public class AdminService {
     private final AdminRepository adminRepository;
     private final BCryptPasswordEncoder passwordEncoder;
 
+    @Transactional
     public void login(AdminLoginRequest request) {
         // TODO
     }
@@ -29,12 +30,7 @@ public class AdminService {
     @Transactional
     public long register(AdminRegisterRequest request, LocalDateTime now) {
         validatePwd(request.pwd());
-        Admin admin = Admin.builder()
-            .username(request.username())
-            .password(passwordEncoder.encode(request.pwd()))
-            .lastLogin(now)
-            .build();
-
+        Admin admin = request.toEntityWithEncoderAndTime(passwordEncoder, now);
         adminRepository.save(admin);
         return admin.getId();
     }
