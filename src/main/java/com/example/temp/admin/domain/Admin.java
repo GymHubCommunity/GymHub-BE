@@ -14,14 +14,14 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "admin_members")
+@Table(name = "admins")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
-public class AdminMember extends BaseTimeEntity {
+public class Admin extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "admin_member_id")
+    @Column(name = "admin_id")
     private Long id;
 
     @Column(nullable = false, unique = true, length = 32)
@@ -34,7 +34,7 @@ public class AdminMember extends BaseTimeEntity {
     private LocalDateTime lastLogin;
 
     @Builder
-    private AdminMember(String username, String password, LocalDateTime lastLogin) {
+    private Admin(String username, String password, LocalDateTime lastLogin) {
         this.username = username;
         this.password = password;
         this.lastLogin = lastLogin;
