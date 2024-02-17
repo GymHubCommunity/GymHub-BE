@@ -1,5 +1,8 @@
 package com.example.temp.admin.presentation;
 
+import com.example.temp.admin.application.AdminService;
+import com.example.temp.admin.dto.request.AdminLoginRequest;
+import com.example.temp.admin.dto.request.AdminRegisterRequest;
 import com.example.temp.machine.dto.request.MachineBulkCreateRequest;
 import com.example.temp.machine.dto.request.MachineCreateRequest;
 import com.example.temp.machine.application.MachineService;
@@ -8,6 +11,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -18,10 +22,18 @@ public class AdminController {
 
     private final MachineService machineService;
 
-    @PostMapping("/machines")
-    public ResponseEntity<MachineCreateResponse> createMachine(MachineCreateRequest request) {
-        MachineCreateResponse response = machineService.createMachine(request);
-        return ResponseEntity.ok(response);
+    private final AdminService adminService;
+
+    @PostMapping("/login")
+    public ResponseEntity<Void> login(@RequestBody AdminLoginRequest request) {
+        adminService.login(request);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/register")
+    public ResponseEntity<Void> register(@RequestBody AdminRegisterRequest request) {
+        adminService.register(request);
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/machines/bulk")
