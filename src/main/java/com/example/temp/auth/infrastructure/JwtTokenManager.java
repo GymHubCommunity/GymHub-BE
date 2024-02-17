@@ -86,16 +86,6 @@ public class JwtTokenManager implements TokenManager, TokenParser {
             .compact();
     }
 
-
-    private String makeToken(String sub, long expires, LocalDateTime now) {
-        LocalDateTime expiresDateTime = now.plusSeconds(expires);
-        return Jwts.builder()
-            .subject(sub)
-            .expiration(Timestamp.valueOf(expiresDateTime))
-            .signWith(key)
-            .compact();
-    }
-
     /**
      * 입력받은 refreshToken을 사용해 accessToken과 refreshToken을 재발급합니다.
      *
@@ -134,6 +124,7 @@ public class JwtTokenManager implements TokenManager, TokenParser {
         Claims claims = claimsJws.getPayload();
         return UserContext.builder()
             .id(Long.parseLong(claims.getSubject()))
+            .role(Role.valueOf(claims.get("role", String.class)))
             .build();
     }
 }

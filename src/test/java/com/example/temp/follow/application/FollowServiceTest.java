@@ -11,6 +11,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
+import com.example.temp.auth.domain.Role;
 import com.example.temp.common.dto.UserContext;
 import com.example.temp.common.entity.Email;
 import com.example.temp.common.exception.ApiException;
@@ -64,7 +65,7 @@ class FollowServiceTest {
         Member toMember = saveMemberWithFollowStrategy(FollowStrategy.EAGER);
 
         // when
-        FollowResponse response = followService.follow(UserContext.from(fromMember), toMember.getId());
+        FollowResponse response = followService.follow(UserContext.fromMember(fromMember), toMember.getId());
 
         // then
         assertThat(response.status()).isEqualTo(toMember.getFollowStrategy().getFollowStatus());
@@ -78,7 +79,7 @@ class FollowServiceTest {
         Member sameMember = saveMember();
 
         // when
-        assertThatThrownBy(() -> followService.follow(UserContext.from(sameMember), sameMember.getId()))
+        assertThatThrownBy(() -> followService.follow(UserContext.fromMember(sameMember), sameMember.getId()))
             .isInstanceOf(ApiException.class)
             .hasMessageContaining(FOLLOW_SELF_FAIL.getMessage());
     }
@@ -91,7 +92,7 @@ class FollowServiceTest {
         Member toMember = saveMemberWithFollowStrategy(FollowStrategy.EAGER);
 
         // when
-        FollowResponse response = followService.follow(UserContext.from(fromMember), toMember.getId());
+        FollowResponse response = followService.follow(UserContext.fromMember(fromMember), toMember.getId());
 
         // then
         assertThat(response.status()).isEqualTo(FollowStatus.APPROVED);
@@ -105,7 +106,7 @@ class FollowServiceTest {
         Member toMember = saveMemberWithFollowStrategy(FollowStrategy.LAZY);
 
         // when
-        FollowResponse response = followService.follow(UserContext.from(fromMember), toMember.getId());
+        FollowResponse response = followService.follow(UserContext.fromMember(fromMember), toMember.getId());
 
         // then
         assertThat(response.status()).isEqualTo(FollowStatus.PENDING);
@@ -120,7 +121,7 @@ class FollowServiceTest {
         saveFollow(fromMember, toMember, FollowStatus.APPROVED);
 
         // when & then
-        assertThatThrownBy(() -> followService.follow(UserContext.from(fromMember), toMember.getId()))
+        assertThatThrownBy(() -> followService.follow(UserContext.fromMember(fromMember), toMember.getId()))
             .isInstanceOf(ApiException.class)
             .hasMessageContaining(FOLLOW_ALREADY_RELATED.getMessage());
     }
@@ -134,7 +135,7 @@ class FollowServiceTest {
         saveFollow(fromMember, toMember, FollowStatus.PENDING);
 
         // when
-        assertThatThrownBy(() -> followService.follow(UserContext.from(fromMember), toMember.getId()))
+        assertThatThrownBy(() -> followService.follow(UserContext.fromMember(fromMember), toMember.getId()))
             .isInstanceOf(ApiException.class)
             .hasMessageContaining(FOLLOW_ALREADY_RELATED.getMessage());
     }
@@ -149,7 +150,7 @@ class FollowServiceTest {
         saveFollow(fromMember, toMember, FollowStatus.valueOf(statusStr));
 
         // when
-        FollowResponse response = followService.follow(UserContext.from(fromMember), toMember.getId());
+        FollowResponse response = followService.follow(UserContext.fromMember(fromMember), toMember.getId());
 
         // then
         assertThat(response.status()).isEqualTo(FollowStatus.APPROVED);
@@ -163,7 +164,7 @@ class FollowServiceTest {
         Member fromMember = saveMember();
 
         // when & then
-        assertThatThrownBy(() -> followService.follow(UserContext.from(fromMember), notExistMemberId))
+        assertThatThrownBy(() -> followService.follow(UserContext.fromMember(fromMember), notExistMemberId))
             .isInstanceOf(ApiException.class)
             .hasMessageContaining(MEMBER_NOT_FOUND.getMessage());
     }
@@ -176,7 +177,7 @@ class FollowServiceTest {
         Member toMember = saveMember();
 
         // when & then
-        assertThatThrownBy(() -> followService.follow(new UserContext(notExistMemberId), toMember.getId()))
+        assertThatThrownBy(() -> followService.follow(new UserContext(notExistMemberId, Role.NORMAL), toMember.getId()))
             .isInstanceOf(ApiException.class)
             .hasMessageContaining(AUTHENTICATED_FAIL.getMessage());
     }
@@ -190,7 +191,7 @@ class FollowServiceTest {
         Follow follow = saveFollow(fromMember, target, FollowStatus.APPROVED);
 
         // when
-        followService.unfollow(UserContext.from(fromMember), target.getId());
+        followService.unfollow(UserContext.fromMember(fromMember), target.getId());
 
         // then
         assertThat(follow.getStatus()).isEqualTo(FollowStatus.CANCELED);
@@ -204,7 +205,7 @@ class FollowServiceTest {
         Member target = saveMember();
 
         // when & then
-        assertThatThrownBy(() -> followService.unfollow(UserContext.from(fromMember), target.getId()))
+        assertThatThrownBy(() -> followService.unfollow(UserContext.fromMember(fromMember), target.getId()))
             .isInstanceOf(ApiException.class)
             .hasMessageContaining(FOLLOW_NOT_FOUND.getMessage());
     }
@@ -216,7 +217,7 @@ class FollowServiceTest {
         Member fromMember = saveMember();
 
         // when & then
-        assertThatThrownBy(() -> followService.unfollow(UserContext.from(fromMember), notExistMemberId))
+        assertThatThrownBy(() -> followService.unfollow(UserContext.fromMember(fromMember), notExistMemberId))
             .isInstanceOf(ApiException.class)
             .hasMessageContaining(MEMBER_NOT_FOUND.getMessage());
     }
@@ -230,7 +231,7 @@ class FollowServiceTest {
         Follow follow = saveFollow(fromMember, target, FollowStatus.PENDING);
 
         // when
-        followService.acceptFollowRequest(UserContext.from(target), follow.getId());
+        followService.acceptFollowRequest(UserContext.fromMember(target), follow.getId());
 
         // then
         assertThat(follow.getStatus()).isEqualTo(FollowStatus.APPROVED);
@@ -246,7 +247,7 @@ class FollowServiceTest {
         Member anotherMember = saveMember();
 
         // when & then
-        assertThatThrownBy(() -> followService.acceptFollowRequest(UserContext.from(anotherMember), follow.getId()))
+        assertThatThrownBy(() -> followService.acceptFollowRequest(UserContext.fromMember(anotherMember), follow.getId()))
             .isInstanceOf(ApiException.class)
             .hasMessageContaining(AUTHORIZED_FAIL.getMessage());
     }
@@ -261,7 +262,7 @@ class FollowServiceTest {
         Follow follow = saveFollow(fromMember, target, FollowStatus.valueOf(statusStr));
 
         // when & then
-        assertThatThrownBy(() -> followService.acceptFollowRequest(UserContext.from(target), follow.getId()))
+        assertThatThrownBy(() -> followService.acceptFollowRequest(UserContext.fromMember(target), follow.getId()))
             .isInstanceOf(ApiException.class)
             .hasMessageContaining(FOLLOW_NOT_PENDING.getMessage());
     }
@@ -276,7 +277,7 @@ class FollowServiceTest {
         Follow follow = saveFollow(fromMember, target, FollowStatus.valueOf(prevStatus));
 
         // when
-        followService.rejectFollowRequest(UserContext.from(target), follow.getId());
+        followService.rejectFollowRequest(UserContext.fromMember(target), follow.getId());
 
         // then
         assertThat(follow.getStatus()).isEqualTo(FollowStatus.REJECTED);
@@ -292,7 +293,7 @@ class FollowServiceTest {
         Member anotherMember = saveMember();
 
         // when & then
-        assertThatThrownBy(() -> followService.rejectFollowRequest(UserContext.from(anotherMember), follow.getId()))
+        assertThatThrownBy(() -> followService.rejectFollowRequest(UserContext.fromMember(anotherMember), follow.getId()))
             .isInstanceOf(ApiException.class)
             .hasMessageContaining(AUTHORIZED_FAIL.getMessage());
     }
@@ -311,7 +312,7 @@ class FollowServiceTest {
             .toList();
 
         // when
-        FollowInfoResult result = followService.getFollowings(UserContext.from(target), target.getId(), -1, pageable);
+        FollowInfoResult result = followService.getFollowings(UserContext.fromMember(target), target.getId(), -1, pageable);
 
         // then
         List<FollowInfo> infos = result.followInfos();
@@ -342,7 +343,7 @@ class FollowServiceTest {
         saveTargetFollowings(FollowStatus.APPROVED, target, members, idx, approvedCnt);
 
         // when
-        FollowInfoResult result = followService.getFollowings(UserContext.from(target), target.getId(), -1, pageable);
+        FollowInfoResult result = followService.getFollowings(UserContext.fromMember(target), target.getId(), -1, pageable);
 
         // then
         assertThat(result.followInfos()).hasSize(approvedCnt);
@@ -359,7 +360,7 @@ class FollowServiceTest {
 
         // when & then
         assertDoesNotThrow(
-            () -> followService.getFollowings(UserContext.from(anotherMember), publicAccountMember.getId(), -1,
+            () -> followService.getFollowings(UserContext.fromMember(anotherMember), publicAccountMember.getId(), -1,
                 pageable));
     }
 
@@ -371,7 +372,7 @@ class FollowServiceTest {
         Member member = saveMember();
 
         // when
-        FollowInfoResult result = followService.getFollowings(UserContext.from(member), member.getId(), -1, pageable);
+        FollowInfoResult result = followService.getFollowings(UserContext.fromMember(member), member.getId(), -1, pageable);
 
         // then
         assertThat(result.hasNext()).isFalse();
@@ -389,7 +390,7 @@ class FollowServiceTest {
         saveFollow(member, other2, FollowStatus.APPROVED);
 
         // when
-        FollowInfoResult result = followService.getFollowings(UserContext.from(member), member.getId(), -1, pageable);
+        FollowInfoResult result = followService.getFollowings(UserContext.fromMember(member), member.getId(), -1, pageable);
 
         // then
         assertThat(result.hasNext()).isTrue();
@@ -407,7 +408,7 @@ class FollowServiceTest {
 
         // when & then
         assertDoesNotThrow(
-            () -> followService.getFollowings(UserContext.from(anotherMember), privateMember.getId(), -1, pageable));
+            () -> followService.getFollowings(UserContext.fromMember(anotherMember), privateMember.getId(), -1, pageable));
     }
 
     @Test
@@ -422,7 +423,7 @@ class FollowServiceTest {
 
         // when & then
         assertThatThrownBy(
-            () -> followService.getFollowings(UserContext.from(anotherMember), privateMember.getId(), -1, pageable))
+            () -> followService.getFollowings(UserContext.fromMember(anotherMember), privateMember.getId(), -1, pageable))
             .isInstanceOf(ApiException.class)
             .hasMessageContaining(AUTHORIZED_FAIL.getMessage());
     }
@@ -444,7 +445,7 @@ class FollowServiceTest {
         em.clear();
 
         // when
-        FollowInfoResult result = followService.getFollowers(UserContext.from(target), target.getId(), -1, pageable);
+        FollowInfoResult result = followService.getFollowers(UserContext.fromMember(target), target.getId(), -1, pageable);
 
         // then
         List<FollowInfo> infos = result.followInfos();
@@ -476,7 +477,7 @@ class FollowServiceTest {
         saveTargetFollowers(FollowStatus.APPROVED, target, members, idx, approvedCnt);
 
         // when
-        FollowInfoResult result = followService.getFollowers(UserContext.from(target), target.getId(), -1, pageable);
+        FollowInfoResult result = followService.getFollowers(UserContext.fromMember(target), target.getId(), -1, pageable);
 
         // then
         assertThat(result.followInfos()).hasSize(approvedCnt);
@@ -493,7 +494,7 @@ class FollowServiceTest {
 
         // when & then
         assertDoesNotThrow(
-            () -> followService.getFollowers(UserContext.from(anotherMember), publicAccountMember.getId(), -1,
+            () -> followService.getFollowers(UserContext.fromMember(anotherMember), publicAccountMember.getId(), -1,
                 pageable));
     }
 
@@ -508,7 +509,7 @@ class FollowServiceTest {
         saveFollow(anotherMember, privateMember, FollowStatus.APPROVED);
 
         // when & then
-        assertDoesNotThrow(() -> followService.getFollowers(UserContext.from(anotherMember), privateMember.getId(), -1,
+        assertDoesNotThrow(() -> followService.getFollowers(UserContext.fromMember(anotherMember), privateMember.getId(), -1,
             pageable));
     }
 
@@ -520,7 +521,7 @@ class FollowServiceTest {
         Member member = saveMember();
 
         // when
-        FollowInfoResult result = followService.getFollowers(UserContext.from(member), member.getId(), -1, pageable);
+        FollowInfoResult result = followService.getFollowers(UserContext.fromMember(member), member.getId(), -1, pageable);
 
         // then
         assertThat(result.hasNext()).isFalse();
@@ -538,7 +539,7 @@ class FollowServiceTest {
         saveFollow(other2, member, FollowStatus.APPROVED);
 
         // when
-        FollowInfoResult result = followService.getFollowers(UserContext.from(member), member.getId(), -1, pageable);
+        FollowInfoResult result = followService.getFollowers(UserContext.fromMember(member), member.getId(), -1, pageable);
 
         // then
         assertThat(result.hasNext()).isTrue();
@@ -555,7 +556,7 @@ class FollowServiceTest {
         saveFollow(privateMember, anotherMember, FollowStatus.PENDING);
 
         // when & then
-        assertThatThrownBy(() -> followService.getFollowers(UserContext.from(anotherMember), privateMember.getId(),
+        assertThatThrownBy(() -> followService.getFollowers(UserContext.fromMember(anotherMember), privateMember.getId(),
             -1, pageable))
             .isInstanceOf(ApiException.class)
             .hasMessageContaining(AUTHORIZED_FAIL.getMessage());

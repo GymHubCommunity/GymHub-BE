@@ -163,6 +163,7 @@ class JwtTokenManagerTest {
 
         // then
         assertThat(userContext.id()).isEqualTo(memberId);
+        assertThat(userContext.role()).isEqualTo(role);
     }
 
     private String createToken(Date expired, long subject, Role role) {
@@ -183,7 +184,7 @@ class JwtTokenManagerTest {
         Claims claims = claimsJws.getPayload();
 
         assertThat(claims.getSubject()).isEqualTo(String.valueOf(subject));
-        assertThat(claims.get("role")).isEqualTo(role.name());
+        assertThat(claims).containsEntry("role", role.name());
 
         Instant expiration = claims.getExpiration().toInstant();
         assertThat(expiration).isEqualTo(comparedMachineTime);
