@@ -7,7 +7,7 @@ import com.example.temp.common.exception.ApiException;
 import com.example.temp.common.exception.ErrorCode;
 import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,7 +20,7 @@ public class AdminService {
     public static final String PWD_REGEX = "^(?=.*\\d)(?=.*[a-zA-Z])(?=.*[!@#$%^&*\\-+=]).*$";
 
     private final AdminRepository adminRepository;
-    private final BCryptPasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
 
     @Transactional
     public long login(AdminLoginRequest request, LocalDateTime now) {
