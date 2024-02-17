@@ -26,7 +26,7 @@ public class AdminController {
 
     @PostMapping("/login")
     public ResponseEntity<Void> login(@RequestBody AdminLoginRequest request) {
-        adminService.login(request);
+        adminService.login(request, LocalDateTime.now());
         return ResponseEntity.ok().build();
     }
 

@@ -43,4 +43,7 @@ public class Admin extends BaseTimeEntity {
         this.activate = activate;
     }
 
+    public void login(LocalDateTime now) {
+        this.lastLogin = now;
+    }
 }
