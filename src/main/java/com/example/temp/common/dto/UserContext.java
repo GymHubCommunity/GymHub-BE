@@ -16,4 +16,8 @@ public record UserContext(
     public boolean isNormal() {
         return role == Role.NORMAL;
     }
+
+    public boolean isAdmin() {
+        return role == Role.ADMIN;
+    }
 }
