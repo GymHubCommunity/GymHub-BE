@@ -30,7 +30,7 @@ public record PostCreateResponse(
 
     private static List<String> urlFromPostImage(List<PostImage> postImages) {
         return postImages.stream()
-            .map(postImage -> postImage.getImage().getUrl())
+            .map(PostImage::getImageUrl)
             .toList();
     }
 
