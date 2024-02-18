@@ -11,6 +11,7 @@ import com.example.temp.image.domain.ImageRepository;
 import com.example.temp.image.dto.request.PresignedUrlRequest;
 import java.net.URL;
 import java.time.Duration;
+import java.util.Optional;
 import java.util.function.Consumer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -57,8 +58,15 @@ public class ImageService {
     }
 
     private void saveImageUrl(URL url) {
-        String imageUrl = url.getHost() + url.getPath();
+        String imageUrl = extractImageUrl(url);
         imageRepository.save(Image.create(imageUrl));
+    }
+
+    private String extractImageUrl(URL url) {
+        return Optional.of(url.toString().indexOf("?"))
+            .filter(index -> index != -1)
+            .map(index -> url.toString().substring(0, index))
+            .orElse(url.toString());
     }
 
     private String generateFileName(Long memberId) {

@@ -1,5 +1,6 @@
 package com.example.temp.image.application;
 
+import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -12,6 +13,7 @@ import com.example.temp.image.domain.ImageRepository;
 import com.example.temp.image.dto.request.PresignedUrlRequest;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -60,7 +62,8 @@ class ImageServiceTest {
 
         // then
         validateUrl(presignedUrl);
-        String imageUrl = presignedUrl.getHost() + presignedUrl.getPath();
+        String imageUrl = extractImageUrl(presignedUrl);
+
         assertThat(imageRepository.existsByUrl(imageUrl)).isTrue();
     }
 
@@ -121,5 +124,12 @@ class ImageServiceTest {
         assertThatThrownBy(() -> imageService.createPresignedUrl(userContext, request))
             .isInstanceOf(ApiException.class)
             .hasMessageContaining(ErrorCode.EXTENSION_NOT_SUPPORTED.getMessage());
+    }
+
+    private String extractImageUrl(URL url) {
+        return Optional.of(url.toString().indexOf("?"))
+            .filter(index -> index != -1)
+            .map(index -> url.toString().substring(0, index))
+            .orElse(url.toString());
     }
 }
