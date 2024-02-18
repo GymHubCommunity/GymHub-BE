@@ -2,6 +2,7 @@ package com.example.temp.post.application;
 
 import static com.example.temp.common.exception.ErrorCode.AUTHENTICATED_FAIL;
 import static com.example.temp.common.exception.ErrorCode.IMAGE_NOT_FOUND;
+import static com.example.temp.common.exception.ErrorCode.POST_NOT_FOUND;
 
 import com.example.temp.common.dto.UserContext;
 import com.example.temp.common.exception.ApiException;
@@ -21,6 +22,7 @@ import com.example.temp.post.domain.PostRepository;
 import com.example.temp.post.dto.request.PostCreateRequest;
 import com.example.temp.post.dto.response.PagePostResponse;
 import com.example.temp.post.dto.response.PostCreateResponse;
+import com.example.temp.post.dto.response.PostDetailResponse;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -60,6 +62,13 @@ public class PostService {
         List<Member> followings = findFollowingOf(member);
         Page<Post> posts = postRepository.findByMemberInOrderByRegisteredAtDesc(followings, pageable);
         return PagePostResponse.from(posts);
+    }
+
+    public PostDetailResponse findPost(Long postId, UserContext userContext) {
+        findMember(userContext);
+        Post findPost = postRepository.findById(postId)
+            .orElseThrow(() -> new ApiException(POST_NOT_FOUND));
+        return PostDetailResponse.from(findPost);
     }
 
     private Member findMember(UserContext userContext) {
