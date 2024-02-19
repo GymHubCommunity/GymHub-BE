@@ -1,5 +1,6 @@
 package com.example.temp.record.domain;
 
+import com.example.temp.common.entity.BaseTimeEntity;
 import com.example.temp.member.domain.Member;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -19,7 +20,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "records")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
-public class Record {
+public class Record extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
