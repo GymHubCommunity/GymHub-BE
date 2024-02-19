@@ -6,7 +6,7 @@ import com.example.temp.common.exception.ErrorCode;
 import com.example.temp.member.domain.Member;
 import com.example.temp.member.domain.MemberRepository;
 import com.example.temp.record.domain.ExerciseRecord;
-import com.example.temp.record.domain.RecordRepository;
+import com.example.temp.record.domain.ExerciseRecordRepository;
 import com.example.temp.record.dto.request.RecordCreateRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -17,14 +17,14 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class ExerciseRecordService {
 
-    private final RecordRepository recordRepository;
+    private final ExerciseRecordRepository exerciseRecordRepository;
     private final MemberRepository memberRepository;
 
     @Transactional
     public long create(UserContext userContext, RecordCreateRequest request) {
         Member member = findMember(userContext);
         ExerciseRecord exerciseRecord = request.toEntityWith(member);
-        recordRepository.save(exerciseRecord);
+        exerciseRecordRepository.save(exerciseRecord);
         return exerciseRecord.getId();
     }
 
