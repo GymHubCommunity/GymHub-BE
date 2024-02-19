@@ -315,7 +315,7 @@ class FollowServiceTest {
         FollowInfoResult result = followService.getFollowings(UserContext.fromMember(target), target.getId(), -1, pageable);
 
         // then
-        List<FollowInfo> infos = result.followInfos();
+        List<FollowInfo> infos = result.follows();
         assertThat(infos).hasSize(followingCnt)
             .containsAnyElementsOf(targetFollowInfos);
         assertThat(infos.get(0).memberId()).isNotEqualTo(target.getId());
@@ -346,7 +346,7 @@ class FollowServiceTest {
         FollowInfoResult result = followService.getFollowings(UserContext.fromMember(target), target.getId(), -1, pageable);
 
         // then
-        assertThat(result.followInfos()).hasSize(approvedCnt);
+        assertThat(result.follows()).hasSize(approvedCnt);
     }
 
     @Test
@@ -448,7 +448,7 @@ class FollowServiceTest {
         FollowInfoResult result = followService.getFollowers(UserContext.fromMember(target), target.getId(), -1, pageable);
 
         // then
-        List<FollowInfo> infos = result.followInfos();
+        List<FollowInfo> infos = result.follows();
         assertThat(infos).hasSize(approvedCnt)
             .containsAnyElementsOf(targetFollowInfos);
         assertThat(infos.get(0).memberId()).isNotEqualTo(target.getId());
@@ -480,7 +480,7 @@ class FollowServiceTest {
         FollowInfoResult result = followService.getFollowers(UserContext.fromMember(target), target.getId(), -1, pageable);
 
         // then
-        assertThat(result.followInfos()).hasSize(approvedCnt);
+        assertThat(result.follows()).hasSize(approvedCnt);
     }
 
     @Test

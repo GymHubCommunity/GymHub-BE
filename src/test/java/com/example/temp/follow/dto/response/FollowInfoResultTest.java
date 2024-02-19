@@ -28,7 +28,7 @@ class FollowInfoResultTest {
         FollowInfoResult result = FollowInfoResult.createFollowingsResult(slice);
 
         // then
-        assertThat(result.followInfos()).hasSize(2);
+        assertThat(result.follows()).hasSize(2);
         assertThat(result.hasNext()).isFalse();
     }
 
@@ -48,7 +48,7 @@ class FollowInfoResultTest {
         FollowInfoResult result = FollowInfoResult.createFollowersResult(slice);
 
         // then
-        assertThat(result.followInfos()).hasSize(2);
+        assertThat(result.follows()).hasSize(2);
         assertThat(result.hasNext()).isFalse();
     }
 
