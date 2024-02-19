@@ -10,7 +10,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -32,19 +31,17 @@ public class PostImage extends BaseTimeEntity {
     @JoinColumn(name = "post_id")
     private Post post;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "image_id")
-    private Image image;
+    private String imageUrl;
 
     @Builder
-    private PostImage(Image image) {
-        this.image = image;
+    private PostImage(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 
     public static PostImage createPostImage(Image image) {
         image.use();
         return PostImage.builder()
-            .image(image)
+            .imageUrl(image.getUrl())
             .build();
     }
 

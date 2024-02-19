@@ -1,7 +1,6 @@
 package com.example.temp.post.domain;
 
 import com.example.temp.common.entity.BaseTimeEntity;
-import com.example.temp.image.domain.Image;
 import com.example.temp.member.domain.Member;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -69,8 +68,7 @@ public class Post extends BaseTimeEntity {
     public Optional<String> getImageUrl() {
         return postImages.stream()
             .findFirst()
-            .map(PostImage::getImage)
-            .map(Image::getUrl);
+            .map(PostImage::getImageUrl);
     }
 
 }

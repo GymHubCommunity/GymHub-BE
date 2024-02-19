@@ -1,8 +1,8 @@
 package com.example.temp.post.dto.response;
 
 import com.example.temp.post.domain.Post;
+import com.example.temp.post.domain.PostImage;
 import java.time.LocalDateTime;
-import java.util.Collections;
 import java.util.List;
 import lombok.Builder;
 
@@ -29,7 +29,7 @@ public record PostDetailResponse(
 
     private static List<String> getImageUrls(Post post) {
         return post.getPostImages().stream()
-            .map(postImage -> postImage.getImage().getUrl())
+            .map(PostImage::getImageUrl)
             .toList();
     }
 
