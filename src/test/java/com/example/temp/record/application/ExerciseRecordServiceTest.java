@@ -104,8 +104,8 @@ class ExerciseRecordServiceTest {
         assertThat(track.getSetsInTrack()).hasSize(2)
             .extracting("order", "weight", "repeatCnt")
             .containsExactlyInAnyOrder(
-                tuple(1, 10, 3),
-                tuple(2, 20, 5)
+                tuple(1, set1CreateRequest.weight(), set1CreateRequest.repeatCnt()),
+                tuple(2, set2CreateRequest.weight(), set2CreateRequest.repeatCnt())
             );
 
         assertThat(em.find(SetInTrack.class, track.getSetsInTrack().get(0).getId())).isNotNull();
