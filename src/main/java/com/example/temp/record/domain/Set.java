@@ -1,5 +1,7 @@
 package com.example.temp.record.domain;
 
+import com.example.temp.common.exception.ApiException;
+import com.example.temp.common.exception.ErrorCode;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -39,10 +41,23 @@ public class Set {
 
     @Builder
     private Set(Track track, int order, int weight, int repeatCnt) {
+        validate(order, weight, repeatCnt);
         this.track = track;
         this.order = order;
         this.weight = weight;
         this.repeatCnt = repeatCnt;
+    }
+
+    private void validate(int order, int weight, int repeatCnt) {
+        if (order < 1) {
+            throw new IllegalArgumentException("Track 내 Set의 순서는 0보다 커야 합니다.");
+        }
+        if (weight < 0) {
+            throw new ApiException(ErrorCode.SET_WEIGHT_INVALID);
+        }
+        if (repeatCnt < 0) {
+            throw new ApiException(ErrorCode.SET_REPEAT_CNT_INVALID);
+        }
     }
 
     /**
