@@ -3,19 +3,18 @@ package com.example.temp.post.dto.response;
 import com.example.temp.post.domain.Post;
 import java.util.List;
 import lombok.Builder;
-import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Slice;
 
 @Builder
-public record PagePostResponse(
+public record SlicePostResponse(
     List<PostElementResponse> posts,
-    int totalPages,
-    int totalElements
+    boolean hasNext
 ) {
 
-    public static PagePostResponse from(Page<Post> posts) {
+    public static SlicePostResponse from(Slice<Post> posts) {
         List<PostElementResponse> postElements = posts.stream()
             .map(PostElementResponse::from)
             .toList();
-        return new PagePostResponse(postElements, posts.getTotalPages(), (int) posts.getTotalElements());
+        return new SlicePostResponse(postElements, posts.hasNext());
     }
 }

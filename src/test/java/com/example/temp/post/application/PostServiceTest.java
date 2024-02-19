@@ -25,10 +25,10 @@ import com.example.temp.post.domain.Post;
 import com.example.temp.post.domain.PostImage;
 import com.example.temp.post.domain.PostRepository;
 import com.example.temp.post.dto.request.PostCreateRequest;
-import com.example.temp.post.dto.response.PagePostResponse;
 import com.example.temp.post.dto.response.PostCreateResponse;
 import com.example.temp.post.dto.response.PostDetailResponse;
 import com.example.temp.post.dto.response.PostElementResponse;
+import com.example.temp.post.dto.response.SlicePostResponse;
 import com.example.temp.post.dto.response.WriterInfo;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -84,13 +84,14 @@ class PostServiceTest {
         savePost(member1, "content3", List.of("image3"));
 
         UserContext userContext = UserContext.fromMember(member1);
-        Pageable pageable = PageRequest.of(0, 5);
+        Pageable pageable = PageRequest.of(0, 10);
 
         // When
-        PagePostResponse pagePostResponse = postService.findPostsFromFollowings(userContext, pageable);
+        SlicePostResponse slicePostResponse = postService.findPostsFromFollowings(userContext, pageable);
 
         // Then
-        assertThat(pagePostResponse.posts()).hasSize(2)
+        assertThat(slicePostResponse.hasNext()).isFalse();
+        assertThat(slicePostResponse.posts()).hasSize(2)
             .extracting("writerInfo")
             .containsExactlyInAnyOrder(WriterInfo.from(member2), WriterInfo.from(member3));
     }
@@ -121,10 +122,10 @@ class PostServiceTest {
         Pageable pageable = PageRequest.of(0, 5);
 
         // When
-        PagePostResponse pagePostResponse = postService.findPostsFromFollowings(userContext, pageable);
+        SlicePostResponse slicePostResponse = postService.findPostsFromFollowings(userContext, pageable);
 
         // Then
-        assertThat(pagePostResponse.posts()).hasSize(2)
+        assertThat(slicePostResponse.posts()).hasSize(2)
             .extracting(post -> post.writerInfo().writerId())
             .containsExactlyInAnyOrder(member2.getId(), member3.getId())
             .doesNotContain(member4.getId());
@@ -155,7 +156,7 @@ class PostServiceTest {
         Pageable pageable = PageRequest.of(0, 10);
 
         // When
-        PagePostResponse postsPage = postService.findPostsFromFollowings(userContext, pageable);
+        SlicePostResponse postsPage = postService.findPostsFromFollowings(userContext, pageable);
         List<PostElementResponse> posts = postsPage.posts();
 
         // Then
@@ -235,7 +236,7 @@ class PostServiceTest {
     void findPostById() {
         // Given
         Member member = saveMember("email@test.com", "nick");
-        UserContext userContext = UserContext.from(member);
+        UserContext userContext = UserContext.fromMember(member);
         List<String> imageUrls = List.of("imageUrl1", "imageUrl2");
         List<String> savedImageUrls = saveImagesAndGetUrls(imageUrls);
         List<String> hashtags = List.of("#hashtag1", "#hashtag2");
@@ -257,7 +258,7 @@ class PostServiceTest {
     void findPostNotContainsImageAndHashtag() {
         // Given
         Member member = saveMember("email@test.com", "nick");
-        UserContext userContext = UserContext.from(member);
+        UserContext userContext = UserContext.fromMember(member);
         List<String> emptyList = Collections.emptyList();
         PostCreateRequest request = new PostCreateRequest("content1", emptyList, emptyList);
         PostCreateResponse savedPost = postService.createPost(userContext, request, LocalDateTime.now());

@@ -17,9 +17,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -56,8 +56,9 @@ class PostRepositoryTest {
         Pageable pageable = PageRequest.of(0, 10);
 
         // When
-        Page<Post> postsPage = postRepository.findByMemberInOrderByRegisteredAtDesc(followMembers, pageable);
-        List<Post> posts = postsPage.getContent();
+        Slice<Post> slicePost = postRepository.findByMemberInOrderByRegisteredAtDesc(
+            followMembers, pageable);
+        List<Post> posts = slicePost.getContent();
 
         // Then
         assertThat(posts).hasSize(2)
@@ -79,10 +80,11 @@ class PostRepositoryTest {
 
         // When
         Pageable pageable = PageRequest.of(0, 10);
-        Page<Post> postsPage = postRepository.findByMemberInOrderByRegisteredAtDesc(List.of(member1, member2), pageable);
+        Slice<Post> slicePost = postRepository.findByMemberInOrderByRegisteredAtDesc(
+            List.of(member1, member2), pageable);
 
         // Then
-        assertThat(postsPage.getContent()).isEmpty();
+        assertThat(slicePost.getContent()).isEmpty();
     }
 
     @DisplayName("게시글을 최근 작성게시글 부터 한 페이지에 5개씩 가져 올 수 있다.")
@@ -100,13 +102,14 @@ class PostRepositoryTest {
         }
 
         // When
-        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("createdAt").descending());
-        Page<Post> postsPage = postRepository.findByMemberInOrderByRegisteredAtDesc(List.of(member1, member2), pageable);
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("registeredAt").descending());
+        Slice<Post> slicePost = postRepository.findByMemberInOrderByRegisteredAtDesc(
+            List.of(member1, member2), pageable);
 
         // Then
-        assertThat(postsPage.getNumber()).isEqualTo(pageNumber);
-        assertThat(postsPage.getSize()).isEqualTo(pageSize);
-        assertThat(postsPage.getContent()).hasSize(pageSize);
+        assertThat(slicePost.getNumber()).isEqualTo(pageNumber);
+        assertThat(slicePost.getSize()).isEqualTo(pageSize);
+        assertThat(slicePost.getContent()).hasSize(pageSize);
     }
 
     @DisplayName("게시글은 최신순으로 조회 된다.")
@@ -126,8 +129,9 @@ class PostRepositoryTest {
         Pageable pageable = PageRequest.of(0, 10);
 
         // When
-        Page<Post> postsPage = postRepository.findByMemberInOrderByRegisteredAtDesc(followMembers, pageable);
-        List<Post> posts = postsPage.getContent();
+        Slice<Post> slicePost = postRepository.findByMemberInOrderByRegisteredAtDesc(
+            followMembers, pageable);
+        List<Post> posts = slicePost.getContent();
 
         // Then
         assertThat(posts).hasSize(2)
