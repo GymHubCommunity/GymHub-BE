@@ -24,8 +24,8 @@ public class ExerciseRecordService {
     public long create(UserContext userContext, RecordCreateRequest request) {
         Member member = findMember(userContext);
         ExerciseRecord exerciseRecord = request.toEntityWith(member);
-        ExerciseRecord savedExerciseRecord = recordRepository.save(exerciseRecord);
-        return savedExerciseRecord.getId();
+        recordRepository.save(exerciseRecord);
+        return exerciseRecord.getId();
     }
 
     private Member findMember(UserContext userContext) {
