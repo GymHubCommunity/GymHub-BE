@@ -23,10 +23,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
 @Transactional
-class ExerciseRecordServiceTest {
+class ExerciseExerciseRecordServiceTest {
 
     @Autowired
-    RecordService recordService;
+    ExerciseRecordService exerciseRecordService;
 
     @Autowired
     EntityManager em;
@@ -52,7 +52,7 @@ class ExerciseRecordServiceTest {
         RecordCreateRequest request = new RecordCreateRequest(List.of(trackCreateRequest));
 
         // when
-        long createdId = recordService.create(loginUserContext, request);
+        long createdId = exerciseRecordService.create(loginUserContext, request);
 
         // then
         ExerciseRecord exerciseRecord = em.find(ExerciseRecord.class, createdId);
