@@ -51,4 +51,9 @@ public class Image {
     public void use() {
         this.used = true;
     }
+
+    public void notUse() {
+        this.used = false;
+    }
+
 }
