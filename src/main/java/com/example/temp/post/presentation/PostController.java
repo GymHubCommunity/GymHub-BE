@@ -6,6 +6,7 @@ import com.example.temp.common.annotation.Login;
 import com.example.temp.common.dto.UserContext;
 import com.example.temp.post.application.PostService;
 import com.example.temp.post.dto.request.PostCreateRequest;
+import com.example.temp.post.dto.request.PostUpdateRequest;
 import com.example.temp.post.dto.response.SlicePostResponse;
 import com.example.temp.post.dto.response.PostCreateResponse;
 import com.example.temp.post.dto.response.PostDetailResponse;
