@@ -49,7 +49,7 @@ public class Post extends BaseTimeEntity {
     private List<PostImage> postImages = new ArrayList<>();
 
     @BatchSize(size = 100)
-    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PostHashtag> postHashtags = new ArrayList<>();
 
     private LocalDateTime registeredAt;
@@ -71,4 +71,14 @@ public class Post extends BaseTimeEntity {
             .map(PostImage::getImageUrl);
     }
 
+    public boolean isOwner(Long memberId) {
+        if (memberId == null) {
+            return false;
+        }
+        return member.getId().equals(memberId);
+    }
+
+    public void updateContent(String content) {
+        this.content = Content.create(content);
+    }
 }
