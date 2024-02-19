@@ -47,17 +47,14 @@ public class ExerciseRecord extends BaseTimeEntity {
     private ExerciseRecord(Member writer, List<Track> tracks, LocalDate recordDate) {
         this.writer = writer;
         this.recordDate = recordDate;
-        if (tracks != null) {
-            this.tracks = new ArrayList<>();
-            this.tracks.addAll(tracks);
-        }
+        this.tracks = new ArrayList<>();
+        tracks.forEach(track -> track.relate(this));
     }
 
     public static ExerciseRecord create(Member writer, List<Track> tracks) {
-        ExerciseRecord exerciseRecord = ExerciseRecord.builder()
+        return ExerciseRecord.builder()
             .writer(writer)
+            .tracks(tracks)
             .build();
-        tracks.forEach(track -> track.relate(exerciseRecord));
-        return exerciseRecord;
     }
 }
