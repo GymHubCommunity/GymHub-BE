@@ -27,7 +27,10 @@ import com.example.temp.member.exception.NicknameDuplicatedException;
 import com.example.temp.oauth.OAuthProviderType;
 import com.example.temp.oauth.OAuthResponse;
 import com.example.temp.oauth.OAuthUserInfo;
+import com.example.temp.post.domain.Content;
+import com.example.temp.post.domain.Post;
 import jakarta.persistence.EntityManager;
+import java.time.LocalDateTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -298,6 +301,36 @@ class MemberServiceTest {
         assertThat(em.find(Follow.class, follow1.getId())).isNull();
         assertThat(em.find(Follow.class, follow2.getId())).isNull();
         assertThat(em.find(Follow.class, notRelatedFollow.getId())).isNotNull();
+    }
+
+    @Test
+    @DisplayName("회원이 탈퇴되었을 때, 작성한 게시글이 전부 삭제된다.")
+    void deleteAllPostWhenMemberWithdraw() throws Exception {
+        // given
+        Member member = saveRegisteredMember(Nickname.create("nick"));
+        Post post = savePost(member, "게시글1");
+        Post post2 = savePost(member, "게시글2");
+
+        // when
+        memberService.withdraw(UserContext.fromMember(member), member.getId());
+        em.flush();
+        em.clear();
+
+        // then
+        Member result = em.find(Member.class, member.getId());
+        assertThat(result.isDeleted()).isTrue();
+
+        assertThat(em.find(Post.class, post.getId())).isNull();
+    }
+
+    private Post savePost(Member member, String content) {
+        Post post = Post.builder()
+            .member(member)
+            .content(Content.create(content))
+            .registeredAt(LocalDateTime.now())
+            .build();
+        em.persist(post);
+        return post;
     }
 
 
