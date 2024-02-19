@@ -8,6 +8,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
@@ -27,8 +28,8 @@ public class Record extends BaseTimeEntity {
     @Column(name = "record_id")
     private Long id;
 
-    @Column(name = "writer_id", nullable = false)
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "writer_id", nullable = false)
     private Member writer;
 
     private LocalDate recordDate;
