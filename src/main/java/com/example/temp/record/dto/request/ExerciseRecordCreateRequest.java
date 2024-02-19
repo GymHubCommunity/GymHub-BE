@@ -7,7 +7,7 @@ import com.example.temp.record.domain.Track;
 import java.util.ArrayList;
 import java.util.List;
 
-public record RecordCreateRequest(
+public record ExerciseRecordCreateRequest(
     List<TrackCreateRequest> tracks
 ) {
 

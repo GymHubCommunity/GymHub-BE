@@ -16,9 +16,9 @@ import com.example.temp.member.domain.nickname.Nickname;
 import com.example.temp.record.domain.ExerciseRecord;
 import com.example.temp.record.domain.SetInTrack;
 import com.example.temp.record.domain.Track;
-import com.example.temp.record.dto.request.RecordCreateRequest;
-import com.example.temp.record.dto.request.RecordCreateRequest.TrackCreateRequest;
-import com.example.temp.record.dto.request.RecordCreateRequest.TrackCreateRequest.SetInTrackCreateRequest;
+import com.example.temp.record.dto.request.ExerciseRecordCreateRequest;
+import com.example.temp.record.dto.request.ExerciseRecordCreateRequest.TrackCreateRequest;
+import com.example.temp.record.dto.request.ExerciseRecordCreateRequest.TrackCreateRequest.SetInTrackCreateRequest;
 import jakarta.persistence.EntityManager;
 import java.util.Collections;
 import java.util.List;
@@ -56,7 +56,7 @@ class ExerciseRecordServiceTest {
     @DisplayName("운동 기록을 저장한다.")
     void create() throws Exception {
         // given
-        RecordCreateRequest request = new RecordCreateRequest(Collections.emptyList());
+        ExerciseRecordCreateRequest request = new ExerciseRecordCreateRequest(Collections.emptyList());
 
         // when
         long createdId = exerciseRecordService.create(loginUserContext, request);
@@ -71,7 +71,7 @@ class ExerciseRecordServiceTest {
     @DisplayName("인증되지 않은 사용자는 운동 기록을 할 수 없다.")
     void createFailNoAuthenticated() throws Exception {
         // given
-        RecordCreateRequest request = new RecordCreateRequest(Collections.emptyList());
+        ExerciseRecordCreateRequest request = new ExerciseRecordCreateRequest(Collections.emptyList());
 
         // when & then
         assertThatThrownBy(() -> exerciseRecordService.create(noLoginUserContext, request))
@@ -87,7 +87,7 @@ class ExerciseRecordServiceTest {
         SetInTrackCreateRequest set2CreateRequest = new SetInTrackCreateRequest(20, 5);
         TrackCreateRequest trackCreateRequest = new TrackCreateRequest("스쿼트",
             List.of(set1CreateRequest, set2CreateRequest));
-        RecordCreateRequest request = new RecordCreateRequest(List.of(trackCreateRequest));
+        ExerciseRecordCreateRequest request = new ExerciseRecordCreateRequest(List.of(trackCreateRequest));
 
         // when
         long createdId = exerciseRecordService.create(loginUserContext, request);

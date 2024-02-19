@@ -5,13 +5,13 @@ import static org.assertj.core.groups.Tuple.tuple;
 
 import com.example.temp.record.domain.SetInTrack;
 import com.example.temp.record.domain.Track;
-import com.example.temp.record.dto.request.RecordCreateRequest.TrackCreateRequest;
-import com.example.temp.record.dto.request.RecordCreateRequest.TrackCreateRequest.SetInTrackCreateRequest;
+import com.example.temp.record.dto.request.ExerciseRecordCreateRequest.TrackCreateRequest;
+import com.example.temp.record.dto.request.ExerciseRecordCreateRequest.TrackCreateRequest.SetInTrackCreateRequest;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-class RecordCreateRequestTest {
+class ExerciseRecordCreateRequestTest {
 
     @Test
     @DisplayName("SetCreateRequest의 toEntityWithOrder 메서드로 SetInTrack을 생성한다.")
