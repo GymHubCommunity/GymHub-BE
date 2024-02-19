@@ -235,7 +235,7 @@ class PostServiceTest {
     void findPostById() {
         // Given
         Member member = saveMember("email@test.com", "nick");
-        UserContext userContext = UserContext.from(member);
+        UserContext userContext = UserContext.fromMember(member);
         List<String> imageUrls = List.of("imageUrl1", "imageUrl2");
         List<String> savedImageUrls = saveImagesAndGetUrls(imageUrls);
         List<String> hashtags = List.of("#hashtag1", "#hashtag2");
@@ -257,7 +257,7 @@ class PostServiceTest {
     void findPostNotContainsImageAndHashtag() {
         // Given
         Member member = saveMember("email@test.com", "nick");
-        UserContext userContext = UserContext.from(member);
+        UserContext userContext = UserContext.fromMember(member);
         List<String> emptyList = Collections.emptyList();
         PostCreateRequest request = new PostCreateRequest("content1", emptyList, emptyList);
         PostCreateResponse savedPost = postService.createPost(userContext, request, LocalDateTime.now());
