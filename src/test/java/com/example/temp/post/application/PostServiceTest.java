@@ -1,6 +1,7 @@
 package com.example.temp.post.application;
 
 import static com.example.temp.common.exception.ErrorCode.IMAGE_NOT_FOUND;
+import static com.example.temp.common.exception.ErrorCode.POST_NOT_FOUND;
 import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -323,6 +324,27 @@ class PostServiceTest {
                 .extracting("ImageUrl")
                 .containsExactly("updateImage");
         });
+    }
+
+    @DisplayName("게시글을 삭제할 수 있다.")
+    @Test
+    void deletePost() {
+        //given
+        Member member = saveMember("email@test.com", "nick");
+        UserContext userContext = UserContext.fromMember(member);
+        List<String> imageUrls = List.of("imageUrl1", "ImageUrl2");
+        List<String> savedImageUrls = saveImagesAndGetUrls(imageUrls);
+        List<String> hashtags = List.of("#hashtag1", "#hashtag2");
+        List<String> savedHashtags = saveHashtagAndGet(hashtags);
+        Post post = savePost(member, "게시글1", savedImageUrls);
+
+        //when
+        postService.deletePost(post.getId(), userContext);
+
+        //then
+        assertThatThrownBy(() -> postService.findPost(post.getId(), userContext))
+            .isInstanceOf(ApiException.class)
+            .hasMessage(POST_NOT_FOUND.getMessage());
     }
 
     private Member saveMember(String email, String nickname) {
