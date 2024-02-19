@@ -58,7 +58,7 @@ public class PostController {
         return ResponseEntity.noContent().build();
     }
 
-    @DeleteMapping("{postId}")
+    @DeleteMapping("/{postId}")
     public ResponseEntity<Void> deletePost(@PathVariable Long postId, @Login UserContext userContext) {
         postService.deletePost(postId, userContext);
         return ResponseEntity.noContent().build();
