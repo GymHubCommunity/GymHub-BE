@@ -3,16 +3,15 @@ package com.example.temp.record.dto.request;
 import java.util.List;
 
 public record RecordCreateRequest(
-    List<RecordsTrackCreateRequest> tracks
+    List<TrackCreateRequest> tracks
 ) {
 
-    public record RecordsTrackCreateRequest(
+    public record TrackCreateRequest(
         String machineName,
-        List<TracksSetCreateRequest> sets
+        List<SetCreateRequest> sets
     ) {
 
-        public record TracksSetCreateRequest(
-            int setNum,
+        public record SetCreateRequest(
             int weight,
             int repeatCnt
         ) {
