@@ -8,6 +8,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.example.temp.auth.domain.Role;
 import com.example.temp.auth.dto.response.MemberInfo;
 import com.example.temp.common.dto.UserContext;
 import com.example.temp.common.entity.Email;
@@ -54,10 +55,13 @@ class MemberServiceTest {
 
     OAuthResponse oAuthResponse;
 
+    UserContext notExistUserContext;
+
     @BeforeEach
     void setUp() {
         oAuthUserInfo = mockOAuthClientResponse();
         oAuthResponse = OAuthResponse.of(OAuthProviderType.GOOGLE, oAuthUserInfo);
+        notExistUserContext = new UserContext(999_999_999L, Role.NORMAL);
     }
 
     private OAuthUserInfo mockOAuthClientResponse() {
@@ -160,7 +164,7 @@ class MemberServiceTest {
         String changedNickname = "변경할닉네임";
 
         // when
-        MemberInfo result = memberService.register(UserContext.from(member),
+        MemberInfo result = memberService.register(UserContext.fromMember(member),
             new MemberRegisterRequest(changedProfile.getUrl(), changedNickname));
 
         // then
@@ -180,7 +184,7 @@ class MemberServiceTest {
         MemberRegisterRequest request = new MemberRegisterRequest("https://imageNotFound", "변경할닉네임");
 
         // when & then
-        assertThatThrownBy(() -> memberService.register(UserContext.from(member), request))
+        assertThatThrownBy(() -> memberService.register(UserContext.fromMember(member), request))
             .isInstanceOf(ApiException.class)
             .hasMessageContaining(IMAGE_NOT_FOUND.getMessage());
     }
@@ -193,7 +197,7 @@ class MemberServiceTest {
         String changedNickname = "변경할닉네임";
 
         // when
-        MemberInfo result = memberService.register(UserContext.from(member),
+        MemberInfo result = memberService.register(UserContext.fromMember(member),
             new MemberRegisterRequest(null, changedNickname));
 
         // then
@@ -215,7 +219,7 @@ class MemberServiceTest {
         MemberRegisterRequest request = new MemberRegisterRequest("profile", nickname.getValue());
 
         // when & then
-        assertThatThrownBy(() -> memberService.register(UserContext.from(member), request))
+        assertThatThrownBy(() -> memberService.register(UserContext.fromMember(member), request))
             .isInstanceOf(ApiException.class)
             .hasMessageContaining(NICKNAME_DUPLICATED.getMessage());
     }
@@ -229,7 +233,7 @@ class MemberServiceTest {
         String changedNickname = "변경할닉네임";
 
         // when & then
-        assertThatThrownBy(() -> memberService.register(UserContext.from(member),
+        assertThatThrownBy(() -> memberService.register(UserContext.fromMember(member),
             new MemberRegisterRequest(changedProfile.getUrl(), changedNickname)))
             .isInstanceOf(ApiException.class)
             .hasMessageContaining(ErrorCode.MEMBER_ALREADY_REGISTER.getMessage());
@@ -238,11 +242,8 @@ class MemberServiceTest {
     @Test
     @DisplayName("DB에 존재하지 않는 회원은 회원가입 요청이 불가능하다.")
     void registerFailNotAuthn() throws Exception {
-        // given
-        long notExistMemberId = 999_999_999L;
-
         // when & then
-        assertThatThrownBy(() -> memberService.register(new UserContext(notExistMemberId),
+        assertThatThrownBy(() -> memberService.register(notExistUserContext,
             new MemberRegisterRequest("이미지url", "닉넴")))
             .isInstanceOf(ApiException.class)
             .hasMessageContaining(ErrorCode.AUTHENTICATED_FAIL.getMessage());
@@ -255,7 +256,7 @@ class MemberServiceTest {
         Member member = saveRegisteredMember(Nickname.create("nick"));
 
         // when
-        memberService.withdraw(UserContext.from(member), member.getId());
+        memberService.withdraw(UserContext.fromMember(member), member.getId());
 
         // then
         assertThat(member.isDeleted()).isTrue();
@@ -269,7 +270,7 @@ class MemberServiceTest {
         Member loginMember = saveRegisteredMember(Nickname.create("nick2"));
 
         // when & then
-        assertThatThrownBy(() -> memberService.withdraw(UserContext.from(loginMember), anotherMember.getId()))
+        assertThatThrownBy(() -> memberService.withdraw(UserContext.fromMember(loginMember), anotherMember.getId()))
             .isInstanceOf(ApiException.class)
             .hasMessageContaining(ErrorCode.AUTHORIZED_FAIL.getMessage());
     }
@@ -286,7 +287,7 @@ class MemberServiceTest {
         Follow notRelatedFollow = saveFollow(follower, following);
 
         // when
-        memberService.withdraw(UserContext.from(member), member.getId());
+        memberService.withdraw(UserContext.fromMember(member), member.getId());
         em.flush();
         em.clear();
 
@@ -326,7 +327,7 @@ class MemberServiceTest {
         long notExistMemberId = 999_999_999L;
 
         // when & then
-        assertThatThrownBy(() -> memberService.changePrivacy(new UserContext(notExistMemberId), PrivacyPolicy.PRIVATE))
+        assertThatThrownBy(() -> memberService.changePrivacy(notExistUserContext, PrivacyPolicy.PRIVATE))
             .isInstanceOf(ApiException.class)
             .hasMessageContaining(ErrorCode.AUTHENTICATED_FAIL.getMessage());
     }
@@ -340,7 +341,7 @@ class MemberServiceTest {
         Member member = saveRegisteredMember(Nickname.create("nick"));
 
         // when
-        memberService.changePrivacy(UserContext.from(member), targetPolicy);
+        memberService.changePrivacy(UserContext.fromMember(member), targetPolicy);
 
         // then
         assertThat(member.getPrivacyPolicy()).isEqualTo(targetPolicy);

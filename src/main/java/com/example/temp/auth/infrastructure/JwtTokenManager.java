@@ -1,8 +1,9 @@
 package com.example.temp.auth.infrastructure;
 
-import com.example.temp.common.dto.UserContext;
+import com.example.temp.auth.domain.Role;
 import com.example.temp.auth.dto.response.TokenInfo;
 import com.example.temp.auth.exception.TokenInvalidException;
+import com.example.temp.common.dto.UserContext;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jws;
@@ -59,26 +60,27 @@ public class JwtTokenManager implements TokenManager, TokenParser {
     }
 
     /**
-     * 입력받은 id를 사용해 Access Token, Refresh Token을 발급합니다.
+     * 입력받은 id와 Role을 사용해 Access Token, Refresh Token을 발급합니다.
      *
      * @param id
      * @return
      */
     @Override
-    public TokenInfo issue(Long id) {
+    public TokenInfo issueWithRole(long id, Role role) {
         LocalDateTime now = LocalDateTime.now(clock);
-        String accessToken = makeToken(String.valueOf(id), properties.accessTokenExpires(), now);
-        String refreshToken = makeToken(String.valueOf(id), properties.refreshTokenExpires(), now);
+        String accessToken = makeToken(String.valueOf(id), role, properties.accessTokenExpires(), now);
+        String refreshToken = makeToken(String.valueOf(id), role, properties.refreshTokenExpires(), now);
         return TokenInfo.builder()
             .accessToken(accessToken)
             .refreshToken(refreshToken)
             .build();
     }
 
-    private String makeToken(String sub, long expires, LocalDateTime now) {
+    private String makeToken(String sub, Role role, long expires, LocalDateTime now) {
         LocalDateTime expiresDateTime = now.plusSeconds(expires);
         return Jwts.builder()
             .subject(sub)
+            .claim("role", role)
             .expiration(Timestamp.valueOf(expiresDateTime))
             .signWith(key)
             .compact();
@@ -90,14 +92,15 @@ public class JwtTokenManager implements TokenManager, TokenParser {
      * @param refreshToken
      * @return
      * @throws TokenInvalidException 토큰의 서명이 적절하지 않을 때, 해당 Exception이 발생합니다.
-     * @throws ExpiredJwtException refreshToken이 만료되었을 때, 해당 Exception이 발생합니다.
+     * @throws ExpiredJwtException   refreshToken이 만료되었을 때, 해당 Exception이 발생합니다.
      */
     @Override
     public TokenInfo reIssue(String refreshToken) {
         Jws<Claims> claimsJws = parseToJwsClaims(refreshToken);
         Claims claims = claimsJws.getPayload();
         long id = Long.parseLong(claims.getSubject());
-        return issue(id);
+        String roleValue = claims.get("role", String.class);
+        return issueWithRole(id, Role.valueOf(roleValue));
     }
 
     private Jws<Claims> parseToJwsClaims(String token) {
@@ -121,6 +124,7 @@ public class JwtTokenManager implements TokenManager, TokenParser {
         Claims claims = claimsJws.getPayload();
         return UserContext.builder()
             .id(Long.parseLong(claims.getSubject()))
+            .role(Role.valueOf(claims.get("role", String.class)))
             .build();
     }
 }

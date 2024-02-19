@@ -84,7 +84,7 @@ class PostServiceTest {
         savePost(member3, "content2", List.of("image2"));
         savePost(member1, "content3", List.of("image3"));
 
-        UserContext userContext = UserContext.from(member1);
+        UserContext userContext = UserContext.fromMember(member1);
         Pageable pageable = PageRequest.of(0, 5);
 
         // When
@@ -118,7 +118,7 @@ class PostServiceTest {
         savePost(member1, "content3", List.of("image3"));
         savePost(member4, "content4", List.of("image4"));
 
-        UserContext userContext = UserContext.from(member1);
+        UserContext userContext = UserContext.fromMember(member1);
         Pageable pageable = PageRequest.of(0, 5);
 
         // When
@@ -152,7 +152,7 @@ class PostServiceTest {
         savePost(member2, "content3", List.of("image3"));
         savePost(member3, "content4", List.of("image4"));
 
-        UserContext userContext = UserContext.from(member1);
+        UserContext userContext = UserContext.fromMember(member1);
         Pageable pageable = PageRequest.of(0, 10);
 
         // When
@@ -175,7 +175,7 @@ class PostServiceTest {
     void createPost() {
         //given
         Member member = saveMember("email@test.com", "nick");
-        UserContext userContext = UserContext.from(member);
+        UserContext userContext = UserContext.fromMember(member);
         List<String> imageUrls = List.of("imageUrl1", "ImageUrl2");
         List<String> savedImageUrls = saveImagesAndGetUrls(imageUrls);
         List<String> hashtags = List.of("#hashtag1", "#hashtag2");
@@ -199,7 +199,7 @@ class PostServiceTest {
     void createPostWithNonexistentImage() {
         // Given
         Member member = saveMember("email@test.com", "nick");
-        UserContext userContext = UserContext.from(member);
+        UserContext userContext = UserContext.fromMember(member);
 
         List<String> imageUrls = List.of("nonexistent_image");
 
@@ -216,7 +216,7 @@ class PostServiceTest {
     void createPostWithoutImage() {
         //given
         Member member = saveMember("email@test.com", "nick");
-        UserContext userContext = UserContext.from(member);
+        UserContext userContext = UserContext.fromMember(member);
         PostCreateRequest postCreateRequest = new PostCreateRequest("content", null, new ArrayList<>());
 
         //when

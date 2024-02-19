@@ -1,7 +1,7 @@
 package com.example.temp.common.interceptor;
 
-import com.example.temp.common.dto.UserContext;
 import com.example.temp.auth.infrastructure.TokenParser;
+import com.example.temp.common.dto.UserContext;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -13,7 +13,7 @@ import software.amazon.awssdk.utils.StringUtils;
 
 @RequiredArgsConstructor
 @Component
-public class AuthenticationInterceptor implements HandlerInterceptor {
+public class AdminInterceptor implements HandlerInterceptor {
 
     public static final String BEARER = "Bearer ";
     public static final String MEMBER_INFO = "memberInfo";
@@ -33,12 +33,11 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
         }
         String accessToken = accessTokenBeforeProcessing.substring(BEARER.length());
         UserContext userContext = tokenParser.parsedClaims(accessToken);
-        if (!userContext.isNormal()) {
-            response.setStatus(HttpStatus.FORBIDDEN.value());
+        if (!userContext.isAdmin()) {
+            response.setStatus(HttpStatus.UNAUTHORIZED.value());
             return false;
         }
         request.setAttribute(MEMBER_INFO, userContext);
         return true;
     }
-
 }

@@ -1,6 +1,7 @@
 package com.example.temp.common.config;
 
 import com.example.temp.common.convertor.StringToPrivacyPolicyConverter;
+import com.example.temp.common.interceptor.AdminInterceptor;
 import com.example.temp.common.interceptor.AuthenticationInterceptor;
 import com.example.temp.common.properties.CorsProperties;
 import com.example.temp.common.resolver.LoginUserArgumentResolver;
@@ -21,6 +22,8 @@ public class WebConfig implements WebMvcConfigurer {
 
     private final AuthenticationInterceptor authenticationInterceptor;
 
+    private final AdminInterceptor adminInterceptor;
+
     private final LoginUserArgumentResolver loginUserArgumentResolver;
 
     @Override
@@ -35,8 +38,13 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(adminInterceptor)
+            .addPathPatterns("/admin/**")
+            .excludePathPatterns("/admin/register", "/admin/login");
+
         registry.addInterceptor(authenticationInterceptor)
             .excludePathPatterns("/oauth/**", "/auth/refresh")
+            .excludePathPatterns("/admin/**")
             .excludePathPatterns("/swagger-ui/**", "/v3/api-docs/**");
     }
 

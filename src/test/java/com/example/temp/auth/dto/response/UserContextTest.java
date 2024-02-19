@@ -2,6 +2,8 @@ package com.example.temp.auth.dto.response;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.example.temp.auth.domain.Role;
+import com.example.temp.common.dto.UserContext;
 import com.example.temp.common.entity.Email;
 import com.example.temp.member.domain.FollowStrategy;
 import com.example.temp.member.domain.Member;
@@ -14,56 +16,40 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
-@SpringBootTest
-@Transactional
 class UserContextTest {
 
-    @Autowired
-    EntityManager em;
-
     @Test
-    @DisplayName("생성자의 순서가 올바른지 테스트한다")
-    void create() throws Exception {
+    @DisplayName("member를 사용해 Normal 권한을 가진 UserContext를 생성한다.")
+    void fromMemberTest() throws Exception {
         // given
-        long id = 1L;
-        String email = "email";
-        String profileUrl = "profile";
-        String nickname = "nick";
-        boolean registered = true;
+        Member member = Member.builder().build();
 
         // when
-        MemberInfo result = new MemberInfo(id, email, profileUrl, nickname, registered);
+        UserContext userContext = UserContext.fromMember(member);
 
         // then
-        assertThat(result.id()).isEqualTo(id);
-        assertThat(result.email()).isEqualTo(email);
-        assertThat(result.profileUrl()).isEqualTo(profileUrl);
-        assertThat(result.nickname()).isEqualTo(nickname);
-        assertThat(result.registered()).isEqualTo(registered);
+        assertThat(userContext.role()).isEqualTo(Role.NORMAL);
     }
 
     @Test
-    @DisplayName("LoginInfoResponse를 생성한다")
-    void ofSuccess() throws Exception {
+    @DisplayName("UserContext가 Normal 권한인지 확인한다.")
+    void testIsNormal() throws Exception {
         // given
-        Member member = Member.builder()
-            .email(Email.create("이멜"))
-            .profileUrl("프로필주소")
-            .nickname(Nickname.create("생성된닉네임"))
-            .registered(true)
-            .followStrategy(FollowStrategy.EAGER)
-            .privacyPolicy(PrivacyPolicy.PRIVATE)
-            .build();
-        em.persist(member);
+        UserContext userContext = new UserContext(1L, Role.NORMAL);
 
-        // when
-        MemberInfo response = MemberInfo.of(member);
+        // when & then
+        assertThat(userContext.isNormal()).isTrue();
+        assertThat(userContext.isAdmin()).isFalse();
+    }
 
-        // then
-        assertThat(response.id()).isNotNull();
-        assertThat(response.profileUrl()).isEqualTo(member.getProfileUrl());
-        assertThat(response.email()).isEqualTo(member.getEmailValue());
-        assertThat(response.nickname()).isEqualTo(member.getNicknameValue());
-        assertThat(response.registered()).isEqualTo(member.isRegistered());
+    @Test
+    @DisplayName("UserContext가 Admin 권한인지 확인한다.")
+    void testIsAdmin() throws Exception {
+        // given
+        UserContext userContext = new UserContext(1L, Role.ADMIN);
+
+        // when & then
+        assertThat(userContext.isAdmin()).isTrue();
+        assertThat(userContext.isNormal()).isFalse();
     }
 }

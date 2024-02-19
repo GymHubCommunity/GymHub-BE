@@ -2,6 +2,7 @@ package com.example.temp.auth.presentation;
 
 import static org.springframework.http.HttpHeaders.SET_COOKIE;
 
+import com.example.temp.auth.domain.Role;
 import com.example.temp.auth.dto.request.OAuthLoginRequest;
 import com.example.temp.auth.dto.response.AuthorizedUrl;
 import com.example.temp.auth.dto.response.LoginResponse;
@@ -36,7 +37,7 @@ public class AuthController {
     public ResponseEntity<LoginResponse> oauthLogin(@PathVariable String provider,
         @RequestBody OAuthLoginRequest request, HttpServletResponse response) {
         MemberInfo memberResponse = oAuthService.login(provider, request.authCode());
-        TokenInfo tokenInfo = tokenManager.issue(memberResponse.id());
+        TokenInfo tokenInfo = tokenManager.issueWithRole(memberResponse.id(), Role.NORMAL);
 
         createRefreshCookie(tokenInfo.refreshToken(), response);
         return ResponseEntity.ok(LoginResponse.of(tokenInfo, memberResponse));

@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.example.temp.auth.domain.Role;
 import com.example.temp.common.dto.UserContext;
 import com.example.temp.common.exception.ApiException;
 import com.example.temp.common.exception.ErrorCode;
@@ -40,6 +41,8 @@ class ImageServiceTest {
     @Autowired
     ImageRepository imageRepository;
 
+    UserContext userContext;
+
     @BeforeEach
     void setUp() {
         s3Presigner = S3Presigner.builder()
@@ -47,12 +50,12 @@ class ImageServiceTest {
             .credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create("accessKey", "secretKey")))
             .build();
         imageService = new ImageService(s3Presigner, s3Properties, randomGenerator, imageRepository);
+        userContext = new UserContext(1234L, Role.NORMAL);
     }
 
     @Test
     @DisplayName("presigned url을 생성한다")
     void createPresignedUrl() throws MalformedURLException {
-        UserContext userContext = new UserContext(1L);
         long contentLength = s3Properties.imgMaxContentLength();
         String extValue = "JPEG";
         PresignedUrlRequest request = new PresignedUrlRequest(contentLength, extValue);
@@ -85,7 +88,6 @@ class ImageServiceTest {
     @DisplayName("서버에서 지정한 사이즈보다 큰 이미지에 대해서는 presigned url을 생성하지 않는다")
     void createFailImageTooBig() throws Exception {
         // given
-        UserContext userContext = new UserContext(1L);
         long contentLength = s3Properties.imgMaxContentLength() + 1;
         String extValue = "JPEG";
         PresignedUrlRequest request = new PresignedUrlRequest(contentLength, extValue);
@@ -100,7 +102,6 @@ class ImageServiceTest {
     @DisplayName("이미지가 아닌 확장자에 대해서는 presigned url을 생성하지 않는다.")
     void createFailInvalidExt() throws Exception {
         // given
-        UserContext userContext = new UserContext(1L);
         long contentLength = s3Properties.imgMaxContentLength();
         String extValue = "TXT";
         PresignedUrlRequest request = new PresignedUrlRequest(contentLength, extValue);
@@ -115,7 +116,6 @@ class ImageServiceTest {
     @DisplayName("존재하지 않는 확장자에 대해서는 presigned url을 생성하지 않는다.")
     void createFailNotExistsExt() throws Exception {
         // given
-        UserContext userContext = new UserContext(1L);
         long contentLength = s3Properties.imgMaxContentLength();
         String extValue = "NOT_FOUND";
         PresignedUrlRequest request = new PresignedUrlRequest(contentLength, extValue);

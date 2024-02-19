@@ -9,6 +9,10 @@ services:
     environment:
       - SERVICES=s3
       - DEBUG=1
+      - EXTRA_CORS_ALLOWED_ORIGINS=http://localhost:3000
+      - DATA_DIR=/tmp/localstack/data
+      - PORT_WEB_UI=${LOCALSTACK_WEB_UI_PORT:-8081}
+      - LAMBDA_EXECUTOR=local
       - DOCKER_SOCK=unix:///var/run/docker.sock
       - DEFAULT_REGION=ap-northeast-2
       - EDGE_PORT=4566

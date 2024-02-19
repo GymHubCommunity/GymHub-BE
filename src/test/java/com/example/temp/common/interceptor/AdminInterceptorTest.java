@@ -9,8 +9,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.example.temp.auth.domain.Role;
-import com.example.temp.common.dto.UserContext;
 import com.example.temp.auth.infrastructure.TokenParser;
+import com.example.temp.common.dto.UserContext;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,9 +23,9 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 
 @ExtendWith(MockitoExtension.class)
-class AuthenticationInterceptorTest {
+class AdminInterceptorTest {
 
-    AuthenticationInterceptor authenticationInterceptor;
+    AdminInterceptor adminInterceptor;
 
     @Mock
     TokenParser tokenParser;
@@ -36,14 +36,14 @@ class AuthenticationInterceptorTest {
     @Mock
     HttpServletResponse response;
 
-    UserContext userContext;
+    UserContext adminContext;
 
     @BeforeEach
     void setUp() {
-        authenticationInterceptor = new AuthenticationInterceptor(tokenParser);
-        userContext = UserContext.builder()
+        adminInterceptor = new AdminInterceptor(tokenParser);
+        adminContext = UserContext.builder()
             .id(1L)
-            .role(Role.NORMAL)
+            .role(Role.ADMIN)
             .build();
     }
 
@@ -53,16 +53,16 @@ class AuthenticationInterceptorTest {
         // given
         String token = "token";
         when(tokenParser.parsedClaims(token))
-            .thenReturn(userContext);
+            .thenReturn(adminContext);
         when(request.getHeader(HttpHeaders.AUTHORIZATION))
             .thenReturn("Bearer " + token);
 
         // when
-        boolean result = authenticationInterceptor.preHandle(request, response, null);
+        boolean result = adminInterceptor.preHandle(request, response, null);
 
         // then
         assertThat(result).isTrue();
-        verify(request, times(1)).setAttribute("memberInfo", userContext);
+        verify(request, times(1)).setAttribute("memberInfo", adminContext);
     }
 
     @Test
@@ -74,7 +74,7 @@ class AuthenticationInterceptorTest {
             .thenReturn(null);
 
         // when
-        boolean result = authenticationInterceptor.preHandle(request, response, null);
+        boolean result = adminInterceptor.preHandle(request, response, null);
 
         // then
         assertThat(result).isFalse();
@@ -92,7 +92,7 @@ class AuthenticationInterceptorTest {
             .thenReturn(token);
 
         // when
-        boolean result = authenticationInterceptor.preHandle(request, response, null);
+        boolean result = adminInterceptor.preHandle(request, response, null);
 
         // then
         assertThat(result).isFalse();
@@ -102,10 +102,10 @@ class AuthenticationInterceptorTest {
     }
 
     @Test
-    @DisplayName("어드민은 AuthenticationInterceptor를 통과할 수 없다.")
+    @DisplayName("어드민이 아닌 사용자는 AdminInterceptor를 통과할 수 없다.")
     void preHandleFailBecauseUserIsAdmin() throws Exception {
-        UserContext adminContext = UserContext.builder()
-            .role(Role.ADMIN)
+        UserContext normalUserContext = UserContext.builder()
+            .role(Role.NORMAL)
             .id(1L)
             .build();
 
@@ -113,19 +113,19 @@ class AuthenticationInterceptorTest {
         when(request.getHeader(HttpHeaders.AUTHORIZATION))
             .thenReturn("Bearer " + token);
         when(tokenParser.parsedClaims(token))
-            .thenReturn(adminContext);
+            .thenReturn(normalUserContext);
 
         // when
-        boolean result = authenticationInterceptor.preHandle(request, response, null);
+        boolean result = adminInterceptor.preHandle(request, response, null);
 
         // then
         assertThat(result).isFalse();
-        verify(request, never()).setAttribute("memberInfo", userContext);
+        verify(request, never()).setAttribute("memberInfo", normalUserContext);
 
     }
 
     @Test
-    @DisplayName("Http Method가 OPTIONS일 때, AuthenticationInterceptor를 통과한다")
+    @DisplayName("Http Method가 OPTIONS일 때, AdminInterceptor를 통과한다")
     void preHandleSuccessThatMethodIsOptions() throws Exception {
         UserContext adminContext = UserContext.builder()
             .role(Role.ADMIN)
@@ -136,7 +136,7 @@ class AuthenticationInterceptorTest {
             .thenReturn("OPTIONS");
 
         // when
-        boolean result = authenticationInterceptor.preHandle(request, response, null);
+        boolean result = adminInterceptor.preHandle(request, response, null);
 
         // then
         assertThat(result).isTrue();
