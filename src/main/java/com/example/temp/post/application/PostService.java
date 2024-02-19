@@ -20,15 +20,15 @@ import com.example.temp.post.domain.PostHashtag;
 import com.example.temp.post.domain.PostImage;
 import com.example.temp.post.domain.PostRepository;
 import com.example.temp.post.dto.request.PostCreateRequest;
-import com.example.temp.post.dto.response.PagePostResponse;
+import com.example.temp.post.dto.response.SlicePostResponse;
 import com.example.temp.post.dto.response.PostCreateResponse;
 import com.example.temp.post.dto.response.PostDetailResponse;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -57,11 +57,11 @@ public class PostService {
         return PostCreateResponse.from(savedPost);
     }
 
-    public PagePostResponse findPostsFromFollowings(UserContext userContext, Pageable pageable) {
+    public SlicePostResponse findPostsFromFollowings(UserContext userContext, Pageable pageable) {
         Member member = findMember(userContext);
         List<Member> followings = findFollowingOf(member);
-        Page<Post> posts = postRepository.findByMemberInOrderByRegisteredAtDesc(followings, pageable);
-        return PagePostResponse.from(posts);
+        Slice<Post> posts = postRepository.findByMemberInOrderByRegisteredAtDesc(followings, pageable);
+        return SlicePostResponse.from(posts);
     }
 
     public PostDetailResponse findPost(Long postId, UserContext userContext) {
