@@ -1,6 +1,7 @@
 package com.example.temp.post.application;
 
 import static com.example.temp.common.exception.ErrorCode.IMAGE_NOT_FOUND;
+import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.groups.Tuple.tuple;
@@ -8,6 +9,7 @@ import static org.assertj.core.groups.Tuple.tuple;
 import com.example.temp.common.dto.UserContext;
 import com.example.temp.common.entity.Email;
 import com.example.temp.common.exception.ApiException;
+import com.example.temp.common.exception.ErrorCode;
 import com.example.temp.follow.domain.Follow;
 import com.example.temp.follow.domain.FollowRepository;
 import com.example.temp.follow.domain.FollowStatus;
@@ -25,6 +27,7 @@ import com.example.temp.post.domain.Post;
 import com.example.temp.post.domain.PostImage;
 import com.example.temp.post.domain.PostRepository;
 import com.example.temp.post.dto.request.PostCreateRequest;
+import com.example.temp.post.dto.request.PostUpdateRequest;
 import com.example.temp.post.dto.response.PostCreateResponse;
 import com.example.temp.post.dto.response.PostDetailResponse;
 import com.example.temp.post.dto.response.PostElementResponse;
@@ -272,6 +275,56 @@ class PostServiceTest {
             .containsExactly(savedPost.postId(), WriterInfo.from(member), "content1", emptyList, emptyList);
     }
 
+    @DisplayName("작성자가 아닌 사람이 게시글 수정을 요청하면 예외를 발생시킨다.")
+    @Test
+    void isNotOwnerUpdatePost() {
+        //given
+        Member writer = saveMember("email1@naver.com", "작성자");
+        Post savedPost = savePost(writer, "게시글", new ArrayList<>());
+        Member reader = saveMember("email2@naver.com", "독자");
+        UserContext userContext = UserContext.fromMember(reader);
+        PostUpdateRequest updateRequest = new PostUpdateRequest("수정1", new ArrayList<>(), new ArrayList<>());
+
+        //then
+        assertThatThrownBy(() -> postService.updatePost(savedPost.getId(), userContext, updateRequest))
+            .isInstanceOf(ApiException.class)
+            .hasMessage(ErrorCode.UNAUTHORIZED_POST.getMessage());
+    }
+
+    @DisplayName("게시글을 수정할 수 있다.")
+    @Test
+    void updatePost() {
+        //given
+        Member member = saveMember("email@test.com", "nick");
+        UserContext userContext = UserContext.fromMember(member);
+        List<String> imageUrls = List.of("imageUrl1", "ImageUrl2");
+        List<String> savedImageUrls = saveImagesAndGetUrls(imageUrls);
+        List<String> hashtags = List.of("#hashtag1", "#hashtag2");
+        List<String> savedHashtags = saveHashtagAndGet(hashtags);
+
+        PostCreateRequest request = new PostCreateRequest("content1", savedImageUrls, savedHashtags);
+        LocalDateTime registeredAt = LocalDateTime.now();
+        PostCreateResponse response = postService.createPost(userContext, request, registeredAt);
+
+        List<String> updateImageUrl = List.of("updateImage");
+        List<String> savedUpdateUrl = saveImagesAndGetUrls(updateImageUrl);
+        List<String> updateHashtag = List.of("#updateHashtag");
+        List<String> savedUpdateHashtag = saveHashtagAndGet(updateHashtag);
+        PostUpdateRequest updateRequest = new PostUpdateRequest("updateContent", savedUpdateUrl, savedUpdateHashtag);
+        Post post = postRepository.findById(response.postId()).orElseThrow();
+
+        //when
+        postService.updatePost(post.getId(), userContext, updateRequest);
+
+        //then
+        assertThat(post).satisfies(updatedPost -> {
+            assertThat(updatedPost.getContent()).isEqualTo("updateContent");
+            assertThat(updatedPost.getPostImages()).hasSize(1)
+                .extracting("ImageUrl")
+                .containsExactly("updateImage");
+        });
+    }
+
     private Member saveMember(String email, String nickname) {
         Member member = Member.builder()
             .email(Email.create(email))
@@ -292,7 +345,7 @@ class PostServiceTest {
         followRepository.save(follow);
     }
 
-    private void savePost(Member member, String content, List<String> imageUrls) {
+    private Post savePost(Member member, String content, List<String> imageUrls) {
         Post post = Post.builder()
             .member(member)
             .content(Content.builder()
@@ -308,7 +361,7 @@ class PostServiceTest {
                 postImage.relate(post);
 
             });
-        postRepository.save(post);
+        return postRepository.save(post);
     }
 
     private List<String> saveImagesAndGetUrls(List<String> imageUrls) {
