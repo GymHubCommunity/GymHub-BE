@@ -2,7 +2,7 @@ package com.example.temp.record.dto.request;
 
 import com.example.temp.member.domain.Member;
 import com.example.temp.record.domain.ExerciseRecord;
-import com.example.temp.record.domain.Set;
+import com.example.temp.record.domain.SetInTrack;
 import com.example.temp.record.domain.Track;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,11 +25,11 @@ public record RecordCreateRequest(
 
         public Track toEntity() {
             int order = 1;
-            List<Set> sets = new ArrayList<>();
+            List<SetInTrack> setInTracks = new ArrayList<>();
             for (SetCreateRequest set : this.sets) {
-                sets.add(set.toEntityWithOrder(order++));
+                setInTracks.add(set.toEntityWithOrder(order++));
             }
-            return Track.createWithoutRecord(machineName, sets);
+            return Track.createWithoutRecord(machineName, setInTracks);
         }
 
         public record SetCreateRequest(
@@ -37,8 +37,8 @@ public record RecordCreateRequest(
             int repeatCnt
         ) {
 
-            public Set toEntityWithOrder(int order) {
-                return Set.builder()
+            public SetInTrack toEntityWithOrder(int order) {
+                return SetInTrack.builder()
                     .weight(weight())
                     .repeatCnt(repeatCnt())
                     .order(order)

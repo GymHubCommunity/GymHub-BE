@@ -19,7 +19,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "sets")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
-public class Set {
+public class SetInTrack {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -40,7 +40,7 @@ public class Set {
     private int repeatCnt;
 
     @Builder
-    private Set(Track track, int order, int weight, int repeatCnt) {
+    private SetInTrack(Track track, int order, int weight, int repeatCnt) {
         validate(order, weight, repeatCnt);
         this.track = track;
         this.order = order;
@@ -65,9 +65,9 @@ public class Set {
      */
     public void relate(Track track) {
         if (this.track != null) {
-            this.track.getSets().remove(this);
+            this.track.getSetsInTrack().remove(this);
         }
         this.track = track;
-        this.track.getSets().add(this);
+        this.track.getSetsInTrack().add(this);
     }
 }

@@ -8,7 +8,7 @@ import com.example.temp.common.exception.ErrorCode;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-class SetTest {
+class SetInTrackTest {
 
     @Test
     @DisplayName("세트를 생성한다.")
@@ -19,12 +19,12 @@ class SetTest {
         int repeatCnt = 1;
 
         // when
-        Set set = createSet(order, weight, repeatCnt);
+        SetInTrack setInTrack = createSet(order, weight, repeatCnt);
 
         // then
-        assertThat(set.getOrder()).isEqualTo(order);
-        assertThat(set.getWeight()).isEqualTo(weight);
-        assertThat(set.getRepeatCnt()).isEqualTo(repeatCnt);
+        assertThat(setInTrack.getOrder()).isEqualTo(order);
+        assertThat(setInTrack.getWeight()).isEqualTo(weight);
+        assertThat(setInTrack.getRepeatCnt()).isEqualTo(repeatCnt);
     }
 
     @Test
@@ -69,8 +69,8 @@ class SetTest {
             .hasMessageContaining(ErrorCode.SET_REPEAT_CNT_INVALID.getMessage());
     }
 
-    private Set createSet(int order, int weight, int repeatCnt) {
-        return Set.builder()
+    private SetInTrack createSet(int order, int weight, int repeatCnt) {
+        return SetInTrack.builder()
             .order(order)
             .weight(weight)
             .repeatCnt(repeatCnt)

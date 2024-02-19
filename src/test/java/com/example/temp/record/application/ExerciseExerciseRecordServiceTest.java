@@ -14,7 +14,7 @@ import com.example.temp.member.domain.Member;
 import com.example.temp.member.domain.PrivacyPolicy;
 import com.example.temp.member.domain.nickname.Nickname;
 import com.example.temp.record.domain.ExerciseRecord;
-import com.example.temp.record.domain.Set;
+import com.example.temp.record.domain.SetInTrack;
 import com.example.temp.record.domain.Track;
 import com.example.temp.record.dto.request.RecordCreateRequest;
 import com.example.temp.record.dto.request.RecordCreateRequest.TrackCreateRequest;
@@ -101,15 +101,15 @@ class ExerciseExerciseRecordServiceTest {
 
         long trackId = tracks.get(0).getId();
         Track track = em.find(Track.class, trackId);
-        assertThat(track.getSets()).hasSize(2)
+        assertThat(track.getSetsInTrack()).hasSize(2)
             .extracting("order", "weight", "repeatCnt")
             .containsExactlyInAnyOrder(
                 tuple(1, 10, 3),
                 tuple(2, 20, 5)
             );
 
-        assertThat(em.find(Set.class, track.getSets().get(0).getId())).isNotNull();
-        assertThat(em.find(Set.class, track.getSets().get(1).getId())).isNotNull();
+        assertThat(em.find(SetInTrack.class, track.getSetsInTrack().get(0).getId())).isNotNull();
+        assertThat(em.find(SetInTrack.class, track.getSetsInTrack().get(1).getId())).isNotNull();
     }
 
 
