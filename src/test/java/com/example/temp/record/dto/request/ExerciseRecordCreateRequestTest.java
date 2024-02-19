@@ -3,10 +3,12 @@ package com.example.temp.record.dto.request;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.groups.Tuple.tuple;
 
+import com.example.temp.record.domain.ExerciseRecord;
 import com.example.temp.record.domain.SetInTrack;
 import com.example.temp.record.domain.Track;
 import com.example.temp.record.dto.request.ExerciseRecordCreateRequest.TrackCreateRequest;
 import com.example.temp.record.dto.request.ExerciseRecordCreateRequest.TrackCreateRequest.SetInTrackCreateRequest;
+import java.util.Collections;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -48,4 +50,27 @@ class ExerciseRecordCreateRequestTest {
                 tuple(1, setInTrackCreateRequest.weight(), setInTrackCreateRequest.repeatCnt()));
     }
 
+
+    @Test
+    @DisplayName("ExerciseRecordCreateRequest의 toEntityWith 메서드로 ExerciseRecord를 생성한다.")
+    void createExerciseRecord() throws Exception {
+        // given
+        TrackCreateRequest trackCreateRequest = makeTrackCreateRequest("머신이름");
+
+        ExerciseRecordCreateRequest request = new ExerciseRecordCreateRequest(List.of(trackCreateRequest));
+
+        // when
+        ExerciseRecord exerciseRecord = request.toEntityWith(null);
+
+        // then
+        assertThat(exerciseRecord.getTracks()).hasSize(1)
+            .extracting("machineName")
+            .containsExactlyInAnyOrder("머신이름");
+    }
+
+    private static TrackCreateRequest makeTrackCreateRequest(String machineName) {
+        SetInTrackCreateRequest setInTrackCreateRequest = new SetInTrackCreateRequest(10, 1);
+        TrackCreateRequest trackCreateRequest = new TrackCreateRequest(machineName, List.of(setInTrackCreateRequest));
+        return trackCreateRequest;
+    }
 }
