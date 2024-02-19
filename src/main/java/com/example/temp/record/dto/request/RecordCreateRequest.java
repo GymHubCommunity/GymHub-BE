@@ -20,19 +20,19 @@ public record RecordCreateRequest(
 
     public record TrackCreateRequest(
         String machineName,
-        List<SetCreateRequest> sets
+        List<SetInTrackCreateRequest> sets
     ) {
 
         public Track toEntity() {
             int order = 1;
             List<SetInTrack> setInTracks = new ArrayList<>();
-            for (SetCreateRequest set : this.sets) {
+            for (SetInTrackCreateRequest set : this.sets) {
                 setInTracks.add(set.toEntityWithOrder(order++));
             }
             return Track.createWithoutRecord(machineName, setInTracks);
         }
 
-        public record SetCreateRequest(
+        public record SetInTrackCreateRequest(
             int weight,
             int repeatCnt
         ) {

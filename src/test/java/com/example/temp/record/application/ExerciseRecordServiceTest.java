@@ -18,7 +18,7 @@ import com.example.temp.record.domain.SetInTrack;
 import com.example.temp.record.domain.Track;
 import com.example.temp.record.dto.request.RecordCreateRequest;
 import com.example.temp.record.dto.request.RecordCreateRequest.TrackCreateRequest;
-import com.example.temp.record.dto.request.RecordCreateRequest.TrackCreateRequest.SetCreateRequest;
+import com.example.temp.record.dto.request.RecordCreateRequest.TrackCreateRequest.SetInTrackCreateRequest;
 import jakarta.persistence.EntityManager;
 import java.util.Collections;
 import java.util.List;
@@ -83,8 +83,8 @@ class ExerciseRecordServiceTest {
     @DisplayName("운동기록을 저장하면 연관된 세트들이 저장된다.")
     void createRecordSuccess() throws Exception {
         // given
-        SetCreateRequest set1CreateRequest = new SetCreateRequest(10, 3);
-        SetCreateRequest set2CreateRequest = new SetCreateRequest(20, 5);
+        SetInTrackCreateRequest set1CreateRequest = new SetInTrackCreateRequest(10, 3);
+        SetInTrackCreateRequest set2CreateRequest = new SetInTrackCreateRequest(20, 5);
         TrackCreateRequest trackCreateRequest = new TrackCreateRequest("스쿼트",
             List.of(set1CreateRequest, set2CreateRequest));
         RecordCreateRequest request = new RecordCreateRequest(List.of(trackCreateRequest));
