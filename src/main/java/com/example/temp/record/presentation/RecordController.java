@@ -19,7 +19,7 @@ public class RecordController {
 
     @PostMapping
     public ResponseEntity<Void> create(@Login UserContext userContext, RecordCreateRequest request) {
-        long createdId = recordService.create(request);
+        long createdId = recordService.create(userContext, request);
         return null;
     }
 }

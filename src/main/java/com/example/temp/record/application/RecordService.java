@@ -1,5 +1,6 @@
 package com.example.temp.record.application;
 
+import com.example.temp.common.dto.UserContext;
 import com.example.temp.record.domain.RecordRepository;
 import com.example.temp.record.dto.request.RecordCreateRequest;
 import lombok.RequiredArgsConstructor;
@@ -13,7 +14,8 @@ public class RecordService {
 
     private final RecordRepository recordRepository;
 
-    public long create(RecordCreateRequest request) {
+    @Transactional
+    public long create(UserContext userContext, RecordCreateRequest request) {
         return 0;
     }
 }
