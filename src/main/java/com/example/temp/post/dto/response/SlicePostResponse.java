@@ -15,6 +15,6 @@ public record SlicePostResponse(
         List<PostElementResponse> postElements = posts.stream()
             .map(PostElementResponse::from)
             .toList();
-        return new SlicePostResponse((postElements), posts.hasNext());
+        return new SlicePostResponse(postElements, posts.hasNext());
     }
 }

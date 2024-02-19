@@ -1,7 +1,6 @@
 package com.example.temp.post.application;
 
 import static com.example.temp.common.exception.ErrorCode.IMAGE_NOT_FOUND;
-import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.groups.Tuple.tuple;
