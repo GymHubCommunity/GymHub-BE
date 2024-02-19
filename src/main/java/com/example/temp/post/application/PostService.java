@@ -16,6 +16,7 @@ import com.example.temp.image.domain.Image;
 import com.example.temp.image.domain.ImageRepository;
 import com.example.temp.member.domain.Member;
 import com.example.temp.member.domain.MemberRepository;
+import com.example.temp.member.event.MemberDeletedEvent;
 import com.example.temp.post.domain.Post;
 import com.example.temp.post.domain.PostHashtag;
 import com.example.temp.post.domain.PostImage;
@@ -29,6 +30,7 @@ import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.event.EventListener;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
@@ -68,18 +70,27 @@ public class PostService {
 
     public PostDetailResponse findPost(Long postId, UserContext userContext) {
         findMember(userContext);
-        Post findPost = findPost(postId);
+        Post findPost = findPostBy(postId);
         return PostDetailResponse.from(findPost);
     }
 
     @Transactional
     public void updatePost(Long postId, UserContext userContext, PostUpdateRequest request) {
-        Post post = findPost(postId);
+        Post post = findPostBy(postId);
         validateOwner(userContext, post);
 
         post.updateContent(request.content());
         updatePostImages(request, post);
         updatePostHashtags(request, post);
+    }
+
+    @Transactional
+    public void deletePost(Long postId, UserContext userContext) {
+        Post post = findPostBy(postId);
+        validateOwner(userContext, post);
+
+        notUseImage(post);
+        postRepository.delete(post);
     }
 
     private void updatePostImages(PostUpdateRequest request, Post post) {
@@ -128,7 +139,7 @@ public class PostService {
             .forEach(postHashtag -> postHashtag.relatePost(post));
     }
 
-    private Post findPost(Long postId) {
+    private Post findPostBy(Long postId) {
         return postRepository.findById(postId)
             .orElseThrow(() -> new ApiException(POST_NOT_FOUND));
     }
@@ -151,5 +162,14 @@ public class PostService {
         if (!post.isOwner(userContext.id())) {
             throw new ApiException(UNAUTHORIZED_POST);
         }
+    }
+
+    /**
+     * 회원이 삭제되었을 때, 해당 회원이 작성한 게시글을 삭제합니다.
+     */
+    @EventListener
+    public void handleMemberDeletedEvent(MemberDeletedEvent event) {
+        List<Post> posts = postRepository.findAllByMemberId(event.getMemberId());
+        postRepository.deleteAll(posts);
     }
 }
