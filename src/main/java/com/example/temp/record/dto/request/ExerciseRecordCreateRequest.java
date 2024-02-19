@@ -4,11 +4,17 @@ import com.example.temp.member.domain.Member;
 import com.example.temp.record.domain.ExerciseRecord;
 import com.example.temp.record.domain.SetInTrack;
 import com.example.temp.record.domain.Track;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PositiveOrZero;
 import java.util.ArrayList;
 import java.util.List;
 
 public record ExerciseRecordCreateRequest(
-    List<TrackCreateRequest> tracks
+
+    @NotNull
+    List<@Valid TrackCreateRequest> tracks
 ) {
 
     public ExerciseRecord toEntityWith(Member member) {
@@ -19,8 +25,12 @@ public record ExerciseRecordCreateRequest(
     }
 
     public record TrackCreateRequest(
+
+        @NotBlank
         String machineName,
-        List<SetInTrackCreateRequest> sets
+
+        @NotNull
+        List<@Valid SetInTrackCreateRequest> sets
     ) {
 
         public Track toEntity() {
@@ -33,8 +43,11 @@ public record ExerciseRecordCreateRequest(
         }
 
         public record SetInTrackCreateRequest(
-            int weight,
-            int repeatCnt
+            @PositiveOrZero
+            Integer weight,
+
+            @PositiveOrZero
+            Integer repeatCnt
         ) {
 
             public SetInTrack toEntityWithOrder(int order) {
