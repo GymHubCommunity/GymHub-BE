@@ -31,7 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
 @Transactional
-class ExerciseExerciseRecordServiceTest {
+class ExerciseRecordServiceTest {
 
     @Autowired
     ExerciseRecordService exerciseRecordService;
