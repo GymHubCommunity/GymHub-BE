@@ -40,7 +40,7 @@ public class Track {
     @Column(nullable = false)
     private String machineName;
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "track", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<SetInTrack> setsInTrack = new ArrayList<>();
 
     @Builder
