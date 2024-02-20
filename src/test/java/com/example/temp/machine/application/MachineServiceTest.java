@@ -2,19 +2,27 @@ package com.example.temp.machine.application;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.tuple;
 
-import com.example.temp.machine.domain.MachineBodyPart;
-import com.example.temp.machine.dto.request.MachineBulkCreateRequest;
-import com.example.temp.machine.dto.request.MachineCreateRequest;
 import com.example.temp.common.exception.ApiException;
 import com.example.temp.common.exception.ErrorCode;
 import com.example.temp.machine.domain.BodyPart;
+import com.example.temp.machine.domain.BodyPart.BodyCategory;
 import com.example.temp.machine.domain.Machine;
+import com.example.temp.machine.domain.MachineBodyPart;
+import com.example.temp.machine.dto.request.MachineBulkCreateRequest;
+import com.example.temp.machine.dto.request.MachineCreateRequest;
 import com.example.temp.machine.dto.request.MachineSearchUsingBodyPartRequest;
 import com.example.temp.machine.dto.response.MachineCreateResponse;
 import com.example.temp.machine.dto.response.MachineInfo;
+import com.example.temp.machine.dto.response.MachineSearchUsingBodyCategoryResponse;
+import com.example.temp.machine.dto.response.MachineSearchUsingBodyCategoryResponse.MachineSearchElementAboutBodyPart;
+import com.example.temp.machine.dto.response.MachineSummary;
 import jakarta.persistence.EntityManager;
 import java.util.List;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -139,6 +147,54 @@ class MachineServiceTest {
 
         // then
         assertThat(results).isEmpty();
+    }
+
+    @Test
+    @DisplayName("BodyCategory[상체, 하체...]에 속해 있는 운동기구를 검색한다.")
+    void searchUsingBodyCategory() throws Exception {
+        // given
+        BodyCategory category = BodyCategory.UPPER;
+        saveMachine("머신1", BodyPart.SHOULDER);
+        saveMachine("머신2", BodyPart.CHEST);
+        saveMachine("전신운동", BodyPart.CORE);
+        List<BodyPart> bodyPartsBelongTo = BodyPart.findAllBelongTo(category);
+
+        // when
+        MachineSearchUsingBodyCategoryResponse response = machineService.searchUsingBodyCategory(category);
+
+        // then
+        assertThat(response.parts()).hasSize(bodyPartsBelongTo.size())
+            .extracting(
+                MachineSearchElementAboutBodyPart::name,
+                extractMachinesName())
+            .contains(
+                tuple(BodyPart.SHOULDER, Set.of("머신1")),
+                tuple(BodyPart.CHEST, Set.of("머신2"))
+
+            ).doesNotContain(
+                tuple(BodyPart.CORE, Set.of("전신운동"))
+            );
+    }
+
+    @Test
+    @DisplayName("BodyCategory[상체, 하체, ...]에 해당하는 운동 기구가 존재하지 않더라도, 각 운동 부위마다 비어있는 리스트를 반환한다.")
+    void searchUsingBodyCategoryEmptyResult() throws Exception {
+        // given
+        BodyCategory category = BodyCategory.WHOLE;
+        List<BodyPart> relatedBodyParts = BodyPart.findAllBelongTo(category);
+
+        // when
+        MachineSearchUsingBodyCategoryResponse response = machineService.searchUsingBodyCategory(category);
+
+        // then
+        assertThat(response.parts()).hasSize(relatedBodyParts.size())
+            .extracting(
+                MachineSearchElementAboutBodyPart::name)
+            .containsExactlyInAnyOrderElementsOf(relatedBodyParts);
+    }
+
+    private static Function<MachineSearchElementAboutBodyPart, Object> extractMachinesName() {
+        return element -> element.machines().stream().map(MachineSummary::name).collect(Collectors.toSet());
     }
 
     private Machine saveMachine(String name, BodyPart bodyPart) {
