@@ -165,7 +165,7 @@ class PostRepositoryTest {
         imageUrls.stream()
             .map(url -> imageRepository.findByUrl(url))
             .forEach(image -> {
-                image.use();
+                image.activate();
                 PostImage postImage = PostImage.createPostImage(image);
                 postImage.relate(post);
 

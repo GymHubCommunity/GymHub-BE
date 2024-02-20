@@ -3,6 +3,7 @@ package com.example.temp.post.application;
 import static com.example.temp.common.exception.ErrorCode.AUTHENTICATED_FAIL;
 import static com.example.temp.common.exception.ErrorCode.IMAGE_NOT_FOUND;
 import static com.example.temp.common.exception.ErrorCode.POST_NOT_FOUND;
+import static com.example.temp.common.exception.ErrorCode.UNAUTHORIZED_POST;
 
 import com.example.temp.common.dto.UserContext;
 import com.example.temp.common.exception.ApiException;
@@ -20,9 +21,10 @@ import com.example.temp.post.domain.PostHashtag;
 import com.example.temp.post.domain.PostImage;
 import com.example.temp.post.domain.PostRepository;
 import com.example.temp.post.dto.request.PostCreateRequest;
-import com.example.temp.post.dto.response.SlicePostResponse;
+import com.example.temp.post.dto.request.PostUpdateRequest;
 import com.example.temp.post.dto.response.PostCreateResponse;
 import com.example.temp.post.dto.response.PostDetailResponse;
+import com.example.temp.post.dto.response.SlicePostResponse;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -66,9 +68,29 @@ public class PostService {
 
     public PostDetailResponse findPost(Long postId, UserContext userContext) {
         findMember(userContext);
-        Post findPost = postRepository.findById(postId)
-            .orElseThrow(() -> new ApiException(POST_NOT_FOUND));
+        Post findPost = findPost(postId);
         return PostDetailResponse.from(findPost);
+    }
+
+    @Transactional
+    public void updatePost(Long postId, UserContext userContext, PostUpdateRequest request) {
+        Post post = findPost(postId);
+        validateOwner(userContext, post);
+
+        post.updateContent(request.content());
+        updatePostImages(request, post);
+        updatePostHashtags(request, post);
+    }
+
+    private void updatePostImages(PostUpdateRequest request, Post post) {
+        disableImage(post);
+        post.getPostImages().clear();
+        createPostImages(request.imageUrls(), post);
+    }
+
+    private void updatePostHashtags(PostUpdateRequest request, Post post) {
+        post.getPostHashtags().clear();
+        createPostHashtags(request.hashTags(), post);
     }
 
     private Member findMember(UserContext userContext) {
@@ -106,10 +128,28 @@ public class PostService {
             .forEach(postHashtag -> postHashtag.relatePost(post));
     }
 
+    private Post findPost(Long postId) {
+        return postRepository.findById(postId)
+            .orElseThrow(() -> new ApiException(POST_NOT_FOUND));
+    }
+
     private List<Member> findFollowingOf(Member member) {
         return followRepository.findAllByFromIdAndStatus(
                 member.getId(), FollowStatus.APPROVED).stream()
             .map(Follow::getTo)
             .toList();
+    }
+
+    private void disableImage(Post post) {
+        List<Image> images = imageRepository.findByUrlIn(post.getPostImages().stream()
+            .map(PostImage::getImageUrl)
+            .toList());
+        images.forEach(Image::deactivate);
+    }
+
+    private void validateOwner(UserContext userContext, Post post) {
+        if (!post.isOwner(userContext.id())) {
+            throw new ApiException(UNAUTHORIZED_POST);
+        }
     }
 }

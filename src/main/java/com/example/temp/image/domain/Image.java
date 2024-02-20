@@ -48,7 +48,12 @@ public class Image {
             .build();
     }
 
-    public void use() {
+    public void activate() {
         this.used = true;
     }
+
+    public void deactivate() {
+        this.used = false;
+    }
+
 }
