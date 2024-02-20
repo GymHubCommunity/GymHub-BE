@@ -21,17 +21,16 @@ public class MachineController {
 
     private final MachineService machineService;
 
-    @GetMapping("/deprecated")
+    @GetMapping("/search")
+    public ResponseEntity<MachineSearchUsingBodyCategoryResponse> searchUsingBodyCategory(
+        @RequestParam("category") BodyCategory category) {
+        MachineSearchUsingBodyCategoryResponse response = machineService.searchUsingBodyCategory(category);
+        return ResponseEntity.ok(response);
+    }
+
     public ResponseEntity<MachineSearchUsingBodyPartResponse> searchUsingBodyPart(
         MachineSearchUsingBodyPartRequest request) {
         List<MachineInfo> machines = machineService.searchUsingBodyPart(request);
         return ResponseEntity.ok(new MachineSearchUsingBodyPartResponse(machines));
-    }
-
-    @GetMapping("/search")
-    public ResponseEntity<MachineSearchUsingBodyCategoryResponse> searchUsingBodyCategory(
-        @RequestParam("category") BodyCategory category) {
-        machineService.searchUsingBodyCategory(category);
-        return ResponseEntity.ok().build();
     }
 }
