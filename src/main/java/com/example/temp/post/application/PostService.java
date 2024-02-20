@@ -83,7 +83,7 @@ public class PostService {
     }
 
     private void updatePostImages(PostUpdateRequest request, Post post) {
-        notUseImage(post);
+        disableImage(post);
         post.getPostImages().clear();
         createPostImages(request.imageUrls(), post);
     }
@@ -140,7 +140,7 @@ public class PostService {
             .toList();
     }
 
-    private void notUseImage(Post post) {
+    private void disableImage(Post post) {
         List<Image> images = imageRepository.findByUrlIn(post.getPostImages().stream()
             .map(PostImage::getImageUrl)
             .toList());
