@@ -20,7 +20,7 @@ class HashtagRepositoryTest {
 
     @BeforeEach
     public void setup() {
-        hashtag = new Hashtag("#test");
+        hashtag = Hashtag.create("#test");
         hashtagRepository.save(hashtag);
     }
 
