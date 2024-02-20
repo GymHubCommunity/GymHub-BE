@@ -4,6 +4,9 @@ import static com.example.temp.machine.domain.BodyPart.BodyCategory.LOWER;
 import static com.example.temp.machine.domain.BodyPart.BodyCategory.UPPER;
 import static com.example.temp.machine.domain.BodyPart.BodyCategory.WHOLE;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
 import lombok.Getter;
 
 @Getter
@@ -26,6 +29,20 @@ public enum BodyPart {
     BodyPart(String text, BodyCategory category) {
         this.text = text;
         this.category = category;
+    }
+
+    public static List<BodyPart> findAllBelongTo(BodyCategory category) {
+        Objects.requireNonNull(category);
+        return Arrays.stream(BodyPart.values())
+            .filter(bodyPart -> bodyPart.isBelongTo(category))
+            .toList();
+    }
+
+    /**
+     * 해당 BodyPart가 category에 포함되는지 확인합니다.
+     */
+    private boolean isBelongTo(BodyCategory category) {
+        return Objects.equals(getCategory(), category);
     }
 
     @Getter
