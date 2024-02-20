@@ -144,7 +144,7 @@ public class PostService {
         List<Image> images = imageRepository.findByUrlIn(post.getPostImages().stream()
             .map(PostImage::getImageUrl)
             .toList());
-        images.forEach(Image::notUse);
+        images.forEach(Image::deactivate);
     }
 
     private void validateOwner(UserContext userContext, Post post) {
