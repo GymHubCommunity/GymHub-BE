@@ -12,9 +12,7 @@ import com.example.temp.machine.domain.Machine;
 import com.example.temp.machine.domain.MachineBodyPart;
 import com.example.temp.machine.dto.request.MachineBulkCreateRequest;
 import com.example.temp.machine.dto.request.MachineCreateRequest;
-import com.example.temp.machine.dto.request.MachineSearchUsingBodyPartRequest;
 import com.example.temp.machine.dto.response.MachineCreateResponse;
-import com.example.temp.machine.dto.response.MachineInfo;
 import com.example.temp.machine.dto.response.MachineSearchUsingBodyCategoryResponse;
 import com.example.temp.machine.dto.response.MachineSearchUsingBodyCategoryResponse.MachineSearchElementAboutBodyPart;
 import com.example.temp.machine.dto.response.MachineSummary;
@@ -109,44 +107,6 @@ class MachineServiceTest {
         assertThat(response).hasSize(2)
             .extracting("name")
             .contains("벤치프레스", "아령");
-    }
-
-    @Test
-    @DisplayName("신체 부위에 해당하는 머신들을 가져온다.")
-    void searchUsingBodyPart() throws Exception {
-        // given
-        BodyPart keyword = BodyPart.SHOULDER;
-        Machine target = saveMachine("머신1", keyword);
-        saveMachine("머신2", BodyPart.CARDIO);
-        em.flush();
-        em.clear();
-
-        // when
-        List<MachineInfo> results = machineService.searchUsingBodyPart(
-            new MachineSearchUsingBodyPartRequest(keyword));
-
-        // then
-        assertThat(results).hasSize(1)
-            .extracting("name")
-            .contains(target.getName());
-    }
-
-    @Test
-    @DisplayName("신체 부위에 해당하는 머신이 없으면 비어있는 리스트를 반환한다.")
-    void searchUsingBodyPartThatResultIsEmpty() throws Exception {
-        // given
-        BodyPart keyword = BodyPart.BACK;
-        saveMachine("머신1", BodyPart.SHOULDER);
-        saveMachine("머신2", BodyPart.CARDIO);
-        em.flush();
-        em.clear();
-
-        // when
-        List<MachineInfo> results = machineService.searchUsingBodyPart(
-            new MachineSearchUsingBodyPartRequest(keyword));
-
-        // then
-        assertThat(results).isEmpty();
     }
 
     @Test

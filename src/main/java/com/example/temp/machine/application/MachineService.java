@@ -9,9 +9,7 @@ import com.example.temp.machine.domain.MachineBodyPart;
 import com.example.temp.machine.domain.MachineRepository;
 import com.example.temp.machine.dto.request.MachineBulkCreateRequest;
 import com.example.temp.machine.dto.request.MachineCreateRequest;
-import com.example.temp.machine.dto.request.MachineSearchUsingBodyPartRequest;
 import com.example.temp.machine.dto.response.MachineCreateResponse;
-import com.example.temp.machine.dto.response.MachineInfo;
 import com.example.temp.machine.dto.response.MachineSearchUsingBodyCategoryResponse;
 import com.example.temp.machine.dto.response.MachineSummary;
 import java.util.ArrayList;
@@ -86,16 +84,6 @@ public class MachineService {
     public List<MachineSummary> searchAll() {
         return machineRepository.findAll().stream()
             .map(MachineSummary::from)
-            .toList();
-    }
-
-    /**
-     * @deprecated 설계가 변경됨에 따라 사용하지 않게 되었습니다. 추후 삭제될 예정입니다.
-     */
-    @Deprecated(since = "first release", forRemoval = true)
-    public List<MachineInfo> searchUsingBodyPart(MachineSearchUsingBodyPartRequest request) {
-        return machineRepository.findAllByBodyPart(request.bodyPart()).stream()
-            .map(MachineInfo::from)
             .toList();
     }
 }
