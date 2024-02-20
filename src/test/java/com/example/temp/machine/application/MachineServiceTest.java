@@ -170,7 +170,6 @@ class MachineServiceTest {
             .contains(
                 tuple(BodyPart.SHOULDER, Set.of("머신1")),
                 tuple(BodyPart.CHEST, Set.of("머신2"))
-
             ).doesNotContain(
                 tuple(BodyPart.CORE, Set.of("전신운동"))
             );
@@ -191,6 +190,22 @@ class MachineServiceTest {
             .extracting(
                 MachineSearchElementAboutBodyPart::name)
             .containsExactlyInAnyOrderElementsOf(relatedBodyParts);
+    }
+
+    @Test
+    @DisplayName("모든 운동기구를 조회한다.")
+    void searchAll() throws Exception {
+        // given
+        saveMachine("머신1", BodyPart.SHOULDER);
+        saveMachine("머신2", BodyPart.LEG);
+
+        // when
+        List<MachineSummary> result = machineService.searchAll();
+
+        // then
+        assertThat(result).hasSize(2)
+            .extracting("name")
+            .containsExactlyInAnyOrder("머신1","머신2");
     }
 
     private static Function<MachineSearchElementAboutBodyPart, Object> extractMachinesName() {

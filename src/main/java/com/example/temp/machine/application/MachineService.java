@@ -13,6 +13,7 @@ import com.example.temp.machine.dto.request.MachineSearchUsingBodyPartRequest;
 import com.example.temp.machine.dto.response.MachineCreateResponse;
 import com.example.temp.machine.dto.response.MachineInfo;
 import com.example.temp.machine.dto.response.MachineSearchUsingBodyCategoryResponse;
+import com.example.temp.machine.dto.response.MachineSummary;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
@@ -79,6 +80,13 @@ public class MachineService {
             hash.put(bodyPart, new ArrayList<>());
         }
         return hash;
+    }
+
+
+    public List<MachineSummary> searchAll() {
+        return machineRepository.findAll().stream()
+            .map(MachineSummary::from)
+            .toList();
     }
 
     /**

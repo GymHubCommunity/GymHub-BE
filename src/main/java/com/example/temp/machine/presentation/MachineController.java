@@ -4,8 +4,10 @@ import com.example.temp.machine.application.MachineService;
 import com.example.temp.machine.domain.BodyPart.BodyCategory;
 import com.example.temp.machine.dto.request.MachineSearchUsingBodyPartRequest;
 import com.example.temp.machine.dto.response.MachineInfo;
+import com.example.temp.machine.dto.response.MachineSearchAllResponse;
 import com.example.temp.machine.dto.response.MachineSearchUsingBodyCategoryResponse;
 import com.example.temp.machine.dto.response.MachineSearchUsingBodyPartResponse;
+import com.example.temp.machine.dto.response.MachineSummary;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -26,6 +28,12 @@ public class MachineController {
         @RequestParam("category") BodyCategory category) {
         MachineSearchUsingBodyCategoryResponse response = machineService.searchUsingBodyCategory(category);
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/search/all")
+    public ResponseEntity<MachineSearchAllResponse> searchAll() {
+        List<MachineSummary> results = machineService.searchAll();
+        return ResponseEntity.ok(new MachineSearchAllResponse(results));
     }
 
     /**
