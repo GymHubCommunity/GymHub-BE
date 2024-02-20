@@ -50,12 +50,6 @@ public class MachineService {
             .toList();
     }
 
-    public List<MachineInfo> searchUsingBodyPart(MachineSearchUsingBodyPartRequest request) {
-        return machineRepository.findAllByBodyPart(request.bodyPart()).stream()
-            .map(MachineInfo::from)
-            .toList();
-    }
-
     public MachineSearchUsingBodyCategoryResponse searchUsingBodyCategory(BodyCategory category) {
         List<BodyPart> bodyParts = BodyPart.findAllBelongTo(category);
         List<Machine> machines = machineRepository.findAllBelongTo(bodyParts);
@@ -87,4 +81,13 @@ public class MachineService {
         return hash;
     }
 
+    /**
+     * @deprecated 설계가 변경됨에 따라 사용하지 않게 되었습니다. 추후 삭제될 예정입니다.
+     */
+    @Deprecated(since = "first release", forRemoval = true)
+    public List<MachineInfo> searchUsingBodyPart(MachineSearchUsingBodyPartRequest request) {
+        return machineRepository.findAllByBodyPart(request.bodyPart()).stream()
+            .map(MachineInfo::from)
+            .toList();
+    }
 }

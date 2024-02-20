@@ -28,6 +28,10 @@ public class MachineController {
         return ResponseEntity.ok(response);
     }
 
+    /**
+     * @deprecated 해당 메서드는 설계가 변경됨에 따라 사용하지 않게 되었습니다.
+     */
+    @Deprecated(since = "first release", forRemoval = true)
     public ResponseEntity<MachineSearchUsingBodyPartResponse> searchUsingBodyPart(
         MachineSearchUsingBodyPartRequest request) {
         List<MachineInfo> machines = machineService.searchUsingBodyPart(request);
