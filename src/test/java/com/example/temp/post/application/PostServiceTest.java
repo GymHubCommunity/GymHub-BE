@@ -1,7 +1,6 @@
 package com.example.temp.post.application;
 
 import static com.example.temp.common.exception.ErrorCode.IMAGE_NOT_FOUND;
-import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.groups.Tuple.tuple;
@@ -182,7 +181,7 @@ class PostServiceTest {
         List<String> imageUrls = List.of("imageUrl1", "ImageUrl2");
         List<String> savedImageUrls = saveImagesAndGetUrls(imageUrls);
         List<String> hashtags = List.of("#hashtag1", "#hashtag2");
-        List<String> savedHashtags = saveHashtagAndGet(hashtags);
+        List<String> savedHashtags = saveHashtagsAndGet(hashtags);
 
         PostCreateRequest request = new PostCreateRequest("content1", savedImageUrls, savedHashtags);
         LocalDateTime registeredAt = LocalDateTime.now();
@@ -243,7 +242,7 @@ class PostServiceTest {
         List<String> imageUrls = List.of("imageUrl1", "imageUrl2");
         List<String> savedImageUrls = saveImagesAndGetUrls(imageUrls);
         List<String> hashtags = List.of("#hashtag1", "#hashtag2");
-        List<String> savedHashtags = saveHashtagAndGet(hashtags);
+        List<String> savedHashtags = saveHashtagsAndGet(hashtags);
         PostCreateRequest request = new PostCreateRequest("content1", savedImageUrls, savedHashtags);
         PostCreateResponse savedPost = postService.createPost(userContext, request, LocalDateTime.now());
 
@@ -300,7 +299,7 @@ class PostServiceTest {
         List<String> imageUrls = List.of("imageUrl1", "ImageUrl2");
         List<String> savedImageUrls = saveImagesAndGetUrls(imageUrls);
         List<String> hashtags = List.of("#hashtag1", "#hashtag2");
-        List<String> savedHashtags = saveHashtagAndGet(hashtags);
+        List<String> savedHashtags = saveHashtagsAndGet(hashtags);
 
         PostCreateRequest request = new PostCreateRequest("content1", savedImageUrls, savedHashtags);
         LocalDateTime registeredAt = LocalDateTime.now();
@@ -309,7 +308,7 @@ class PostServiceTest {
         List<String> updateImageUrl = List.of("updateImage");
         List<String> savedUpdateUrl = saveImagesAndGetUrls(updateImageUrl);
         List<String> updateHashtag = List.of("#updateHashtag");
-        List<String> savedUpdateHashtag = saveHashtagAndGet(updateHashtag);
+        List<String> savedUpdateHashtag = saveHashtagsAndGet(updateHashtag);
         PostUpdateRequest updateRequest = new PostUpdateRequest("updateContent", savedUpdateUrl, savedUpdateHashtag);
         Post post = postRepository.findById(response.postId()).orElseThrow();
 
@@ -369,7 +368,7 @@ class PostServiceTest {
         return imageUrls;
     }
 
-    private List<String> saveHashtagAndGet(List<String> names) {
+    private List<String> saveHashtagsAndGet(List<String> names) {
         names.forEach(this::saveHashtag);
         return names;
     }
