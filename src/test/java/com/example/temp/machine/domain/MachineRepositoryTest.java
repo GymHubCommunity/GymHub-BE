@@ -1,9 +1,13 @@
 package com.example.temp.machine.domain;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.groups.Tuple.tuple;
 
 import jakarta.persistence.EntityManager;
 import java.util.List;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,14 +61,67 @@ class MachineRepositoryTest {
         // then
         assertThat(results).isEmpty();
     }
+
+    @Test
+    @DisplayName("BodyPart에 속한 모든 머신을 가져온다.")
+    void findAllBelongTo() throws Exception {
+        // given
+        saveMachine("레그 프레스", BodyPart.LEG);
+        saveMachine("레그 컬", List.of(BodyPart.LEG, BodyPart.SHOULDER));
+        saveMachine("벤치 프레스", BodyPart.SHOULDER);
+        saveMachine("시티드 체스트 프레스 머신", BodyPart.CHEST);
+        em.flush();
+        em.clear();
+
+        // when
+        List<Machine> machines = machineRepository.findAllBelongTo(List.of(BodyPart.LEG, BodyPart.SHOULDER));
+        // then
+        assertThat(machines).hasSize(3)
+            .extracting(
+                Machine::getName,
+                extractBodyParts())
+            .containsExactlyInAnyOrder(
+                tuple("레그 프레스", Set.of(BodyPart.LEG)),
+                tuple("레그 컬", Set.of(BodyPart.LEG, BodyPart.SHOULDER)),
+                tuple("벤치 프레스", Set.of(BodyPart.SHOULDER))
+            );
+    }
+
+    private static Function<Machine, Set<BodyPart>> extractBodyParts() {
+        return machine -> machine.getMachineBodyParts().stream()
+            .map(MachineBodyPart::getBodyPart)
+            .collect(Collectors.toSet());
+    }
+
+    @Test
+    @DisplayName("BodyPart에 속한 머신이 없으면 비어있는 리스트를 반환한다.")
+    void findAllBelongToThatResultIsEmpty() throws Exception {
+        // given
+        saveMachine("레그 프레스", BodyPart.LEG);
+        em.flush();
+        em.clear();
+
+        // when
+        List<Machine> machines = machineRepository.findAllBelongTo(List.of(BodyPart.SHOULDER));
+        // then
+        assertThat(machines).isEmpty();
+    }
+
     private Machine saveMachine(String name, BodyPart bodyPart) {
-        MachineBodyPart machineBodyPart = MachineBodyPart.create(bodyPart);
+        return saveMachine(name, List.of(bodyPart));
+    }
+
+    private Machine saveMachine(String name, List<BodyPart> bodyParts) {
+        List<MachineBodyPart> machineBodyParts = bodyParts.stream()
+            .map(MachineBodyPart::create)
+            .toList();
         Machine machine = Machine.builder()
             .name(name)
-            .machineBodyParts(List.of(machineBodyPart))
+            .machineBodyParts(machineBodyParts)
             .build();
-        machineBodyPart.relate(machine);
-
+        for (MachineBodyPart machineBodyPart : machineBodyParts) {
+            machineBodyPart.relate(machine);
+        }
         machineRepository.save(machine);
         return machine;
     }
