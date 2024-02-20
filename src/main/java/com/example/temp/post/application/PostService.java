@@ -19,7 +19,9 @@ import com.example.temp.member.domain.MemberRepository;
 import com.example.temp.member.event.MemberDeletedEvent;
 import com.example.temp.post.domain.Post;
 import com.example.temp.post.domain.PostHashtag;
+import com.example.temp.post.domain.PostHashtagRepository;
 import com.example.temp.post.domain.PostImage;
+import com.example.temp.post.domain.PostImageRepository;
 import com.example.temp.post.domain.PostRepository;
 import com.example.temp.post.dto.request.PostCreateRequest;
 import com.example.temp.post.dto.request.PostUpdateRequest;
@@ -46,6 +48,8 @@ public class PostService {
     private final FollowRepository followRepository;
     private final ImageRepository imageRepository;
     private final HashtagService hashtagService;
+    private final PostImageRepository postImageRepository;
+    private final PostHashtagRepository postHashtagRepository;
 
     @Transactional
     public PostCreateResponse createPost(UserContext userContext, PostCreateRequest postCreateRequest,
@@ -89,12 +93,12 @@ public class PostService {
         Post post = findPostBy(postId);
         validateOwner(userContext, post);
 
-        notUseImage(post);
+        disableImage(post);
         postRepository.delete(post);
     }
 
     private void updatePostImages(PostUpdateRequest request, Post post) {
-        notUseImage(post);
+        disableImage(post);
         post.getPostImages().clear();
         createPostImages(request.imageUrls(), post);
     }
@@ -151,11 +155,11 @@ public class PostService {
             .toList();
     }
 
-    private void notUseImage(Post post) {
+    private void disableImage(Post post) {
         List<Image> images = imageRepository.findByUrlIn(post.getPostImages().stream()
             .map(PostImage::getImageUrl)
             .toList());
-        images.forEach(Image::notUse);
+        images.forEach(Image::deactivate);
     }
 
     private void validateOwner(UserContext userContext, Post post) {
@@ -167,9 +171,12 @@ public class PostService {
     /**
      * 회원이 삭제되었을 때, 해당 회원이 작성한 게시글을 삭제합니다.
      */
+    @Transactional
     @EventListener
     public void handleMemberDeletedEvent(MemberDeletedEvent event) {
         List<Post> posts = postRepository.findAllByMemberId(event.getMemberId());
-        postRepository.deleteAll(posts);
+        postHashtagRepository.deleteAllInBatchByPostIn(posts);
+        postImageRepository.deleteAllInBatchByPostIn(posts);
+        postRepository.deleteAllInBatch(posts);
     }
 }
