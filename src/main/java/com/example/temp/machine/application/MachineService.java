@@ -2,6 +2,7 @@ package com.example.temp.machine.application;
 
 import com.example.temp.common.exception.ApiException;
 import com.example.temp.common.exception.ErrorCode;
+import com.example.temp.machine.domain.BodyPart.BodyCategory;
 import com.example.temp.machine.domain.Machine;
 import com.example.temp.machine.domain.MachineRepository;
 import com.example.temp.machine.dto.request.MachineBulkCreateRequest;
@@ -47,5 +48,9 @@ public class MachineService {
         return machineRepository.findAllByBodyPart(request.bodyPart()).stream()
             .map(MachineInfo::from)
             .toList();
+    }
+
+    public void searchUsingBodyCategory(BodyCategory category) {
+
     }
 }
