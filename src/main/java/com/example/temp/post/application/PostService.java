@@ -25,7 +25,6 @@ import com.example.temp.post.domain.PostImageRepository;
 import com.example.temp.post.domain.PostRepository;
 import com.example.temp.post.dto.request.PostCreateRequest;
 import com.example.temp.post.dto.request.PostUpdateRequest;
-import com.example.temp.post.dto.response.PostCreateResponse;
 import com.example.temp.post.dto.response.PostDetailResponse;
 import com.example.temp.post.dto.response.SlicePostResponse;
 import java.time.LocalDateTime;
@@ -53,7 +52,7 @@ public class PostService {
     private final PostHashtagRepository postHashtagRepository;
 
     @Transactional
-    public PostCreateResponse createPost(UserContext userContext, PostCreateRequest postCreateRequest,
+    public Long createPost(UserContext userContext, PostCreateRequest postCreateRequest,
         LocalDateTime registeredAt) {
         Member member = findMember(userContext);
         Post post = postCreateRequest.toEntity(member, registeredAt);
@@ -62,8 +61,7 @@ public class PostService {
         createPostHashtags(postCreateRequest.hashTags(), post);
 
         Post savedPost = postRepository.save(post);
-
-        return PostCreateResponse.from(savedPost);
+        return savedPost.getId();
     }
 
     public SlicePostResponse findMyAndFollowingPosts(UserContext userContext, Pageable pageable) {
