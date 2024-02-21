@@ -61,6 +61,7 @@ public enum ErrorCode {
     // 운동 기록
     RECORD_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 운동기록은 존재하지 않습니다."),
     TRACK_MACHINE_NAME_INVALID(HttpStatus.BAD_REQUEST, "운동기구의 이름은 공백이어서는 안됩니다."),
+    TRACK_CANT_EMPTY(HttpStatus.BAD_REQUEST, "운동기록 내 트랙은 최소 한 개 이상 존재해야 합니다."),
     SET_CANT_EMPTY(HttpStatus.BAD_REQUEST, "트랙 내 세트는 최소 한 개 이상 존재해야 합니다."),
     SET_WEIGHT_INVALID(HttpStatus.BAD_REQUEST, "세트의 무게는 0보다 커야 합니다."),
     SET_REPEAT_CNT_INVALID(HttpStatus.BAD_REQUEST, "세트의 반복 횟수는 0보다 커야 합니다.");

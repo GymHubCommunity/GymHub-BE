@@ -1,6 +1,8 @@
 package com.example.temp.record.domain;
 
 import com.example.temp.common.entity.BaseTimeEntity;
+import com.example.temp.common.exception.ApiException;
+import com.example.temp.common.exception.ErrorCode;
 import com.example.temp.member.domain.Member;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -46,11 +48,17 @@ public class ExerciseRecord extends BaseTimeEntity {
 
     @Builder
     private ExerciseRecord(Member member, List<Track> tracks, LocalDate recordDate) {
+        validate(tracks);
         this.member = member;
         this.recordDate = recordDate;
         this.tracks = new ArrayList<>();
-        if (tracks != null) {
-            tracks.forEach(track -> track.relate(this));
+        tracks.forEach(track -> track.relate(this));
+    }
+
+    private void validate(List<Track> tracks) {
+        Objects.requireNonNull(tracks);
+        if (tracks.isEmpty()) {
+            throw new ApiException(ErrorCode.TRACK_CANT_EMPTY);
         }
     }
 
