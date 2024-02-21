@@ -114,6 +114,20 @@ class ExerciseRecordServiceTest {
     }
 
     @Test
+    @DisplayName("운동기록을 삭제한다.")
+    void delete() throws Exception {
+        // given
+        Member member = saveMember("nick1");
+        ExerciseRecord record = saveExerciseRecord(member);
+
+        // when
+        exerciseRecordService.delete(UserContext.fromMember(member), record.getId());
+
+        // then
+        assertThat(em.find(ExerciseRecord.class, record.getId())).isNull();
+    }
+
+    @Test
     @DisplayName("로그인한 사용자만 운동기록을 삭제할 수 있다.")
     void deleteFailNoAuthN() throws Exception {
         // given

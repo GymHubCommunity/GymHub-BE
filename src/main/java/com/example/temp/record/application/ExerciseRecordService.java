@@ -36,6 +36,7 @@ public class ExerciseRecordService {
         if (!exerciseRecord.isOwnedBy(member)) {
             throw new ApiException(ErrorCode.AUTHORIZED_FAIL);
         }
+        exerciseRecordRepository.delete(exerciseRecord);
     }
 
     private Member findMember(UserContext userContext) {
