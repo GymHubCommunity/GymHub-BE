@@ -323,10 +323,11 @@ class MemberServiceTest {
 
     @Test
     @DisplayName("회원 정보를 수정한다.")
-    void update() throws Exception {
+    void updateSuccess() throws Exception {
         // given
         Member member = saveRegisteredMember(Nickname.create("nick1"));
         MemberUpdateRequest request = new MemberUpdateRequest("https://changedUrl", "change");
+
         // when
         memberService.changeMemberInfo(UserContext.fromMember(member), request);
 
@@ -335,6 +336,22 @@ class MemberServiceTest {
 
         assertThat(updatedMember.getNicknameValue()).isEqualTo(request.nickname());
         assertThat(updatedMember.getProfileUrl()).isEqualTo(request.profileUrl());
+    }
+
+    @Test
+    @DisplayName("다른 회원과 중복된 닉네임으로 닉네임을 변경할 수 없다.")
+    void updateFailDuplicatedNickname() throws Exception {
+        // given
+        String duplicatedNickname = "duplicated";
+        Member anotherMember = saveRegisteredMember(Nickname.create(duplicatedNickname));
+
+        Member target = saveRegisteredMember(Nickname.create("nick1"));
+        MemberUpdateRequest request = new MemberUpdateRequest("https://changedUrl", duplicatedNickname);
+
+        // when & then
+        assertThatThrownBy(() -> memberService.changeMemberInfo(UserContext.fromMember(target), request))
+            .isInstanceOf(ApiException.class)
+            .hasMessageContaining(NICKNAME_DUPLICATED.getMessage());
     }
 
     @Test

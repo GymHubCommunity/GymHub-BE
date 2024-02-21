@@ -112,10 +112,14 @@ public class MemberService {
     public void changeMemberInfo(UserContext userContext, MemberUpdateRequest request) {
         Member member = memberRepository.findById(userContext.id())
             .orElseThrow(() -> new ApiException(ErrorCode.AUTHENTICATED_FAIL));
+        if (memberRepository.existsByNickname(request.nickname())) {
+            throw new ApiException(ErrorCode.NICKNAME_DUPLICATED);
+        }
         member.setProfileUrl(request.profileUrl());
         member.setNickname(Nickname.create(request.nickname()));
     }
 
+    // Find말고 다른 이름으로 변경해야 할듯
     public MemberInfo find(long targetId) {
         Member member = memberRepository.findById(targetId)
             .orElseThrow(() -> new ApiException(ErrorCode.MEMBER_NOT_FOUND));
