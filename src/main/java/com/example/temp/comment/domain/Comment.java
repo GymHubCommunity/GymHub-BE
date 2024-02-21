@@ -13,6 +13,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -36,5 +37,26 @@ public class Comment {
     private Post post;
 
     @Embedded
-    private Message message;
+    private Content content;
+
+    @Builder
+    private Comment(Member member, Content content, Post post) {
+        this.member = member;
+        this.content = content;
+        this.post = post;
+    }
+
+    public static Comment create(Member member, String content, Post post) {
+        Comment comment = Comment.builder()
+            .member(member)
+            .content(Content.create(content))
+            .post(post)
+            .build();
+        post.addComment(comment);
+        return comment;
+    }
+
+    public void relatePost(Post post) {
+        this.post = post;
+    }
 }
