@@ -116,6 +116,9 @@ public class MemberService {
             memberRepository.existsByNickname(request.nickname())) {
             throw new ApiException(ErrorCode.NICKNAME_DUPLICATED);
         }
+        if (!imageRepository.existsByUrl(request.profileUrl())) {
+            throw new ApiException(ErrorCode.IMAGE_NOT_FOUND);
+        }
         member.setProfileUrl(request.profileUrl());
         member.setNickname(Nickname.create(request.nickname()));
     }

@@ -61,11 +61,17 @@ class MemberServiceTest {
 
     UserContext notExistUserContext;
 
+    Image defaultImage;
+
+    Image savedImage;
+
     @BeforeEach
     void setUp() {
         oAuthUserInfo = mockOAuthClientResponse();
         oAuthResponse = OAuthResponse.of(OAuthProviderType.GOOGLE, oAuthUserInfo);
         notExistUserContext = new UserContext(999_999_999L, Role.NORMAL);
+        defaultImage = saveImage("https://default");
+        savedImage = saveImage("https://savedImage");
     }
 
     private OAuthUserInfo mockOAuthClientResponse() {
@@ -326,7 +332,7 @@ class MemberServiceTest {
     void updateSuccess() throws Exception {
         // given
         Member member = saveRegisteredMember(Nickname.create("nick1"));
-        MemberUpdateRequest request = new MemberUpdateRequest("https://changedUrl", "change");
+        MemberUpdateRequest request = new MemberUpdateRequest(savedImage.getUrl(), "change");
 
         // when
         memberService.changeMemberInfo(UserContext.fromMember(member), request);
@@ -346,7 +352,7 @@ class MemberServiceTest {
         Member anotherMember = saveRegisteredMember(Nickname.create(duplicatedNickname));
 
         Member target = saveRegisteredMember(Nickname.create("nick1"));
-        MemberUpdateRequest request = new MemberUpdateRequest("https://changedUrl", duplicatedNickname);
+        MemberUpdateRequest request = new MemberUpdateRequest(savedImage.getUrl(), duplicatedNickname);
 
         // when & then
         assertThatThrownBy(() -> memberService.changeMemberInfo(UserContext.fromMember(target), request))
@@ -359,7 +365,7 @@ class MemberServiceTest {
     void updateSuccessNotChangeNickname() throws Exception {
         // given
         Member member = saveRegisteredMember(Nickname.create("nick1"));
-        MemberUpdateRequest request = new MemberUpdateRequest("https://changedUrl", member.getNicknameValue());
+        MemberUpdateRequest request = new MemberUpdateRequest(savedImage.getUrl(), member.getNicknameValue());
 
         // when
         memberService.changeMemberInfo(UserContext.fromMember(member), request);
@@ -369,6 +375,19 @@ class MemberServiceTest {
 
         assertThat(updatedMember.getNicknameValue()).isEqualTo(request.nickname());
         assertThat(updatedMember.getProfileUrl()).isEqualTo(request.profileUrl());
+    }
+
+    @Test
+    @DisplayName("기존에 등록되지 않은 이미지로는 회원 정보 변경이 불가능하다.")
+    void updateFailNotFoundImage() throws Exception {
+        // given
+        Member member = saveRegisteredMember(Nickname.create("nick1"));
+        MemberUpdateRequest request = new MemberUpdateRequest("https://notfound", "changed");
+
+        // when & then
+        assertThatThrownBy(() -> memberService.changeMemberInfo(UserContext.fromMember(member), request))
+            .isInstanceOf(ApiException.class)
+            .hasMessageContaining(IMAGE_NOT_FOUND.getMessage());
     }
 
     @Test
@@ -405,6 +424,7 @@ class MemberServiceTest {
     private Image saveImage(String url) {
         Image image = Image.builder()
             .url(url)
+            .used(false)
             .build();
         em.persist(image);
         return image;
@@ -465,10 +485,11 @@ class MemberServiceTest {
     }
 
     private Member saveMember(Nickname nickname, boolean registered, PrivacyPolicy privacyPolicy) {
+
         Member member = Member.builder()
             .nickname(nickname)
             .email(Email.create("이메일"))
-            .profileUrl("프로필주소")
+            .profileUrl(defaultImage.getUrl())
             .registered(registered)
             .privacyPolicy(privacyPolicy)
             .followStrategy(FollowStrategy.LAZY)
@@ -476,6 +497,7 @@ class MemberServiceTest {
         em.persist(member);
         return member;
     }
+
 
     private void validateMemberIsSame(Member result, OAuthResponse oAuthResponse) {
         assertThat(result.getId()).isNotNull();
