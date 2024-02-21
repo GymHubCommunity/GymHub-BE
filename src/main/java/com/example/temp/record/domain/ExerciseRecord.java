@@ -48,7 +48,9 @@ public class ExerciseRecord extends BaseTimeEntity {
         this.member = member;
         this.recordDate = recordDate;
         this.tracks = new ArrayList<>();
-        tracks.forEach(track -> track.relate(this));
+        if (tracks != null) {
+            tracks.forEach(track -> track.relate(this));
+        }
     }
 
     public static ExerciseRecord create(Member member, List<Track> tracks) {
