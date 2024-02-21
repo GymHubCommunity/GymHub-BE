@@ -65,6 +65,12 @@ public class Post extends BaseTimeEntity {
         this.registeredAt = registeredAt;
     }
 
+    //== 연관관계 편의 메서드 ==//
+    public void addComment(Comment comment) {
+        this.comments.add(comment);
+        comment.relatePost(this);
+    }
+
     public String getContent() {
         return content.getValue();
     }
