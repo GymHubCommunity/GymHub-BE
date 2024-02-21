@@ -1,5 +1,6 @@
 package com.example.temp.comment.domain;
 
+import com.example.temp.common.entity.BaseTimeEntity;
 import com.example.temp.member.domain.Member;
 import com.example.temp.post.domain.Post;
 import jakarta.persistence.Column;
@@ -21,7 +22,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "comments")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
-public class Comment {
+public class Comment extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
