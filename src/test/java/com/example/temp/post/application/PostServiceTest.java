@@ -90,7 +90,7 @@ class PostServiceTest {
         Pageable pageable = PageRequest.of(0, 10);
 
         // When
-        SlicePostResponse slicePostResponse = postService.findPostsFromFollowings(userContext, pageable);
+        SlicePostResponse slicePostResponse = postService.findMyAndFollowingPosts(userContext, pageable);
 
         // Then
         assertThat(slicePostResponse.hasNext()).isFalse();
@@ -125,7 +125,7 @@ class PostServiceTest {
         Pageable pageable = PageRequest.of(0, 5);
 
         // When
-        SlicePostResponse slicePostResponse = postService.findPostsFromFollowings(userContext, pageable);
+        SlicePostResponse slicePostResponse = postService.findMyAndFollowingPosts(userContext, pageable);
 
         // Then
         assertThat(slicePostResponse.posts()).hasSize(2)
@@ -159,7 +159,7 @@ class PostServiceTest {
         Pageable pageable = PageRequest.of(0, 10);
 
         // When
-        SlicePostResponse postsPage = postService.findPostsFromFollowings(userContext, pageable);
+        SlicePostResponse postsPage = postService.findMyAndFollowingPosts(userContext, pageable);
         List<PostElementResponse> posts = postsPage.posts();
 
         // Then

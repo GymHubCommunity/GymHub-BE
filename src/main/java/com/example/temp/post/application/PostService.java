@@ -65,10 +65,11 @@ public class PostService {
         return PostCreateResponse.from(savedPost);
     }
 
-    public SlicePostResponse findPostsFromFollowings(UserContext userContext, Pageable pageable) {
+    public SlicePostResponse findMyAndFollowingPosts(UserContext userContext, Pageable pageable) {
         Member member = findMember(userContext);
-        List<Member> followings = findFollowingOf(member);
-        Slice<Post> posts = postRepository.findByMemberInOrderByRegisteredAtDesc(followings, pageable);
+        List<Member> myselfAndFollowings = findFollowingOf(member);
+        myselfAndFollowings.add(member);
+        Slice<Post> posts = postRepository.findByMemberInOrderByRegisteredAtDesc(myselfAndFollowings, pageable);
         return SlicePostResponse.from(posts);
     }
 

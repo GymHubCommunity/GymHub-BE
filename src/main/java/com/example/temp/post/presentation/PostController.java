@@ -42,7 +42,7 @@ public class PostController {
     @GetMapping
     public ResponseEntity<SlicePostResponse> getFollowingPosts(@Login UserContext userContext,
         @PageableDefault(sort = "registeredAt", direction = DESC) Pageable pageable) {
-        SlicePostResponse posts = postService.findPostsFromFollowings(userContext, pageable);
+        SlicePostResponse posts = postService.findMyAndFollowingPosts(userContext, pageable);
         return ResponseEntity.ok(posts);
     }
 
