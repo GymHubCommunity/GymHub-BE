@@ -107,4 +107,9 @@ public class MemberService {
         member.changePrivacy(privacyPolicy);
     }
 
+    public MemberInfo find(long targetId) {
+        Member member = memberRepository.findById(targetId)
+            .orElseThrow(() -> new ApiException(ErrorCode.MEMBER_NOT_FOUND));
+        return MemberInfo.of(member);
+    }
 }

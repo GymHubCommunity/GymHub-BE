@@ -303,6 +303,23 @@ class MemberServiceTest {
         assertThat(em.find(Follow.class, notRelatedFollow.getId())).isNotNull();
     }
 
+
+    @Test
+    @DisplayName("회원을 조회한다.")
+    void find() throws Exception {
+        // given
+        Member member = savePublicMember("nick1");
+
+        // when
+        MemberInfo memberInfo = memberService.find(member.getId());
+
+        // then
+        assertThat(memberInfo.id()).isEqualTo(member.getId());
+        assertThat(memberInfo.email()).isEqualTo(member.getEmailValue());
+        assertThat(memberInfo.nickname()).isEqualTo(member.getNicknameValue());
+        assertThat(memberInfo.profileUrl()).isEqualTo(member.getProfileUrl());
+    }
+
     @Test
     @DisplayName("회원이 탈퇴되었을 때, 작성한 게시글이 전부 삭제된다.")
     void deleteAllPostWhenMemberWithdraw() throws Exception {
@@ -386,6 +403,14 @@ class MemberServiceTest {
 
     private Member saveNotInitializedMember(Nickname nickname) {
         return saveMember(nickname, false, PrivacyPolicy.PRIVATE);
+    }
+
+    private Member savePublicMember(String nickname) {
+        return saveMember(Nickname.create(nickname), true, PrivacyPolicy.PUBLIC);
+    }
+
+    private Member savePrivateMember(String nickname) {
+        return saveMember(Nickname.create(nickname), true, PrivacyPolicy.PRIVATE);
     }
 
     private Member saveMember(Nickname nickname, boolean registered, PrivacyPolicy privacyPolicy) {
