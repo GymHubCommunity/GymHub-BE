@@ -211,6 +211,21 @@ class ExerciseRecordServiceTest {
             .hasMessageContaining(ErrorCode.AUTHENTICATED_FAIL.getMessage());
     }
 
+    @Test
+    @DisplayName("인가 권한이 없는 사용자는 운동기록을 수정할 수 없다.")
+    void updateFailNoAuthZ() throws Exception {
+        // given
+        ExerciseRecord record = saveExerciseRecord(loginMember);
+        Member anotherMember = saveMember("another1");
+        ExerciseRecordUpdateRequest request = new ExerciseRecordUpdateRequest(Collections.emptyList());
+
+        // when & then
+        assertThatThrownBy(() ->
+            exerciseRecordService.update(UserContext.fromMember(anotherMember), record.getId(), request))
+            .isInstanceOf(ApiException.class)
+            .hasMessageContaining(ErrorCode.AUTHORIZED_FAIL.getMessage());
+    }
+
     private ExerciseRecord saveExerciseRecord(Member member) {
         ExerciseRecord record = ExerciseRecord.builder()
             .member(member)
