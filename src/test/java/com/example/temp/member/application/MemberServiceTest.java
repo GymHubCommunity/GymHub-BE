@@ -355,6 +355,23 @@ class MemberServiceTest {
     }
 
     @Test
+    @DisplayName("닉네임을 변경하지 않고 회원 정보를 변경한다.")
+    void updateSuccessNotChangeNickname() throws Exception {
+        // given
+        Member member = saveRegisteredMember(Nickname.create("nick1"));
+        MemberUpdateRequest request = new MemberUpdateRequest("https://changedUrl", member.getNicknameValue());
+
+        // when
+        memberService.changeMemberInfo(UserContext.fromMember(member), request);
+
+        // then
+        Member updatedMember = em.find(Member.class, member.getId());
+
+        assertThat(updatedMember.getNicknameValue()).isEqualTo(request.nickname());
+        assertThat(updatedMember.getProfileUrl()).isEqualTo(request.profileUrl());
+    }
+
+    @Test
     @DisplayName("회원이 탈퇴되었을 때, 작성한 게시글이 전부 삭제된다.")
     void deleteAllPostWhenMemberWithdraw() throws Exception {
         // given

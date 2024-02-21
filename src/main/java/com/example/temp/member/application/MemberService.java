@@ -112,7 +112,8 @@ public class MemberService {
     public void changeMemberInfo(UserContext userContext, MemberUpdateRequest request) {
         Member member = memberRepository.findById(userContext.id())
             .orElseThrow(() -> new ApiException(ErrorCode.AUTHENTICATED_FAIL));
-        if (memberRepository.existsByNickname(request.nickname())) {
+        if (!member.getNicknameValue().equals(request.nickname()) &&
+            memberRepository.existsByNickname(request.nickname())) {
             throw new ApiException(ErrorCode.NICKNAME_DUPLICATED);
         }
         member.setProfileUrl(request.profileUrl());
