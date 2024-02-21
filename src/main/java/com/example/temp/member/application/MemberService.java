@@ -15,6 +15,7 @@ import com.example.temp.member.dto.request.MemberUpdateRequest;
 import com.example.temp.member.event.MemberDeletedEvent;
 import com.example.temp.member.exception.NicknameDuplicatedException;
 import com.example.temp.oauth.OAuthResponse;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -112,7 +113,7 @@ public class MemberService {
     public void changeMemberInfo(UserContext userContext, MemberUpdateRequest request) {
         Member member = memberRepository.findById(userContext.id())
             .orElseThrow(() -> new ApiException(ErrorCode.AUTHENTICATED_FAIL));
-        if (!member.getNicknameValue().equals(request.nickname()) &&
+        if (!isMemberOriginalNickname(member, request.nickname()) &&
             memberRepository.existsByNickname(request.nickname())) {
             throw new ApiException(ErrorCode.NICKNAME_DUPLICATED);
         }
@@ -121,6 +122,11 @@ public class MemberService {
         }
         member.setProfileUrl(request.profileUrl());
         member.setNickname(Nickname.create(request.nickname()));
+    }
+
+    private boolean isMemberOriginalNickname(Member member, String nickname) {
+        Objects.requireNonNull(nickname);
+        return Objects.equals(member.getNicknameValue(), nickname);
     }
 
     // Find말고 다른 이름으로 변경해야 할듯
