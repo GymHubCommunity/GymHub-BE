@@ -67,7 +67,7 @@ class PostServiceTest {
     @Autowired
     private FollowRepository followRepository;
 
-    @DisplayName("내가 팔로우한 유저의 게시글 목록을 볼 수 있다.")
+    @DisplayName("내가 작성한 글과 팔로우한 유저의 게시글 목록을 볼 수 있다.")
     @Test
     void findPostsByFollowedMembers() {
         // Given
@@ -94,9 +94,9 @@ class PostServiceTest {
 
         // Then
         assertThat(slicePostResponse.hasNext()).isFalse();
-        assertThat(slicePostResponse.posts()).hasSize(2)
+        assertThat(slicePostResponse.posts()).hasSize(3)
             .extracting("writerInfo")
-            .containsExactlyInAnyOrder(WriterInfo.from(member2), WriterInfo.from(member3));
+            .containsExactlyInAnyOrder(WriterInfo.from(member2), WriterInfo.from(member3), WriterInfo.from(member1));
     }
 
     @DisplayName("팔로우 하지 않은 유저의 게시물은 볼 수 없다.")
@@ -128,9 +128,9 @@ class PostServiceTest {
         SlicePostResponse slicePostResponse = postService.findMyAndFollowingPosts(userContext, pageable);
 
         // Then
-        assertThat(slicePostResponse.posts()).hasSize(2)
+        assertThat(slicePostResponse.posts()).hasSize(3)
             .extracting(post -> post.writerInfo().writerId())
-            .containsExactlyInAnyOrder(member2.getId(), member3.getId())
+            .containsExactlyInAnyOrder(member2.getId(), member3.getId(), member1.getId())
             .doesNotContain(member4.getId());
     }
 
