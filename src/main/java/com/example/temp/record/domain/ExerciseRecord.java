@@ -67,11 +67,11 @@ public class ExerciseRecord extends BaseTimeEntity {
     }
 
     /**
-     * ExerciseRecord를 입력받아, 내부의 Track을 변경합니다.
+     * ExerciseRecord를 입력받아, 내부의 Track을 변경합니다. ConcurrentModificationException 으로 인해 updated의 tracks를 복사한 뒤 사용합니다.
      */
     public void update(ExerciseRecord updated) {
         this.tracks.clear();
-        updated.getTracks()
-            .forEach(track -> track.relate(this));
+        List<Track> copies = List.copyOf(updated.getTracks());
+        copies.forEach(track -> track.relate(this));
     }
 }
