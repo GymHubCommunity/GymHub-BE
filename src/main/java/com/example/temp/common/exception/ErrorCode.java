@@ -44,6 +44,9 @@ public enum ErrorCode {
     POST_NOT_FOUND(HttpStatus.NOT_FOUND, "게시글을 찾을 수 없습니다."),
     UNAUTHORIZED_POST(HttpStatus.FORBIDDEN, "게시글에 대한 권한이 없습니다."),
 
+    //댓글
+    MESSAGE_TOO_LONG(HttpStatus.BAD_REQUEST, "댓글은 최대 200자 까지 가능합니다."),
+
     // 이미지
     IMAGE_TOO_BIG(HttpStatus.BAD_REQUEST, "이미지의 크기가 너무 큽니다"),
     IMAGE_NAME_DUPLICATED(HttpStatus.CONFLICT, "서버에서 생성한 이미지의 이름이 중복되었습니다. 다시 한 번 요청을 보내주세요."),
