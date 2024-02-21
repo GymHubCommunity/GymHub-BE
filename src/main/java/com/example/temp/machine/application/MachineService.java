@@ -2,14 +2,20 @@ package com.example.temp.machine.application;
 
 import com.example.temp.common.exception.ApiException;
 import com.example.temp.common.exception.ErrorCode;
+import com.example.temp.machine.domain.BodyPart;
+import com.example.temp.machine.domain.BodyPart.BodyCategory;
 import com.example.temp.machine.domain.Machine;
+import com.example.temp.machine.domain.MachineBodyPart;
 import com.example.temp.machine.domain.MachineRepository;
 import com.example.temp.machine.dto.request.MachineBulkCreateRequest;
 import com.example.temp.machine.dto.request.MachineCreateRequest;
-import com.example.temp.machine.dto.request.MachineSearchUsingBodyPartRequest;
 import com.example.temp.machine.dto.response.MachineCreateResponse;
-import com.example.temp.machine.dto.response.MachineInfo;
+import com.example.temp.machine.dto.response.MachineSearchUsingBodyCategoryResponse;
+import com.example.temp.machine.dto.response.MachineSummary;
+import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,9 +49,41 @@ public class MachineService {
             .toList();
     }
 
-    public List<MachineInfo> searchUsingBodyPart(MachineSearchUsingBodyPartRequest request) {
-        return machineRepository.findAllByBodyPart(request.bodyPart()).stream()
-            .map(MachineInfo::from)
+    public MachineSearchUsingBodyCategoryResponse searchUsingBodyCategory(BodyCategory category) {
+        List<BodyPart> bodyParts = BodyPart.findAllBelongTo(category);
+        List<Machine> machines = machineRepository.findAllBelongTo(bodyParts);
+
+        Map<BodyPart, List<Machine>> hash = convertListToMapByBodyPart(bodyParts, machines);
+        return MachineSearchUsingBodyCategoryResponse.of(hash);
+    }
+
+    private Map<BodyPart, List<Machine>> convertListToMapByBodyPart(List<BodyPart> bodyParts, List<Machine> machines) {
+        Map<BodyPart, List<Machine>> hash = createMapByBodyPart(bodyParts);
+        for (Machine machine : machines) {
+            addMachineIntoBodyPartMap(machine, hash);
+        }
+        return hash;
+    }
+
+    private void addMachineIntoBodyPartMap(Machine machine, Map<BodyPart, List<Machine>> hash) {
+        List<MachineBodyPart> machineBodyPartList = machine.getMachineBodyParts();
+        for (MachineBodyPart machineBodyPart : machineBodyPartList) {
+            hash.get(machineBodyPart.getBodyPart()).add(machine);
+        }
+    }
+
+    private Map<BodyPart, List<Machine>> createMapByBodyPart(List<BodyPart> bodyParts) {
+        Map<BodyPart, List<Machine>> hash = new EnumMap<>(BodyPart.class);
+        for (BodyPart bodyPart : bodyParts) {
+            hash.put(bodyPart, new ArrayList<>());
+        }
+        return hash;
+    }
+
+
+    public List<MachineSummary> searchAll() {
+        return machineRepository.findAll().stream()
+            .map(MachineSummary::from)
             .toList();
     }
 }

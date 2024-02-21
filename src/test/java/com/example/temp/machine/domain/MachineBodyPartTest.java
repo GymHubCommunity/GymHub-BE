@@ -2,7 +2,10 @@ package com.example.temp.machine.domain;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.example.temp.machine.domain.BodyPart.BodyCategory;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -59,6 +62,29 @@ class MachineBodyPartTest {
         assertThat(target.getMachineBodyParts()).hasSize(1)
             .contains(machineBodyPart);
         assertThat(past.getMachineBodyParts()).isEmpty();
+    }
+    
+    @Test
+    @DisplayName("특정 신체 카테고리에 속한 신체부위들을 모두 가져온다.")
+    void findAllBelongTo() throws Exception {
+        // given
+        BodyCategory category = BodyCategory.WHOLE;
+
+        // when
+        List<BodyPart> bodyParts = BodyPart.findAllBelongTo(category);
+
+        // then
+        assertThat(bodyParts)
+            .extracting(BodyPart::getCategory)
+            .containsOnly(category);
+        validateSize(category, bodyParts);
+    }
+
+    private static void validateSize(BodyCategory category, List<BodyPart> bodyParts) {
+        int cnt = (int) Arrays.stream(BodyPart.values())
+            .filter(bodyPart -> bodyPart.getCategory() == category)
+            .count();
+        assertThat(bodyParts).hasSize(cnt);
     }
 
     private static MachineBodyPart createRelatedMachineBodyPart(BodyPart bodyPart, Machine past) {

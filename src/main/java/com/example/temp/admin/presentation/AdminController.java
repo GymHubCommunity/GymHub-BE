@@ -14,6 +14,7 @@ import com.example.temp.machine.dto.request.MachineBulkCreateRequest;
 import com.example.temp.machine.dto.request.MachineCreateRequest;
 import com.example.temp.machine.dto.response.MachineCreateResponse;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -70,7 +71,8 @@ public class AdminController {
     }
 
     @PostMapping("/machines")
-    public ResponseEntity<MachineCreateResponse> createMachine(MachineCreateRequest request) {
+    public ResponseEntity<MachineCreateResponse> createMachine(
+        @RequestBody @Valid MachineCreateRequest request) {
         MachineCreateResponse response = machineService.createMachine(request);
         return ResponseEntity.ok(response);
     }
