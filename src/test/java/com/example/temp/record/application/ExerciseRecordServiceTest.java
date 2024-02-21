@@ -19,6 +19,7 @@ import com.example.temp.record.domain.Track;
 import com.example.temp.record.dto.request.ExerciseRecordCreateRequest;
 import com.example.temp.record.dto.request.ExerciseRecordCreateRequest.TrackCreateRequest;
 import com.example.temp.record.dto.request.ExerciseRecordCreateRequest.TrackCreateRequest.SetInTrackCreateRequest;
+import com.example.temp.record.dto.request.ExerciseRecordUpdateRequest;
 import jakarta.persistence.EntityManager;
 import java.time.LocalDate;
 import java.util.Collections;
@@ -197,6 +198,18 @@ class ExerciseRecordServiceTest {
             .hasMessageContaining(ErrorCode.AUTHORIZED_FAIL.getMessage());
     }
 
+    @Test
+    @DisplayName("로그인한 사용자만 운동기록을 수정할 수 있다.")
+    void updateFailNoAuthN() throws Exception {
+        // given
+        ExerciseRecord record = saveExerciseRecord(loginMember);
+        ExerciseRecordUpdateRequest request = new ExerciseRecordUpdateRequest(Collections.emptyList());
+
+        // when & then
+        assertThatThrownBy(() -> exerciseRecordService.update(noLoginUserContext, record.getId(), request))
+            .isInstanceOf(ApiException.class)
+            .hasMessageContaining(ErrorCode.AUTHENTICATED_FAIL.getMessage());
+    }
 
     private ExerciseRecord saveExerciseRecord(Member member) {
         ExerciseRecord record = ExerciseRecord.builder()
