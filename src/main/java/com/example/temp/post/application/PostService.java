@@ -31,6 +31,7 @@ import com.example.temp.post.dto.response.SlicePostResponse;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.event.EventListener;
 import org.springframework.data.domain.Pageable;
@@ -67,7 +68,7 @@ public class PostService {
 
     public SlicePostResponse findMyAndFollowingPosts(UserContext userContext, Pageable pageable) {
         Member member = findMember(userContext);
-        List<Member> myselfAndFollowings = findFollowingOf(member);
+        List<Member> myselfAndFollowings = findMyselfAndFollowings(member);
         myselfAndFollowings.add(member);
         Slice<Post> posts = postRepository.findByMemberInOrderByRegisteredAtDesc(myselfAndFollowings, pageable);
         return SlicePostResponse.from(posts);
@@ -149,11 +150,14 @@ public class PostService {
             .orElseThrow(() -> new ApiException(POST_NOT_FOUND));
     }
 
-    private List<Member> findFollowingOf(Member member) {
-        return followRepository.findAllByFromIdAndStatus(
+    private List<Member> findMyselfAndFollowings(Member member) {
+        List<Member> followings = followRepository.findAllByFromIdAndStatus(
                 member.getId(), FollowStatus.APPROVED).stream()
             .map(Follow::getTo)
-            .toList();
+            .collect(Collectors.toList());
+        followings.add(member);
+
+        return followings;
     }
 
     private void disableImage(Post post) {
