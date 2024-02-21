@@ -5,7 +5,7 @@ import java.util.List;
 import org.springframework.data.domain.Slice;
 
 public record FollowInfoResult(
-    List<FollowInfo> followInfos,
+    List<FollowInfo> follows,
     boolean hasNext
 ) {
 

@@ -56,7 +56,13 @@ public enum ErrorCode {
     BODY_PART_ALREADY_REGISTER(HttpStatus.BAD_REQUEST, "이미 등록된 신체 부위입니다"),
     MACHINE_ALREADY_REGISTER(HttpStatus.BAD_REQUEST, "이미 등록된 운동 기구입니다"),
     MACHINE_MATCH_ONLY_ONE_BODY_PART(HttpStatus.BAD_REQUEST, "운동기구는 하나의 신체 부위에만 매핑할 수 있습니다"),
-    MACHINE_MAPPED_INVALID_BODY_PART(HttpStatus.BAD_REQUEST, "입력하신 신체부위 중 적절하지 않은 게 있습니다.");
+    MACHINE_MAPPED_INVALID_BODY_PART(HttpStatus.BAD_REQUEST, "입력하신 신체부위 중 적절하지 않은 게 있습니다."),
+
+    // 운동 기록
+    TRACK_MACHINE_NAME_INVALID(HttpStatus.BAD_REQUEST, "운동기구의 이름은 공백이어서는 안됩니다."),
+    SET_CANT_EMPTY(HttpStatus.BAD_REQUEST, "트랙 내 세트는 최소 한 개 이상 존재해야 합니다."),
+    SET_WEIGHT_INVALID(HttpStatus.BAD_REQUEST, "세트의 무게는 0보다 커야 합니다."),
+    SET_REPEAT_CNT_INVALID(HttpStatus.BAD_REQUEST, "세트의 반복 횟수는 0보다 커야 합니다.");
 
     private final HttpStatus httpStatus;
     private final String message;
