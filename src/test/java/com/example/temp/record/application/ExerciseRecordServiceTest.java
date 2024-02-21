@@ -20,6 +20,8 @@ import com.example.temp.record.dto.request.ExerciseRecordCreateRequest;
 import com.example.temp.record.dto.request.ExerciseRecordCreateRequest.TrackCreateRequest;
 import com.example.temp.record.dto.request.ExerciseRecordCreateRequest.TrackCreateRequest.SetInTrackCreateRequest;
 import com.example.temp.record.dto.request.ExerciseRecordUpdateRequest;
+import com.example.temp.record.dto.request.ExerciseRecordUpdateRequest.TrackUpdateRequest;
+import com.example.temp.record.dto.request.ExerciseRecordUpdateRequest.TrackUpdateRequest.SetInTrackUpdateRequest;
 import jakarta.persistence.EntityManager;
 import java.time.LocalDate;
 import java.util.Collections;
@@ -204,7 +206,7 @@ class ExerciseRecordServiceTest {
         // given
         Track trackBeforeSaved = createTrack("머신1", List.of(createSetInTrack(1), createSetInTrack(2)));
         ExerciseRecord record = saveExerciseRecord(loginMember, trackBeforeSaved);
-        ExerciseRecordUpdateRequest request = new ExerciseRecordUpdateRequest(Collections.emptyList());
+        ExerciseRecordUpdateRequest request = makeExerciseRecordUpdateRequest("변경한_머신", 100, 10);
 
         Long prevTrackId = record.getTracks().get(0).getId();
         assertThat(em.find(Track.class, prevTrackId)).isNotNull();
@@ -251,13 +253,8 @@ class ExerciseRecordServiceTest {
     }
 
     private ExerciseRecord saveExerciseRecord(Member member) {
-        ExerciseRecord record = ExerciseRecord.builder()
-            .member(member)
-            .tracks(Collections.emptyList())
-            .recordDate(LocalDate.now())
-            .build();
-        em.persist(record);
-        return record;
+        Track tracks = createTrack("머신1", List.of(createSetInTrack(1)));
+        return saveExerciseRecord(member, tracks);
     }
 
     private ExerciseRecord saveExerciseRecord(Member member, Track track) {
@@ -281,4 +278,16 @@ class ExerciseRecordServiceTest {
         em.persist(member);
         return member;
     }
+
+    /**
+     * machineName이라는 운동 기구를 사용하는 1세트짜리 트랙을 UPDATE하는 요청을 만듭니다.
+     */
+    private ExerciseRecordUpdateRequest makeExerciseRecordUpdateRequest(String machineName, int weight, int repeatCnt) {
+        SetInTrackUpdateRequest setInTrackUpdateRequest = new SetInTrackUpdateRequest(weight, repeatCnt);
+        List<TrackUpdateRequest> trackUpdateRequests = List.of(
+            new TrackUpdateRequest(machineName, List.of(setInTrackUpdateRequest)));
+        return new ExerciseRecordUpdateRequest(trackUpdateRequests);
+    }
+
+
 }

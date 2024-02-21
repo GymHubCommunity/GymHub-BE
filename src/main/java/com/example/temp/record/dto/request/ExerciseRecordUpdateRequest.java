@@ -14,35 +14,35 @@ import java.util.List;
 public record ExerciseRecordUpdateRequest(
 
     @NotNull
-    List<@Valid TrackCreateRequest> tracks
+    List<@Valid TrackUpdateRequest> tracks
 ) {
 
     public ExerciseRecord toEntityWith(Member member) {
         List<Track> tracks = this.tracks.stream()
-            .map(TrackCreateRequest::toEntity)
+            .map(TrackUpdateRequest::toEntity)
             .toList();
         return ExerciseRecord.create(member, tracks);
     }
 
-    public record TrackCreateRequest(
+    public record TrackUpdateRequest(
 
         @NotBlank
         String machineName,
 
         @NotNull
-        List<@Valid SetInTrackCreateRequest> sets
+        List<@Valid SetInTrackUpdateRequest> sets
     ) {
 
         public Track toEntity() {
             int order = 1;
             List<SetInTrack> setInTracks = new ArrayList<>();
-            for (SetInTrackCreateRequest set : this.sets) {
+            for (SetInTrackUpdateRequest set : this.sets) {
                 setInTracks.add(set.toEntityWithOrder(order++));
             }
             return Track.createWithoutRecord(machineName, setInTracks);
         }
 
-        public record SetInTrackCreateRequest(
+        public record SetInTrackUpdateRequest(
             @PositiveOrZero
             Integer weight,
 
