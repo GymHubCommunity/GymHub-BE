@@ -7,9 +7,9 @@ import com.example.temp.common.dto.UserContext;
 import com.example.temp.post.application.PostService;
 import com.example.temp.post.dto.request.PostCreateRequest;
 import com.example.temp.post.dto.request.PostUpdateRequest;
-import com.example.temp.post.dto.response.SlicePostResponse;
-import com.example.temp.post.dto.response.PostCreateResponse;
 import com.example.temp.post.dto.response.PostDetailResponse;
+import com.example.temp.post.dto.response.SlicePostResponse;
+import java.net.URI;
 import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -33,10 +33,11 @@ public class PostController {
     private final PostService postService;
 
     @PostMapping
-    public ResponseEntity<PostCreateResponse> createPost(@Login UserContext userContext,
+    public ResponseEntity<Void> createPost(@Login UserContext userContext,
         @RequestBody PostCreateRequest postCreateRequest) {
         LocalDateTime registeredAt = LocalDateTime.now();
-        return ResponseEntity.ok(postService.createPost(userContext, postCreateRequest, registeredAt));
+        Long postId = postService.createPost(userContext, postCreateRequest, registeredAt);
+        return ResponseEntity.created(URI.create("/posts/" + postId)).build();
     }
 
     @GetMapping
