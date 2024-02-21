@@ -127,6 +127,51 @@ class ExerciseRecordServiceTest {
         assertThat(em.find(ExerciseRecord.class, record.getId())).isNull();
     }
 
+    /**
+     * ExerciseRecord, Track, SetInTrack 엔티티들이 DB에 저장되었는지 확인합니다. delete 명령 이후, 해당 엔티티들이 DB에서 삭제되었는지 확인합니다.
+     */
+    @Test
+    @DisplayName("운동기록이 삭제되면 해당 기록에 포함된 Track, Set 엔티티를 함께 삭제한다.")
+    void deleteCheckAllChildrenDelete() throws Exception {
+        // given
+        Member member = saveMember("nick1");
+        Track trackBeforeSaved = createTrack("머신1", List.of(createSetInTrack(1), createSetInTrack(2)));
+        ExerciseRecord savedExerciseRecord = saveExerciseRecord(member, trackBeforeSaved);
+        Track savedTrack = savedExerciseRecord.getTracks().get(0);
+        List<SetInTrack> savedSetsInTrack = savedTrack.getSetsInTrack();
+
+        assertThat(em.find(ExerciseRecord.class, savedExerciseRecord.getId())).isNotNull();
+        assertThat(em.find(Track.class, savedTrack.getId())).isNotNull();
+        for (SetInTrack setInTrack : savedSetsInTrack) {
+            assertThat(em.find(SetInTrack.class, setInTrack.getId())).isNotNull();
+        }
+
+        // when
+        exerciseRecordService.delete(UserContext.fromMember(member), savedExerciseRecord.getId());
+
+        // then
+        assertThat(em.find(ExerciseRecord.class, savedExerciseRecord.getId())).isNull();
+        assertThat(em.find(Track.class, savedTrack.getId())).isNull();
+        for (SetInTrack setInTrack : savedSetsInTrack) {
+            assertThat(em.find(SetInTrack.class, setInTrack.getId())).isNull();
+        }
+    }
+
+    private Track createTrack(String machineName, List<SetInTrack> setsInTrack) {
+        return Track.builder()
+            .machineName(machineName)
+            .setsInTrack(setsInTrack)
+            .build();
+    }
+
+    private SetInTrack createSetInTrack(int order) {
+        return SetInTrack.builder()
+            .order(order)
+            .weight(10)
+            .repeatCnt(5)
+            .build();
+    }
+
     @Test
     @DisplayName("로그인한 사용자만 운동기록을 삭제할 수 있다.")
     void deleteFailNoAuthN() throws Exception {
@@ -141,7 +186,7 @@ class ExerciseRecordServiceTest {
 
     @Test
     @DisplayName("인가 권한이 없는 사용자는 운동기록을 삭제할 수 없다.")
-    void dd() throws Exception {
+    void deleteFailNoAuthZ() throws Exception {
         // given
         ExerciseRecord record = saveExerciseRecord(loginMember);
         Member anotherMember = saveMember("another1");
@@ -163,6 +208,15 @@ class ExerciseRecordServiceTest {
         return record;
     }
 
+    private ExerciseRecord saveExerciseRecord(Member member, Track track) {
+        ExerciseRecord record = ExerciseRecord.builder()
+            .member(member)
+            .tracks(List.of(track))
+            .recordDate(LocalDate.now())
+            .build();
+        em.persist(record);
+        return record;
+    }
 
     private Member saveMember(String nickname) {
         Member member = Member.builder()
