@@ -31,9 +31,6 @@ public class ExerciseRecordService {
 
     /**
      * 기존 Track과 Set을 모두 지우고 새로운 데이터를 넣는 방식을 사용할 예정입니다. 추후 내부 로직을 리팩토링할 예정입니다.
-     * @param userContext
-     * @param targetId
-     * @param request
      */
     @Transactional
     public void update(UserContext userContext, long targetId, ExerciseRecordUpdateRequest request) {
@@ -43,6 +40,7 @@ public class ExerciseRecordService {
         if (!exerciseRecord.isOwnedBy(member)) {
             throw new ApiException(ErrorCode.AUTHORIZED_FAIL);
         }
+        exerciseRecord.update(request.toEntityWith(member));
     }
 
     @Transactional

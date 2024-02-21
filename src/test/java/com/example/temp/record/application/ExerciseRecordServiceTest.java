@@ -199,6 +199,30 @@ class ExerciseRecordServiceTest {
     }
 
     @Test
+    @DisplayName("운동기록 수정 요청을 보내면, 기존에 등록되어 있던 트랙들은 삭제되고 새로운 트랙들로 대체된다.")
+    void updateSuccess() throws Exception {
+        // given
+        Track trackBeforeSaved = createTrack("머신1", List.of(createSetInTrack(1), createSetInTrack(2)));
+        ExerciseRecord record = saveExerciseRecord(loginMember, trackBeforeSaved);
+        ExerciseRecordUpdateRequest request = new ExerciseRecordUpdateRequest(Collections.emptyList());
+
+        Long prevTrackId = record.getTracks().get(0).getId();
+        assertThat(em.find(Track.class, prevTrackId)).isNotNull();
+
+        // when
+        exerciseRecordService.update(loginUserContext, record.getId(), request);
+        em.flush();
+        em.clear();
+
+        // then
+        ExerciseRecord updatedRecord = em.find(ExerciseRecord.class, record.getId());
+
+        assertThat(updatedRecord.getRecordDate()).isEqualTo(record.getRecordDate());
+        assertThat(updatedRecord.getTracks()).hasSize(request.tracks().size());
+        assertThat(em.find(Track.class, prevTrackId)).isNull();
+    }
+
+    @Test
     @DisplayName("로그인한 사용자만 운동기록을 수정할 수 있다.")
     void updateFailNoAuthN() throws Exception {
         // given

@@ -65,4 +65,13 @@ public class ExerciseRecord extends BaseTimeEntity {
         Objects.requireNonNull(member);
         return Objects.equals(member, getMember());
     }
+
+    /**
+     * ExerciseRecord를 입력받아, 내부의 Track을 변경합니다.
+     */
+    public void update(ExerciseRecord updated) {
+        this.tracks.clear();
+        updated.getTracks()
+            .forEach(track -> track.relate(this));
+    }
 }
