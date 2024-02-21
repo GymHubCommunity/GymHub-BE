@@ -1,5 +1,6 @@
 package com.example.temp.post.domain;
 
+import com.example.temp.comment.domain.Comment;
 import com.example.temp.common.entity.BaseTimeEntity;
 import com.example.temp.member.domain.Member;
 import jakarta.persistence.CascadeType;
@@ -51,6 +52,9 @@ public class Post extends BaseTimeEntity {
     @BatchSize(size = 100)
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PostHashtag> postHashtags = new ArrayList<>();
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Comment> comments = new ArrayList<>();
 
     private LocalDateTime registeredAt;
 
