@@ -64,7 +64,7 @@ class ExerciseRecordServiceTest {
         // then
         ExerciseRecord exerciseRecord = em.find(ExerciseRecord.class, createdId);
         assertThat(exerciseRecord.getRecordDate()).isNotNull();
-        assertThat(exerciseRecord.getWriter()).isEqualTo(loginMember);
+        assertThat(exerciseRecord.getMember()).isEqualTo(loginMember);
     }
 
     @Test

@@ -34,8 +34,8 @@ public class ExerciseRecord extends BaseTimeEntity {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "writer_id", nullable = false)
-    private Member writer;
+    @JoinColumn(name = "member_id", nullable = false)
+    private Member member;
 
     @OneToMany(mappedBy = "exerciseRecord", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Track> tracks = new ArrayList<>();
@@ -44,16 +44,16 @@ public class ExerciseRecord extends BaseTimeEntity {
     private LocalDate recordDate;
 
     @Builder
-    private ExerciseRecord(Member writer, List<Track> tracks, LocalDate recordDate) {
-        this.writer = writer;
+    private ExerciseRecord(Member member, List<Track> tracks, LocalDate recordDate) {
+        this.member = member;
         this.recordDate = recordDate;
         this.tracks = new ArrayList<>();
         tracks.forEach(track -> track.relate(this));
     }
 
-    public static ExerciseRecord create(Member writer, List<Track> tracks) {
+    public static ExerciseRecord create(Member member, List<Track> tracks) {
         return ExerciseRecord.builder()
-            .writer(writer)
+            .member(member)
             .tracks(tracks)
             .build();
     }
