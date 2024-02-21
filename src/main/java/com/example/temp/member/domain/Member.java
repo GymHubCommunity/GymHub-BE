@@ -18,6 +18,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "members")
@@ -42,12 +43,14 @@ public class Member {
      */
     private boolean deleted;
 
+    @Setter
     @Embedded
     private Nickname nickname;
 
     @Embedded
     private Email email;
 
+    @Setter
     @Column(nullable = false)
     private String profileUrl;
 

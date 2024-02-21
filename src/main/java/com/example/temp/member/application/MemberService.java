@@ -11,6 +11,7 @@ import com.example.temp.member.domain.PrivacyPolicy;
 import com.example.temp.member.domain.nickname.Nickname;
 import com.example.temp.member.domain.nickname.NicknameGenerator;
 import com.example.temp.member.dto.request.MemberRegisterRequest;
+import com.example.temp.member.dto.request.MemberUpdateRequest;
 import com.example.temp.member.event.MemberDeletedEvent;
 import com.example.temp.member.exception.NicknameDuplicatedException;
 import com.example.temp.oauth.OAuthResponse;
@@ -105,6 +106,14 @@ public class MemberService {
         Member member = memberRepository.findById(userContext.id())
             .orElseThrow(() -> new ApiException(ErrorCode.AUTHENTICATED_FAIL));
         member.changePrivacy(privacyPolicy);
+    }
+
+    @Transactional
+    public void changeMemberInfo(UserContext userContext, MemberUpdateRequest request) {
+        Member member = memberRepository.findById(userContext.id())
+            .orElseThrow(() -> new ApiException(ErrorCode.AUTHENTICATED_FAIL));
+        member.setProfileUrl(request.profileUrl());
+        member.setNickname(Nickname.create(request.nickname()));
     }
 
     public MemberInfo find(long targetId) {

@@ -23,6 +23,7 @@ import com.example.temp.member.domain.PrivacyPolicy;
 import com.example.temp.member.domain.nickname.Nickname;
 import com.example.temp.member.domain.nickname.NicknameGenerator;
 import com.example.temp.member.dto.request.MemberRegisterRequest;
+import com.example.temp.member.dto.request.MemberUpdateRequest;
 import com.example.temp.member.exception.NicknameDuplicatedException;
 import com.example.temp.oauth.OAuthProviderType;
 import com.example.temp.oauth.OAuthResponse;
@@ -318,6 +319,22 @@ class MemberServiceTest {
         assertThat(memberInfo.email()).isEqualTo(member.getEmailValue());
         assertThat(memberInfo.nickname()).isEqualTo(member.getNicknameValue());
         assertThat(memberInfo.profileUrl()).isEqualTo(member.getProfileUrl());
+    }
+
+    @Test
+    @DisplayName("회원 정보를 수정한다.")
+    void update() throws Exception {
+        // given
+        Member member = saveRegisteredMember(Nickname.create("nick1"));
+        MemberUpdateRequest request = new MemberUpdateRequest("https://changedUrl", "change");
+        // when
+        memberService.changeMemberInfo(UserContext.fromMember(member), request);
+
+        // then
+        Member updatedMember = em.find(Member.class, member.getId());
+
+        assertThat(updatedMember.getNicknameValue()).isEqualTo(request.nickname());
+        assertThat(updatedMember.getProfileUrl()).isEqualTo(request.profileUrl());
     }
 
     @Test
