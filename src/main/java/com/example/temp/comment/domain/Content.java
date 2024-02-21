@@ -14,29 +14,29 @@ import lombok.NoArgsConstructor;
 @Embeddable
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
-public class Message {
+public class Content {
 
-    private static final int MAX_MESSAGE_LENGTH = 200;
+    private static final int MAX_MESSAGE_LENGTH = 500;
 
     @NotBlank
     @Column(name = "content", nullable = false)
     private String value;
 
     @Builder
-    private Message(String value) {
+    private Content(String value) {
         validate(value);
         this.value = value;
     }
 
-    public static Message create(String value) {
-        return Message.builder()
+    public static Content create(String value) {
+        return Content.builder()
             .value(value)
             .build();
     }
 
     private void validate(String value) {
         if (value.length() > MAX_MESSAGE_LENGTH) {
-            throw new ApiException(ErrorCode.MESSAGE_TOO_LONG);
+            throw new ApiException(ErrorCode.COMMENT_TOO_LONG);
         }
     }
 }
