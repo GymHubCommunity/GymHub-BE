@@ -16,6 +16,7 @@ import jakarta.persistence.Table;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -58,5 +59,10 @@ public class ExerciseRecord extends BaseTimeEntity {
             .member(member)
             .tracks(tracks)
             .build();
+    }
+
+    public boolean isOwnedBy(Member member) {
+        Objects.requireNonNull(member);
+        return Objects.equals(member, getMember());
     }
 }

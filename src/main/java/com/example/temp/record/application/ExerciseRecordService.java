@@ -31,6 +31,11 @@ public class ExerciseRecordService {
     @Transactional
     public void delete(UserContext userContext, long targetId) {
         Member member = findMember(userContext);
+        ExerciseRecord exerciseRecord = exerciseRecordRepository.findById(targetId)
+            .orElseThrow(() -> new ApiException(ErrorCode.RECORD_NOT_FOUND));
+        if (!exerciseRecord.isOwnedBy(member)) {
+            throw new ApiException(ErrorCode.AUTHORIZED_FAIL);
+        }
     }
 
     private Member findMember(UserContext userContext) {

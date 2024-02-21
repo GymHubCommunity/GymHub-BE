@@ -48,7 +48,7 @@ class ExerciseRecordServiceTest {
 
     @BeforeEach
     void setUp() {
-        loginMember = saveMember();
+        loginMember = saveMember("loginMember");
         loginUserContext = UserContext.fromMember(loginMember);
         noLoginUserContext = new UserContext(99999999L, Role.NORMAL);
     }
@@ -125,6 +125,20 @@ class ExerciseRecordServiceTest {
             .hasMessageContaining(ErrorCode.AUTHENTICATED_FAIL.getMessage());
     }
 
+    @Test
+    @DisplayName("인가 권한이 없는 사용자는 운동기록을 삭제할 수 없다.")
+    void dd() throws Exception {
+        // given
+        ExerciseRecord record = saveExerciseRecord(loginMember);
+        Member anotherMember = saveMember("another1");
+
+        // when & then
+        assertThatThrownBy(() -> exerciseRecordService.delete(UserContext.fromMember(anotherMember), record.getId()))
+            .isInstanceOf(ApiException.class)
+            .hasMessageContaining(ErrorCode.AUTHORIZED_FAIL.getMessage());
+    }
+
+
     private ExerciseRecord saveExerciseRecord(Member member) {
         ExerciseRecord record = ExerciseRecord.builder()
             .member(member)
@@ -136,13 +150,13 @@ class ExerciseRecordServiceTest {
     }
 
 
-    private Member saveMember() {
+    private Member saveMember(String nickname) {
         Member member = Member.builder()
             .email(Email.create("test@test.com"))
             .followStrategy(FollowStrategy.EAGER)
             .privacyPolicy(PrivacyPolicy.PUBLIC)
             .profileUrl("https://profileurl")
-            .nickname(Nickname.create("nick"))
+            .nickname(Nickname.create(nickname))
             .build();
         em.persist(member);
         return member;
