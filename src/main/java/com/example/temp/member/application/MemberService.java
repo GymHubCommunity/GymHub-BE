@@ -129,8 +129,7 @@ public class MemberService {
         return Objects.equals(member.getNicknameValue(), nickname);
     }
 
-    // Find말고 다른 이름으로 변경해야 할듯
-    public MemberInfo find(long targetId) {
+    public MemberInfo retrieveMemberInfo(long targetId) {
         Member member = memberRepository.findById(targetId)
             .orElseThrow(() -> new ApiException(ErrorCode.MEMBER_NOT_FOUND));
         return MemberInfo.of(member);

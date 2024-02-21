@@ -47,8 +47,8 @@ public class MemberController {
     }
 
     @GetMapping("/{memberId}")
-    public ResponseEntity<MemberInfo> find(@PathVariable long memberId) {
-        MemberInfo memberInfo = memberService.find(memberId);
+    public ResponseEntity<MemberInfo> retrieveMemberInfo(@PathVariable long memberId) {
+        MemberInfo memberInfo = memberService.retrieveMemberInfo(memberId);
         return ResponseEntity.ok(memberInfo);
     }
 }

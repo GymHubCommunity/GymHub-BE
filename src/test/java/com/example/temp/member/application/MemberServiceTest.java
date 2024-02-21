@@ -318,7 +318,7 @@ class MemberServiceTest {
         Member member = savePublicMember("nick1");
 
         // when
-        MemberInfo memberInfo = memberService.find(member.getId());
+        MemberInfo memberInfo = memberService.retrieveMemberInfo(member.getId());
 
         // then
         assertThat(memberInfo.id()).isEqualTo(member.getId());
