@@ -16,6 +16,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -54,6 +55,12 @@ public class PostController {
     public ResponseEntity<Void> updatePost(@PathVariable Long postId, @Login UserContext userContext,
         @Validated @RequestBody PostUpdateRequest request) {
         postService.updatePost(postId, userContext, request);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/{postId}")
+    public ResponseEntity<Void> deletePost(@PathVariable Long postId, @Login UserContext userContext) {
+        postService.deletePost(postId, userContext);
         return ResponseEntity.noContent().build();
     }
 }

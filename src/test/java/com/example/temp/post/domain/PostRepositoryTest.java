@@ -1,6 +1,8 @@
 package com.example.temp.post.domain;
 
+import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.groups.Tuple.*;
 import static org.assertj.core.groups.Tuple.tuple;
 
 import com.example.temp.common.entity.Email;
@@ -12,7 +14,9 @@ import com.example.temp.member.domain.MemberRepository;
 import com.example.temp.member.domain.PrivacyPolicy;
 import com.example.temp.member.domain.nickname.Nickname;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import org.assertj.core.groups.Tuple;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -140,6 +144,24 @@ class PostRepositoryTest {
                 tuple("내용2", member2),
                 tuple("내용1", member1)
             );
+    }
+
+    @DisplayName("멤버Id로 해당 멤버가 작성한 게시글을 전부 조회 할 수 있다.")
+    @Test
+    void findAllByMemberId() {
+        //given
+        Member member = saveMember("email1@naver.com", "작성자");
+        saveImage("이미지1");
+        savePost(member, "게시글1", List.of("이미지1"));
+        savePost(member, "게시글2", new ArrayList<>());
+
+        //when
+        List<Post> posts = postRepository.findAllByMemberId(member.getId());
+
+        //then
+        assertThat(posts).hasSize(2)
+            .extracting("content")
+            .containsExactly("게시글1", "게시글2");
     }
 
     private Member saveMember(String email, String nickname) {

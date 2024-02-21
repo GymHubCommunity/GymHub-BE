@@ -41,9 +41,15 @@ public class Hashtag extends BaseTimeEntity {
     private String name;
 
     @Builder
-    public Hashtag(String name) {
+    private Hashtag(String name) {
         validate(name);
         this.name = name;
+    }
+
+    public static Hashtag create(String name) {
+        return Hashtag.builder()
+            .name(name)
+            .build();
     }
 
     private void validate(String name) {
