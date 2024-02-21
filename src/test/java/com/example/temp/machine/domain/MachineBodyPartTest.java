@@ -3,6 +3,7 @@ package com.example.temp.machine.domain;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.example.temp.machine.domain.BodyPart.BodyCategory;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
@@ -73,19 +74,16 @@ class MachineBodyPartTest {
         List<BodyPart> bodyParts = BodyPart.findAllBelongTo(category);
 
         // then
-        for (BodyPart bodyPart : bodyParts) {
-            assertThat(bodyPart.getCategory()).isEqualTo(category);
-        }
+        assertThat(bodyParts)
+            .extracting(BodyPart::getCategory)
+            .containsOnly(category);
         validateSize(category, bodyParts);
     }
 
     private static void validateSize(BodyCategory category, List<BodyPart> bodyParts) {
-        int cnt = 0;
-        for(BodyPart bodyPart : BodyPart.values()) {
-            if (bodyPart.getCategory() == category) {
-                cnt++;
-            }
-        }
+        int cnt = (int) Arrays.stream(BodyPart.values())
+            .filter(bodyPart -> bodyPart.getCategory() == category)
+            .count();
         assertThat(bodyParts).hasSize(cnt);
     }
 
