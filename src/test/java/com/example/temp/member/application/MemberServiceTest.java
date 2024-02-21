@@ -335,7 +335,7 @@ class MemberServiceTest {
         MemberUpdateRequest request = new MemberUpdateRequest(savedImage.getUrl(), "change");
 
         // when
-        memberService.changeMemberInfo(UserContext.fromMember(member), request);
+        memberService.updateMemberInfo(UserContext.fromMember(member), request);
 
         // then
         Member updatedMember = em.find(Member.class, member.getId());
@@ -355,7 +355,7 @@ class MemberServiceTest {
         MemberUpdateRequest request = new MemberUpdateRequest(savedImage.getUrl(), duplicatedNickname);
 
         // when & then
-        assertThatThrownBy(() -> memberService.changeMemberInfo(UserContext.fromMember(target), request))
+        assertThatThrownBy(() -> memberService.updateMemberInfo(UserContext.fromMember(target), request))
             .isInstanceOf(ApiException.class)
             .hasMessageContaining(NICKNAME_DUPLICATED.getMessage());
     }
@@ -368,7 +368,7 @@ class MemberServiceTest {
         MemberUpdateRequest request = new MemberUpdateRequest(savedImage.getUrl(), member.getNicknameValue());
 
         // when
-        memberService.changeMemberInfo(UserContext.fromMember(member), request);
+        memberService.updateMemberInfo(UserContext.fromMember(member), request);
 
         // then
         Member updatedMember = em.find(Member.class, member.getId());
@@ -385,7 +385,7 @@ class MemberServiceTest {
         MemberUpdateRequest request = new MemberUpdateRequest("https://notfound", "changed");
 
         // when & then
-        assertThatThrownBy(() -> memberService.changeMemberInfo(UserContext.fromMember(member), request))
+        assertThatThrownBy(() -> memberService.updateMemberInfo(UserContext.fromMember(member), request))
             .isInstanceOf(ApiException.class)
             .hasMessageContaining(IMAGE_NOT_FOUND.getMessage());
     }

@@ -6,6 +6,7 @@ import com.example.temp.common.dto.UserContext;
 import com.example.temp.member.application.MemberService;
 import com.example.temp.member.domain.PrivacyPolicy;
 import com.example.temp.member.dto.request.MemberRegisterRequest;
+import com.example.temp.member.dto.request.MemberUpdateRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -50,5 +52,12 @@ public class MemberController {
     public ResponseEntity<MemberInfo> retrieveMemberInfo(@PathVariable long memberId) {
         MemberInfo memberInfo = memberService.retrieveMemberInfo(memberId);
         return ResponseEntity.ok(memberInfo);
+    }
+
+    @PutMapping("/me")
+    public ResponseEntity<Void> updateMemberInfo(@Login UserContext userContext,
+        @RequestBody MemberUpdateRequest request) {
+        memberService.updateMemberInfo(userContext, request);
+        return ResponseEntity.noContent().build();
     }
 }

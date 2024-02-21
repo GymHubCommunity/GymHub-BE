@@ -110,7 +110,7 @@ public class MemberService {
     }
 
     @Transactional
-    public void changeMemberInfo(UserContext userContext, MemberUpdateRequest request) {
+    public void updateMemberInfo(UserContext userContext, MemberUpdateRequest request) {
         Member member = memberRepository.findById(userContext.id())
             .orElseThrow(() -> new ApiException(ErrorCode.AUTHENTICATED_FAIL));
         if (!isMemberOriginalNickname(member, request.nickname()) &&
