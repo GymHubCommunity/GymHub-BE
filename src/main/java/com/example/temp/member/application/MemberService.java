@@ -125,6 +125,7 @@ public class MemberService {
     }
 
     private boolean isMemberOriginalNickname(Member member, String nickname) {
+        Objects.requireNonNull(member);
         Objects.requireNonNull(nickname);
         return Objects.equals(member.getNicknameValue(), nickname);
     }
