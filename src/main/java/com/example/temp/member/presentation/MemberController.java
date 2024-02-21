@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -43,5 +44,11 @@ public class MemberController {
         @RequestParam("policy") PrivacyPolicy privacyPolicy) {
         memberService.changePrivacy(userContext, privacyPolicy);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/{memberId}")
+    public ResponseEntity<MemberInfo> find(@PathVariable long memberId) {
+        MemberInfo memberInfo = memberService.find(memberId);
+        return ResponseEntity.ok(memberInfo);
     }
 }
