@@ -60,7 +60,7 @@ class ExerciseRecordServiceTest {
     @DisplayName("운동 기록을 저장한다.")
     void create() throws Exception {
         // given
-        ExerciseRecordCreateRequest request = new ExerciseRecordCreateRequest(Collections.emptyList());
+        ExerciseRecordCreateRequest request = makeExerciseRecordCreateRequest("머신1", 10, 3);
 
         // when
         long createdId = exerciseRecordService.create(loginUserContext, request);
@@ -278,6 +278,17 @@ class ExerciseRecordServiceTest {
         em.persist(member);
         return member;
     }
+
+    /**
+     * machineName이라는 운동 기구를 사용하는 1세트짜리 트랙을 CREATE하는 요청을 만듭니다.
+     */
+    private ExerciseRecordCreateRequest makeExerciseRecordCreateRequest(String machineName, int weight, int repeatCnt) {
+        SetInTrackCreateRequest setInTrackCreateRequest = new SetInTrackCreateRequest(weight, repeatCnt);
+        List<TrackCreateRequest> trackCreateRequests = List.of(
+            new TrackCreateRequest(machineName, List.of(setInTrackCreateRequest)));
+        return new ExerciseRecordCreateRequest(trackCreateRequests);
+    }
+
 
     /**
      * machineName이라는 운동 기구를 사용하는 1세트짜리 트랙을 UPDATE하는 요청을 만듭니다.

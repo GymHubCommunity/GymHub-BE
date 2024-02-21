@@ -64,7 +64,7 @@ class ExerciseRecordTest {
         ExerciseRecord record = createExerciseRecord(member);
 
         // when & then
-        Assertions.assertThat(record.isOwnedBy(member)).isTrue();
+        assertThat(record.isOwnedBy(member)).isTrue();
     }
 
     @Test
@@ -77,7 +77,7 @@ class ExerciseRecordTest {
         Member another = createMember("another");
 
         // when & then
-        Assertions.assertThat(record.isOwnedBy(another)).isFalse();
+        assertThat(record.isOwnedBy(another)).isFalse();
     }
 
     private Track createTrack(String machineName) {
@@ -99,6 +99,7 @@ class ExerciseRecordTest {
     private ExerciseRecord createExerciseRecord(Member member) {
         return ExerciseRecord.builder()
             .member(member)
+            .tracks(List.of(createTrack("머신1")))
             .build();
     }
 
