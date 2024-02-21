@@ -20,6 +20,7 @@ import com.example.temp.record.dto.request.ExerciseRecordCreateRequest;
 import com.example.temp.record.dto.request.ExerciseRecordCreateRequest.TrackCreateRequest;
 import com.example.temp.record.dto.request.ExerciseRecordCreateRequest.TrackCreateRequest.SetInTrackCreateRequest;
 import jakarta.persistence.EntityManager;
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -110,6 +111,28 @@ class ExerciseRecordServiceTest {
 
         assertThat(em.find(SetInTrack.class, track.getSetsInTrack().get(0).getId())).isNotNull();
         assertThat(em.find(SetInTrack.class, track.getSetsInTrack().get(1).getId())).isNotNull();
+    }
+
+    @Test
+    @DisplayName("로그인한 사용자만 운동기록을 삭제할 수 있다.")
+    void deleteFailNoAuthN() throws Exception {
+        // given
+        ExerciseRecord record = saveExerciseRecord(loginMember);
+
+        // when & then
+        assertThatThrownBy(() -> exerciseRecordService.delete(noLoginUserContext, record.getId()))
+            .isInstanceOf(ApiException.class)
+            .hasMessageContaining(ErrorCode.AUTHENTICATED_FAIL.getMessage());
+    }
+
+    private ExerciseRecord saveExerciseRecord(Member member) {
+        ExerciseRecord record = ExerciseRecord.builder()
+            .member(member)
+            .tracks(Collections.emptyList())
+            .recordDate(LocalDate.now())
+            .build();
+        em.persist(record);
+        return record;
     }
 
 

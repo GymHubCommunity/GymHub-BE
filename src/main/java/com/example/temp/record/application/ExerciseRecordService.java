@@ -28,6 +28,11 @@ public class ExerciseRecordService {
         return exerciseRecord.getId();
     }
 
+    @Transactional
+    public void delete(UserContext userContext, long targetId) {
+        Member member = findMember(userContext);
+    }
+
     private Member findMember(UserContext userContext) {
         return memberRepository.findById(userContext.id())
             .orElseThrow(() -> new ApiException(ErrorCode.AUTHENTICATED_FAIL));
