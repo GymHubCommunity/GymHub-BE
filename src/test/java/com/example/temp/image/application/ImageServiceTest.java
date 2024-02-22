@@ -71,7 +71,7 @@ class ImageServiceTest {
     }
 
     /**
-     * host가 .amazonaws.com이어야 하고, 버킷명이 지정한 값으로 나와야 합니다. 또한, path는 [id.uuid] 형태로 이뤄졌는지 검사합니다.
+     * host가 .amazonaws.com이어야 하고, 버킷명이 지정한 값으로 나와야 합니다. 또한, path는 [date.uuid] 형태로 이뤄졌는지 검사합니다.
      */
     private void validateUrl(URL presignedUrl) {
         assertThat(presignedUrl.getHost()).endsWith(".amazonaws.com");

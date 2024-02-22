@@ -20,11 +20,10 @@ public record RetrievePeriodExerciseRecordsResponse(
     }
 
     public record RetrievePeriodRecordsElement(
-        String id,
+        String date,
         List<ExerciseRecordInfo> exerciseRecords
     ) {
 
-        // TODO Formatter 입력받도록 구현
         public static RetrievePeriodRecordsElement of(LocalDate localDate, List<ExerciseRecord> exerciseRecords) {
             List<ExerciseRecordInfo> exerciseRecordInfos = exerciseRecords.stream()
                 .map(ExerciseRecordInfo::from)

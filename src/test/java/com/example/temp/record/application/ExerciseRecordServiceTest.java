@@ -180,7 +180,7 @@ class ExerciseRecordServiceTest {
         int totalCntInMonth = LocalDate.of(year, month, 1).lengthOfMonth();
         assertThat(response.results()).hasSize(totalCntInMonth);
         RetrievePeriodRecordsElement periodRecordsElement = response.results().stream()
-            .filter(each -> each.id().equals(recordDate.toString()))
+            .filter(each -> each.date().equals(recordDate.toString()))
             .findAny()
             .get();
         assertThat(periodRecordsElement.exerciseRecords()).isNotEmpty();
@@ -201,7 +201,7 @@ class ExerciseRecordServiceTest {
         int totalCntInMonth = LocalDate.of(year, month, 1).lengthOfMonth();
         assertThat(response.results()).hasSize(totalCntInMonth);
         RetrievePeriodRecordsElement periodRecordsElement = response.results().stream()
-            .filter(each -> each.id().equals(LocalDate.of(year, month, 1).toString()))
+            .filter(each -> each.date().equals(LocalDate.of(year, month, 1).toString()))
             .findAny()
             .get();
         assertThat(periodRecordsElement.exerciseRecords()).isEmpty();
@@ -225,7 +225,7 @@ class ExerciseRecordServiceTest {
         int totalCntInMonth = LocalDate.of(year, month, 1).lengthOfMonth();
         assertThat(response.results()).hasSize(totalCntInMonth);
         RetrievePeriodRecordsElement periodRecordsElement = response.results().stream()
-            .filter(each -> each.id().equals(recordDate.toString()))
+            .filter(each -> each.date().equals(recordDate.toString()))
             .findAny()
             .get();
         assertThat(periodRecordsElement.exerciseRecords()).isEmpty();
