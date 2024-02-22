@@ -10,6 +10,7 @@ import com.example.temp.record.domain.ExerciseRecordRepository;
 import com.example.temp.record.dto.request.ExerciseRecordCreateRequest;
 import com.example.temp.record.dto.request.ExerciseRecordUpdateRequest;
 import com.example.temp.record.dto.response.RetrievePeriodExerciseRecordsResponse;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,7 +34,8 @@ public class ExerciseRecordService {
     public RetrievePeriodExerciseRecordsResponse retrievePeriodExerciseRecords(UserContext userContext,
         int year, int month) {
         Member member = findMember(userContext);
-        return RetrievePeriodExerciseRecordsResponse.of(year, month);
+        List<ExerciseRecord> exerciseRecords = exerciseRecordRepository.findAll(); //TODO 특정 회원, 특정 일자 데이터만 가져오도록 변경
+        return RetrievePeriodExerciseRecordsResponse.of(year, month, exerciseRecords);
     }
 
     /**

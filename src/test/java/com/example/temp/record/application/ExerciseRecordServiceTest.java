@@ -23,6 +23,7 @@ import com.example.temp.record.dto.request.ExerciseRecordUpdateRequest;
 import com.example.temp.record.dto.request.ExerciseRecordUpdateRequest.TrackUpdateRequest;
 import com.example.temp.record.dto.request.ExerciseRecordUpdateRequest.TrackUpdateRequest.SetInTrackUpdateRequest;
 import com.example.temp.record.dto.response.RetrievePeriodExerciseRecordsResponse;
+import com.example.temp.record.dto.response.RetrievePeriodExerciseRecordsResponse.RetrievePeriodRecordsElement;
 import jakarta.persistence.EntityManager;
 import java.time.LocalDate;
 import java.util.Collections;
@@ -167,7 +168,8 @@ class ExerciseRecordServiceTest {
         // given
         int year = 2024;
         int month = 1;
-        saveExerciseRecord(loginMember, LocalDate.of(year, month, 1));
+        LocalDate date = LocalDate.of(year, month, 1);
+        saveExerciseRecord(loginMember, date);
 
         // when
         RetrievePeriodExerciseRecordsResponse response =
@@ -175,6 +177,11 @@ class ExerciseRecordServiceTest {
 
         // then
         assertThat(response.results()).hasSize(LocalDate.of(year, month, 1).lengthOfMonth());
+        RetrievePeriodRecordsElement periodRecordsElement = response.results().stream()
+            .filter(each -> each.id().equals(date.toString()))
+            .findAny()
+            .get();
+        assertThat(periodRecordsElement).isNotNull();
     }
 
     @Test
