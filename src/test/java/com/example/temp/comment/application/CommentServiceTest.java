@@ -54,7 +54,7 @@ class CommentServiceTest {
         CommentCreateRequest request = new CommentCreateRequest("댓글 내용");
 
         //when
-        Long commentId = commentService.createComment(post.getId(), userContext, request);
+        Long commentId = commentService.createComment(post.getId(), userContext, request, LocalDateTime.now());
 
         //then
         Comment comment = commentRepository.findById(commentId).orElseThrow();
@@ -72,7 +72,7 @@ class CommentServiceTest {
         CommentCreateRequest request = new CommentCreateRequest("댓글 내용");
 
         //when, then
-        assertThatThrownBy(() -> commentService.createComment(1L, userContext, request))
+        assertThatThrownBy(() -> commentService.createComment(1L, userContext, request, LocalDateTime.now()))
             .isInstanceOf(ApiException.class)
             .hasMessage(POST_NOT_FOUND.getMessage());
     }
@@ -90,7 +90,7 @@ class CommentServiceTest {
         CommentCreateRequest request = new CommentCreateRequest("댓글 내용");
 
         //when, then
-        assertThatThrownBy(() -> commentService.createComment(post.getId(), userContext, request))
+        assertThatThrownBy(() -> commentService.createComment(post.getId(), userContext, request, LocalDateTime.now()))
             .isInstanceOf(ApiException.class)
             .hasMessage(AUTHENTICATED_FAIL.getMessage());
     }

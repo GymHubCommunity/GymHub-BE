@@ -12,6 +12,7 @@ import com.example.temp.member.domain.Member;
 import com.example.temp.member.domain.MemberRepository;
 import com.example.temp.post.domain.Post;
 import com.example.temp.post.domain.PostRepository;
+import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,11 +27,12 @@ public class CommentService {
     private final CommentRepository commentRepository;
 
     @Transactional
-    public Long createComment(Long postId, UserContext userContext, CommentCreateRequest commentCreateRequest) {
+    public Long createComment(Long postId, UserContext userContext, CommentCreateRequest commentCreateRequest,
+        LocalDateTime registeredAt) {
         Post post = findPostBy(postId);
         Member member = findMemberBy(userContext.id());
 
-        Comment comment = Comment.create(member, commentCreateRequest.content(), post);
+        Comment comment = Comment.create(member, commentCreateRequest.content(), post, registeredAt);
         Comment savedComment = commentRepository.save(comment);
 
         return savedComment.getId();

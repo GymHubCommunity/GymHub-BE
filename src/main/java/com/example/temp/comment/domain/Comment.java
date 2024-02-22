@@ -13,6 +13,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -40,18 +41,22 @@ public class Comment extends BaseTimeEntity {
     @Embedded
     private Content content;
 
+    private LocalDateTime registeredAt;
+
     @Builder
-    private Comment(Member member, Content content, Post post) {
+    private Comment(Member member, Content content, Post post, LocalDateTime registeredAt) {
         this.member = member;
         this.content = content;
         this.post = post;
+        this.registeredAt = registeredAt;
     }
 
-    public static Comment create(Member member, String content, Post post) {
+    public static Comment create(Member member, String content, Post post, LocalDateTime registeredAt) {
         Comment comment = Comment.builder()
             .member(member)
             .content(Content.create(content))
             .post(post)
+            .registeredAt(registeredAt)
             .build();
         post.addComment(comment);
         return comment;

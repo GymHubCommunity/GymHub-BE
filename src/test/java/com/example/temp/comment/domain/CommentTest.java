@@ -28,7 +28,7 @@ class CommentTest {
         String content = String.join("", Collections.nCopies(100, "테스트댓글"));
 
         //when
-        Comment comment = Comment.create(member, content, post);
+        Comment comment = Comment.create(member, content, post, LocalDateTime.now());
 
         //then
         assertThat(comment.getContent()).isEqualTo(content);
@@ -43,7 +43,7 @@ class CommentTest {
         String content = String.join("", Collections.nCopies(501, "a"));
 
         //when, then
-        assertThatThrownBy(() -> Comment.create(member, content, post))
+        assertThatThrownBy(() -> Comment.create(member, content, post, LocalDateTime.now()))
             .isInstanceOf(ApiException.class)
             .hasMessage(COMMENT_TOO_LONG.getMessage());
 

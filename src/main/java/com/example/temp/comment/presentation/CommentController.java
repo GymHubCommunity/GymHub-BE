@@ -5,6 +5,7 @@ import com.example.temp.comment.dto.request.CommentCreateRequest;
 import com.example.temp.comment.dto.response.CommentCreateResponse;
 import com.example.temp.common.annotation.Login;
 import com.example.temp.common.dto.UserContext;
+import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,7 +23,8 @@ public class CommentController {
     public ResponseEntity<CommentCreateResponse> createComment(@PathVariable Long postId,
         @Login UserContext userContext,
         @RequestBody CommentCreateRequest commentCreateRequest) {
-        Long commentId = commentService.createComment(postId, userContext, commentCreateRequest);
+        LocalDateTime registeredAt = LocalDateTime.now();
+        Long commentId = commentService.createComment(postId, userContext, commentCreateRequest, registeredAt);
         return ResponseEntity.ok(CommentCreateResponse.create(commentId));
     }
 }
