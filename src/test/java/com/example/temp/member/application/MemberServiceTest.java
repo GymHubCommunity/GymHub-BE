@@ -23,6 +23,7 @@ import com.example.temp.member.domain.PrivacyPolicy;
 import com.example.temp.member.domain.nickname.Nickname;
 import com.example.temp.member.domain.nickname.NicknameGenerator;
 import com.example.temp.member.dto.request.MemberRegisterRequest;
+import com.example.temp.member.dto.request.MemberUpdateRequest;
 import com.example.temp.member.exception.NicknameDuplicatedException;
 import com.example.temp.oauth.OAuthProviderType;
 import com.example.temp.oauth.OAuthResponse;
@@ -60,11 +61,17 @@ class MemberServiceTest {
 
     UserContext notExistUserContext;
 
+    Image defaultImage;
+
+    Image savedImage;
+
     @BeforeEach
     void setUp() {
         oAuthUserInfo = mockOAuthClientResponse();
         oAuthResponse = OAuthResponse.of(OAuthProviderType.GOOGLE, oAuthUserInfo);
         notExistUserContext = new UserContext(999_999_999L, Role.NORMAL);
+        defaultImage = saveImage("https://default");
+        savedImage = saveImage("https://savedImage");
     }
 
     private OAuthUserInfo mockOAuthClientResponse() {
@@ -303,6 +310,86 @@ class MemberServiceTest {
         assertThat(em.find(Follow.class, notRelatedFollow.getId())).isNotNull();
     }
 
+
+    @Test
+    @DisplayName("회원을 조회한다.")
+    void find() throws Exception {
+        // given
+        Member member = savePublicMember("nick1");
+
+        // when
+        MemberInfo memberInfo = memberService.retrieveMemberInfo(member.getId());
+
+        // then
+        assertThat(memberInfo.id()).isEqualTo(member.getId());
+        assertThat(memberInfo.email()).isEqualTo(member.getEmailValue());
+        assertThat(memberInfo.nickname()).isEqualTo(member.getNicknameValue());
+        assertThat(memberInfo.profileUrl()).isEqualTo(member.getProfileUrl());
+    }
+
+    @Test
+    @DisplayName("회원 정보를 수정한다.")
+    void updateSuccess() throws Exception {
+        // given
+        Member member = saveRegisteredMember(Nickname.create("nick1"));
+        MemberUpdateRequest request = new MemberUpdateRequest(savedImage.getUrl(), "change");
+
+        // when
+        memberService.updateMemberInfo(UserContext.fromMember(member), request);
+
+        // then
+        Member updatedMember = em.find(Member.class, member.getId());
+
+        assertThat(updatedMember.getNicknameValue()).isEqualTo(request.nickname());
+        assertThat(updatedMember.getProfileUrl()).isEqualTo(request.profileUrl());
+    }
+
+    @Test
+    @DisplayName("다른 회원과 중복된 닉네임으로 닉네임을 변경할 수 없다.")
+    void updateFailDuplicatedNickname() throws Exception {
+        // given
+        String duplicatedNickname = "duplicated";
+        Member anotherMember = saveRegisteredMember(Nickname.create(duplicatedNickname));
+
+        Member target = saveRegisteredMember(Nickname.create("nick1"));
+        MemberUpdateRequest request = new MemberUpdateRequest(savedImage.getUrl(), duplicatedNickname);
+
+        // when & then
+        assertThatThrownBy(() -> memberService.updateMemberInfo(UserContext.fromMember(target), request))
+            .isInstanceOf(ApiException.class)
+            .hasMessageContaining(NICKNAME_DUPLICATED.getMessage());
+    }
+
+    @Test
+    @DisplayName("닉네임을 변경하지 않고 회원 정보를 변경한다.")
+    void updateSuccessNotChangeNickname() throws Exception {
+        // given
+        Member member = saveRegisteredMember(Nickname.create("nick1"));
+        MemberUpdateRequest request = new MemberUpdateRequest(savedImage.getUrl(), member.getNicknameValue());
+
+        // when
+        memberService.updateMemberInfo(UserContext.fromMember(member), request);
+
+        // then
+        Member updatedMember = em.find(Member.class, member.getId());
+
+        assertThat(updatedMember.getNicknameValue()).isEqualTo(request.nickname());
+        assertThat(updatedMember.getProfileUrl()).isEqualTo(request.profileUrl());
+    }
+
+    @Test
+    @DisplayName("기존에 등록되지 않은 이미지로는 회원 정보 변경이 불가능하다.")
+    void updateFailNotFoundImage() throws Exception {
+        // given
+        Member member = saveRegisteredMember(Nickname.create("nick1"));
+        MemberUpdateRequest request = new MemberUpdateRequest("https://notfound", "changed");
+
+        // when & then
+        assertThatThrownBy(() -> memberService.updateMemberInfo(UserContext.fromMember(member), request))
+            .isInstanceOf(ApiException.class)
+            .hasMessageContaining(IMAGE_NOT_FOUND.getMessage());
+    }
+
     @Test
     @DisplayName("회원이 탈퇴되었을 때, 작성한 게시글이 전부 삭제된다.")
     void deleteAllPostWhenMemberWithdraw() throws Exception {
@@ -337,6 +424,7 @@ class MemberServiceTest {
     private Image saveImage(String url) {
         Image image = Image.builder()
             .url(url)
+            .used(false)
             .build();
         em.persist(image);
         return image;
@@ -388,11 +476,20 @@ class MemberServiceTest {
         return saveMember(nickname, false, PrivacyPolicy.PRIVATE);
     }
 
+    private Member savePublicMember(String nickname) {
+        return saveMember(Nickname.create(nickname), true, PrivacyPolicy.PUBLIC);
+    }
+
+    private Member savePrivateMember(String nickname) {
+        return saveMember(Nickname.create(nickname), true, PrivacyPolicy.PRIVATE);
+    }
+
     private Member saveMember(Nickname nickname, boolean registered, PrivacyPolicy privacyPolicy) {
+
         Member member = Member.builder()
             .nickname(nickname)
             .email(Email.create("이메일"))
-            .profileUrl("프로필주소")
+            .profileUrl(defaultImage.getUrl())
             .registered(registered)
             .privacyPolicy(privacyPolicy)
             .followStrategy(FollowStrategy.LAZY)
@@ -400,6 +497,7 @@ class MemberServiceTest {
         em.persist(member);
         return member;
     }
+
 
     private void validateMemberIsSame(Member result, OAuthResponse oAuthResponse) {
         assertThat(result.getId()).isNotNull();

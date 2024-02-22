@@ -11,9 +11,11 @@ import com.example.temp.member.domain.PrivacyPolicy;
 import com.example.temp.member.domain.nickname.Nickname;
 import com.example.temp.member.domain.nickname.NicknameGenerator;
 import com.example.temp.member.dto.request.MemberRegisterRequest;
+import com.example.temp.member.dto.request.MemberUpdateRequest;
 import com.example.temp.member.event.MemberDeletedEvent;
 import com.example.temp.member.exception.NicknameDuplicatedException;
 import com.example.temp.oauth.OAuthResponse;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -107,4 +109,30 @@ public class MemberService {
         member.changePrivacy(privacyPolicy);
     }
 
+    @Transactional
+    public void updateMemberInfo(UserContext userContext, MemberUpdateRequest request) {
+        Member member = memberRepository.findById(userContext.id())
+            .orElseThrow(() -> new ApiException(ErrorCode.AUTHENTICATED_FAIL));
+        if (!isMemberOriginalNickname(member, request.nickname()) &&
+            memberRepository.existsByNickname(request.nickname())) {
+            throw new ApiException(ErrorCode.NICKNAME_DUPLICATED);
+        }
+        if (!imageRepository.existsByUrl(request.profileUrl())) {
+            throw new ApiException(ErrorCode.IMAGE_NOT_FOUND);
+        }
+        member.setProfileUrl(request.profileUrl());
+        member.setNickname(Nickname.create(request.nickname()));
+    }
+
+    private boolean isMemberOriginalNickname(Member member, String nickname) {
+        Objects.requireNonNull(member);
+        Objects.requireNonNull(nickname);
+        return Objects.equals(member.getNicknameValue(), nickname);
+    }
+
+    public MemberInfo retrieveMemberInfo(long targetId) {
+        Member member = memberRepository.findById(targetId)
+            .orElseThrow(() -> new ApiException(ErrorCode.MEMBER_NOT_FOUND));
+        return MemberInfo.of(member);
+    }
 }
