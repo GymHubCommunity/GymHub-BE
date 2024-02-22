@@ -4,7 +4,7 @@ import java.time.LocalDate;
 
 public interface DatePeriod {
 
-    LocalDate getFirstDate();
+    LocalDate getStartDate();
 
     LocalDate getLastDate();
 

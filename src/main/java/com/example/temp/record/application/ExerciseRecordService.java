@@ -36,9 +36,10 @@ public class ExerciseRecordService {
     public RetrievePeriodExerciseRecordsResponse retrievePeriodExerciseRecords(UserContext userContext,
         DatePeriod datePeriod) {
         Member member = findMember(userContext);
-        LocalDate firstDate = datePeriod.getFirstDate();
-        List<ExerciseRecord> exerciseRecords = exerciseRecordRepository.findAllByMemberAndRecordDateBetween(member,
-            datePeriod.getFirstDate(), datePeriod.getLastDate());
+        LocalDate firstDate = datePeriod.getStartDate();
+
+        List<ExerciseRecord> exerciseRecords = exerciseRecordRepository.findAllByMemberAndPeriod(member,
+            datePeriod.getStartDate(), datePeriod.getLastDate());
         return RetrievePeriodExerciseRecordsResponse.of(firstDate.getYear(), firstDate.getMonthValue(),
             exerciseRecords);
     }

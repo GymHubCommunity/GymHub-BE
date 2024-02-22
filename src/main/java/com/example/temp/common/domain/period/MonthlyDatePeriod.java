@@ -7,7 +7,7 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class MonthlyDatePeriod implements DatePeriod {
 
-    private LocalDate firstDate;
+    private LocalDate startDate;
     private LocalDate lastDate;
 
     public static DatePeriod of(int year, int month) {
@@ -17,8 +17,8 @@ public class MonthlyDatePeriod implements DatePeriod {
     }
 
     @Override
-    public LocalDate getFirstDate() {
-        return firstDate;
+    public LocalDate getStartDate() {
+        return startDate;
     }
 
     @Override
