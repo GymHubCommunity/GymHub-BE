@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.example.temp.common.exception.ApiException;
 import com.example.temp.common.exception.ErrorCode;
+import com.example.temp.machine.domain.BodyPart;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -23,7 +24,7 @@ class TrackTest {
         List<SetInTrack> setInTracks = List.of(createSet(1));
 
         // when
-        Track track = Track.createWithoutRecord(machineName, setInTracks);
+        Track track = Track.createWithoutRecord(machineName, BodyPart.HIP, setInTracks);
 
         // then
         assertThat(track.getMachineName()).isEqualTo(machineName);
@@ -38,7 +39,7 @@ class TrackTest {
         List<SetInTrack> setInTracks = List.of(createSet(1));
 
         // when & then
-        assertThatThrownBy(() -> Track.createWithoutRecord(machineName, setInTracks))
+        assertThatThrownBy(() -> Track.createWithoutRecord(machineName, BodyPart.HIP, setInTracks))
             .isInstanceOf(ApiException.class)
             .hasMessageContaining(ErrorCode.TRACK_MACHINE_NAME_INVALID.getMessage());
     }
@@ -51,7 +52,7 @@ class TrackTest {
         List<SetInTrack> setInTracks = Collections.emptyList();
 
         // when & then
-        assertThatThrownBy(() -> Track.createWithoutRecord(machineName, setInTracks))
+        assertThatThrownBy(() -> Track.createWithoutRecord(machineName, BodyPart.HIP, setInTracks))
             .isInstanceOf(ApiException.class)
             .hasMessageContaining(ErrorCode.SET_CANT_EMPTY.getMessage());
     }
@@ -68,7 +69,7 @@ class TrackTest {
             .toList();
 
         // when & then
-        assertThatThrownBy(() -> Track.createWithoutRecord(machineName, setInTracks))
+        assertThatThrownBy(() -> Track.createWithoutRecord(machineName, BodyPart.HIP, setInTracks))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("트랙 내 세트들의 순서는 1부터 순차적으로 올라가야 합니다.");
     }

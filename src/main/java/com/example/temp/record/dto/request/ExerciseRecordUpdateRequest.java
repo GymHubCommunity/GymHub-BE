@@ -1,5 +1,6 @@
 package com.example.temp.record.dto.request;
 
+import com.example.temp.machine.domain.BodyPart;
 import com.example.temp.member.domain.Member;
 import com.example.temp.record.domain.ExerciseRecord;
 import com.example.temp.record.domain.SetInTrack;
@@ -39,7 +40,7 @@ public record ExerciseRecordUpdateRequest(
             for (SetInTrackUpdateRequest set : this.sets) {
                 setInTracks.add(set.toEntityWithOrder(order++));
             }
-            return Track.createWithoutRecord(machineName, setInTracks);
+            return Track.createWithoutRecord(machineName, BodyPart.CARDIO, setInTracks); // TODO
         }
 
         public record SetInTrackUpdateRequest(

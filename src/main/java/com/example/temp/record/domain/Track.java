@@ -42,7 +42,7 @@ public class Track {
     private String machineName;
 
     @Column(nullable = false)
-    private BodyPart majorBodyPart; // TODO
+    private BodyPart majorBodyPart;
 
     @OneToMany(mappedBy = "track", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<SetInTrack> setsInTrack = new ArrayList<>();
@@ -55,7 +55,7 @@ public class Track {
         this.exerciseRecord = exerciseRecord;
         this.machineName = machineName;
         this.setsInTrack = new ArrayList<>();
-        this.majorBodyPart = BodyPart.CARDIO; // TODO
+        this.majorBodyPart = majorBodyPart;
         setsInTrack.forEach(set -> set.relate(this));
     }
 
@@ -89,9 +89,10 @@ public class Track {
     /**
      * Track 엔티티를 생성합니다. 추후 relate 메서드를 사용해 Record 객체를 연결해야 합니다.
      */
-    public static Track createWithoutRecord(String machineName, List<SetInTrack> setInTracks) {
+    public static Track createWithoutRecord(String machineName, BodyPart majorBodyPart, List<SetInTrack> setInTracks) {
         return Track.builder()
             .machineName(machineName)
+            .majorBodyPart(majorBodyPart)
             .setsInTrack(setInTracks)
             .build();
     }

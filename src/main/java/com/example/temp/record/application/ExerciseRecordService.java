@@ -4,11 +4,15 @@ import com.example.temp.common.domain.period.DatePeriod;
 import com.example.temp.common.dto.UserContext;
 import com.example.temp.common.exception.ApiException;
 import com.example.temp.common.exception.ErrorCode;
+import com.example.temp.machine.domain.BodyPart;
+import com.example.temp.machine.domain.Machine;
+import com.example.temp.machine.domain.MachineRepository;
 import com.example.temp.member.domain.Member;
 import com.example.temp.member.domain.MemberRepository;
 import com.example.temp.record.domain.ExerciseRecord;
 import com.example.temp.record.domain.ExerciseRecordRepository;
 import com.example.temp.record.dto.request.ExerciseRecordCreateRequest;
+import com.example.temp.record.dto.request.ExerciseRecordCreateRequest.TrackCreateRequest;
 import com.example.temp.record.dto.request.ExerciseRecordUpdateRequest;
 import com.example.temp.record.dto.response.ExerciseRecordInfo;
 import com.example.temp.record.dto.response.RetrievePeriodExerciseRecordsResponse;
@@ -17,6 +21,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,13 +33,29 @@ public class ExerciseRecordService {
 
     private final ExerciseRecordRepository exerciseRecordRepository;
     private final MemberRepository memberRepository;
+    private final MachineRepository machineRepository;
 
     @Transactional
     public long create(UserContext userContext, ExerciseRecordCreateRequest request) {
         Member member = findMember(userContext);
-        ExerciseRecord exerciseRecord = request.toEntityWith(member);
+        List<String> machineNames = extractMachineNames(request.tracks());
+        Map<String, BodyPart> machineToMajorBodyPartMap = createMachineToMajorBodyPartMap(machineNames);
+        ExerciseRecord exerciseRecord = request.toEntityWith(member, machineToMajorBodyPartMap);
         exerciseRecordRepository.save(exerciseRecord);
         return exerciseRecord.getId();
+    }
+
+    private static List<String> extractMachineNames(List<TrackCreateRequest> tracks) {
+        return tracks.stream()
+            .map(TrackCreateRequest::machineName)
+            .toList();
+    }
+
+    private Map<String, BodyPart> createMachineToMajorBodyPartMap(List<String> machineNames) {
+        Map<String, BodyPart> machineToMajorBodyPartMap = machineRepository.findAllByNameIn(machineNames).stream()
+            .collect(Collectors.toMap(Machine::getName, Machine::getMajorBodyPart));
+        machineNames.forEach(name -> machineToMajorBodyPartMap.putIfAbsent(name, BodyPart.ETC));
+        return machineToMajorBodyPartMap;
     }
 
     public RetrievePeriodExerciseRecordsResponse retrievePeriodExerciseRecords(UserContext userContext,
@@ -45,7 +66,8 @@ public class ExerciseRecordService {
             .map(ExerciseRecordInfo::from)
             .toList();
 
-        Map<LocalDate, List<ExerciseRecordInfo>> exerciseRecordMap = convertListToMapByDate(datePeriod, exerciseRecords);
+        Map<LocalDate, List<ExerciseRecordInfo>> exerciseRecordMap = convertListToMapByDate(datePeriod,
+            exerciseRecords);
         return RetrievePeriodExerciseRecordsResponse.from(exerciseRecordMap);
     }
 

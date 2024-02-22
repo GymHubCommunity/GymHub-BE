@@ -8,7 +8,7 @@ import com.example.temp.record.domain.SetInTrack;
 import com.example.temp.record.domain.Track;
 import com.example.temp.record.dto.request.ExerciseRecordCreateRequest.TrackCreateRequest;
 import com.example.temp.record.dto.request.ExerciseRecordCreateRequest.TrackCreateRequest.SetInTrackCreateRequest;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -40,7 +40,7 @@ class ExerciseRecordCreateRequestTest {
         TrackCreateRequest request = new TrackCreateRequest("머신이름", List.of(setInTrackCreateRequest));
 
         // when
-        Track track = request.toEntity();
+        Track track = request.toEntityUsing(new HashMap<>());
 
         // then
         assertThat(track.getMachineName()).isEqualTo(request.machineName());
@@ -60,7 +60,7 @@ class ExerciseRecordCreateRequestTest {
         ExerciseRecordCreateRequest request = new ExerciseRecordCreateRequest(List.of(trackCreateRequest));
 
         // when
-        ExerciseRecord exerciseRecord = request.toEntityWith(null);
+        ExerciseRecord exerciseRecord = request.toEntityWith(null, new HashMap<>());
 
         // then
         assertThat(exerciseRecord.getTracks()).hasSize(1)

@@ -10,6 +10,7 @@ import com.example.temp.common.dto.UserContext;
 import com.example.temp.common.entity.Email;
 import com.example.temp.common.exception.ApiException;
 import com.example.temp.common.exception.ErrorCode;
+import com.example.temp.machine.domain.BodyPart;
 import com.example.temp.member.domain.FollowStrategy;
 import com.example.temp.member.domain.Member;
 import com.example.temp.member.domain.PrivacyPolicy;
@@ -250,6 +251,7 @@ class ExerciseRecordServiceTest {
         return Track.builder()
             .machineName(machineName)
             .setsInTrack(setsInTrack)
+            .majorBodyPart(BodyPart.CARDIO)
             .build();
     }
 
