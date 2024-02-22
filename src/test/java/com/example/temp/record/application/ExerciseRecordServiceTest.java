@@ -168,17 +168,18 @@ class ExerciseRecordServiceTest {
         // given
         int year = 2024;
         int month = 1;
-        LocalDate date = LocalDate.of(year, month, 1);
-        saveExerciseRecord(loginMember, date);
+        LocalDate recordDate = LocalDate.of(year, month, 1);
+        saveExerciseRecord(loginMember, recordDate);
 
         // when
         RetrievePeriodExerciseRecordsResponse response =
             exerciseRecordService.retrievePeriodExerciseRecords(loginUserContext, year, month);
 
         // then
-        assertThat(response.results()).hasSize(LocalDate.of(year, month, 1).lengthOfMonth());
+        int totalCntInMonth = LocalDate.of(year, month, 1).lengthOfMonth();
+        assertThat(response.results()).hasSize(totalCntInMonth);
         RetrievePeriodRecordsElement periodRecordsElement = response.results().stream()
-            .filter(each -> each.id().equals(date.toString()))
+            .filter(each -> each.id().equals(recordDate.toString()))
             .findAny()
             .get();
         assertThat(periodRecordsElement).isNotNull();
