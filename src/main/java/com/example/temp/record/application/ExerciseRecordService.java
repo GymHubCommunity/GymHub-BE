@@ -10,6 +10,7 @@ import com.example.temp.record.domain.ExerciseRecordRepository;
 import com.example.temp.record.dto.request.ExerciseRecordCreateRequest;
 import com.example.temp.record.dto.request.ExerciseRecordUpdateRequest;
 import com.example.temp.record.dto.response.RetrievePeriodExerciseRecordsResponse;
+import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -34,8 +35,9 @@ public class ExerciseRecordService {
     public RetrievePeriodExerciseRecordsResponse retrievePeriodExerciseRecords(UserContext userContext,
         int year, int month) {
         Member member = findMember(userContext);
-
-        List<ExerciseRecord> exerciseRecords = exerciseRecordRepository.findAllByMember(member);
+        LocalDate start = LocalDate.of(year, month, 1);
+        LocalDate end = start.withDayOfMonth(start.lengthOfMonth());
+        List<ExerciseRecord> exerciseRecords = exerciseRecordRepository.findAllByMemberAndRecordDateBetween(member, start, end);
         return RetrievePeriodExerciseRecordsResponse.of(year, month, exerciseRecords);
     }
 
