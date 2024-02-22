@@ -9,6 +9,7 @@ import com.example.temp.record.domain.ExerciseRecord;
 import com.example.temp.record.domain.ExerciseRecordRepository;
 import com.example.temp.record.dto.request.ExerciseRecordCreateRequest;
 import com.example.temp.record.dto.request.ExerciseRecordUpdateRequest;
+import com.example.temp.record.dto.response.RetrievePeriodExerciseRecordsResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,6 +28,11 @@ public class ExerciseRecordService {
         ExerciseRecord exerciseRecord = request.toEntityWith(member);
         exerciseRecordRepository.save(exerciseRecord);
         return exerciseRecord.getId();
+    }
+
+    public RetrievePeriodExerciseRecordsResponse retrievePeriodExerciseRecords(int year, int month) {
+
+        return RetrievePeriodExerciseRecordsResponse.of(year, month);
     }
 
     /**

@@ -22,6 +22,7 @@ import com.example.temp.record.dto.request.ExerciseRecordCreateRequest.TrackCrea
 import com.example.temp.record.dto.request.ExerciseRecordUpdateRequest;
 import com.example.temp.record.dto.request.ExerciseRecordUpdateRequest.TrackUpdateRequest;
 import com.example.temp.record.dto.request.ExerciseRecordUpdateRequest.TrackUpdateRequest.SetInTrackUpdateRequest;
+import com.example.temp.record.dto.response.RetrievePeriodExerciseRecordsResponse;
 import jakarta.persistence.EntityManager;
 import java.time.LocalDate;
 import java.util.Collections;
@@ -160,6 +161,22 @@ class ExerciseRecordServiceTest {
         }
     }
 
+    @Test
+    @DisplayName("기간별 운동기록을 조회한다.")
+    void retrievePeriodExerciseRecords() throws Exception {
+        // given
+        int year = 2024;
+        int month = 1;
+        saveExerciseRecord(loginMember, LocalDate.of(year, month, 1));
+
+        // when
+        RetrievePeriodExerciseRecordsResponse response =
+            exerciseRecordService.retrievePeriodExerciseRecords(year, month);
+
+        // then
+        assertThat(response.results()).hasSize(LocalDate.of(year, month, 1).lengthOfMonth());
+    }
+
     private Track createTrack(String machineName, List<SetInTrack> setsInTrack) {
         return Track.builder()
             .machineName(machineName)
@@ -256,6 +273,7 @@ class ExerciseRecordServiceTest {
         Track tracks = createTrack("머신1", List.of(createSetInTrack(1)));
         return saveExerciseRecordHelper(member, tracks, date);
     }
+
     private ExerciseRecord saveExerciseRecord(Member member) {
         return saveExerciseRecord(member, LocalDate.now());
     }
