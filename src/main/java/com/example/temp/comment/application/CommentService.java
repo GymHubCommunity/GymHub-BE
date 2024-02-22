@@ -46,7 +46,6 @@ public class CommentService {
         Post post = findPostBy(postId);
         Slice<Comment> sliceComments = commentRepository.findByPostId(post.getId(), pageable);
         return SliceCommentResponse.from(sliceComments);
-
     }
 
     private Post findPostBy(Long postId) {
