@@ -2,6 +2,7 @@ package com.example.temp.record.domain;
 
 import com.example.temp.common.exception.ApiException;
 import com.example.temp.common.exception.ErrorCode;
+import com.example.temp.machine.domain.BodyPart;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -40,16 +41,21 @@ public class Track {
     @Column(nullable = false)
     private String machineName;
 
+    @Column(nullable = false)
+    private BodyPart majorBodyPart; // TODO
+
     @OneToMany(mappedBy = "track", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<SetInTrack> setsInTrack = new ArrayList<>();
 
     @Builder
-    public Track(ExerciseRecord exerciseRecord, String machineName, List<SetInTrack> setsInTrack) {
+    public Track(ExerciseRecord exerciseRecord, String machineName, BodyPart majorBodyPart,
+        List<SetInTrack> setsInTrack) {
         machineName = machineName.trim();
         validate(machineName, setsInTrack);
         this.exerciseRecord = exerciseRecord;
         this.machineName = machineName;
         this.setsInTrack = new ArrayList<>();
+        this.majorBodyPart = BodyPart.CARDIO; // TODO
         setsInTrack.forEach(set -> set.relate(this));
     }
 

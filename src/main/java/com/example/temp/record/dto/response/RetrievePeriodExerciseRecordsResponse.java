@@ -1,6 +1,5 @@
 package com.example.temp.record.dto.response;
 
-import com.example.temp.record.domain.ExerciseRecord;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -11,9 +10,9 @@ public record RetrievePeriodExerciseRecordsResponse(
     List<RetrievePeriodRecordsElement> results
 ) {
 
-    public static RetrievePeriodExerciseRecordsResponse from(Map<LocalDate, List<ExerciseRecord>> result) {
+    public static RetrievePeriodExerciseRecordsResponse from(Map<LocalDate, List<ExerciseRecordInfo>> result) {
         List<RetrievePeriodRecordsElement> results = new ArrayList<>();
-        for (Entry<LocalDate, List<ExerciseRecord>> entry : result.entrySet()) {
+        for (Entry<LocalDate, List<ExerciseRecordInfo>> entry : result.entrySet()) {
             results.add(RetrievePeriodRecordsElement.of(entry.getKey(), entry.getValue()));
         }
         return new RetrievePeriodExerciseRecordsResponse(results);
@@ -24,11 +23,8 @@ public record RetrievePeriodExerciseRecordsResponse(
         List<ExerciseRecordInfo> exerciseRecords
     ) {
 
-        public static RetrievePeriodRecordsElement of(LocalDate localDate, List<ExerciseRecord> exerciseRecords) {
-            List<ExerciseRecordInfo> exerciseRecordInfos = exerciseRecords.stream()
-                .map(ExerciseRecordInfo::from)
-                .toList();
-            return new RetrievePeriodRecordsElement(localDate.toString(), exerciseRecordInfos);
+        public static RetrievePeriodRecordsElement of(LocalDate localDate, List<ExerciseRecordInfo> exerciseRecords) {
+            return new RetrievePeriodRecordsElement(localDate.toString(), exerciseRecords);
         }
     }
 }

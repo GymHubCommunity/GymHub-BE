@@ -10,6 +10,7 @@ import com.example.temp.record.domain.ExerciseRecord;
 import com.example.temp.record.domain.ExerciseRecordRepository;
 import com.example.temp.record.dto.request.ExerciseRecordCreateRequest;
 import com.example.temp.record.dto.request.ExerciseRecordUpdateRequest;
+import com.example.temp.record.dto.response.ExerciseRecordInfo;
 import com.example.temp.record.dto.response.RetrievePeriodExerciseRecordsResponse;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -39,26 +40,29 @@ public class ExerciseRecordService {
     public RetrievePeriodExerciseRecordsResponse retrievePeriodExerciseRecords(UserContext userContext,
         DatePeriod datePeriod) {
         Member member = findMember(userContext);
-        List<ExerciseRecord> exerciseRecords = exerciseRecordRepository.findAllByMemberAndPeriod(member,
-            datePeriod.getStartDate(), datePeriod.getLastDate());
-        Map<LocalDate, List<ExerciseRecord>> exerciseRecordMap = convertListToMapByDate(datePeriod, exerciseRecords);
+        List<ExerciseRecordInfo> exerciseRecords = exerciseRecordRepository
+            .findAllByMemberAndPeriod(member, datePeriod.getStartDate(), datePeriod.getLastDate()).stream()
+            .map(ExerciseRecordInfo::from)
+            .toList();
+
+        Map<LocalDate, List<ExerciseRecordInfo>> exerciseRecordMap = convertListToMapByDate(datePeriod, exerciseRecords);
         return RetrievePeriodExerciseRecordsResponse.from(exerciseRecordMap);
     }
 
-    private Map<LocalDate, List<ExerciseRecord>> convertListToMapByDate(DatePeriod datePeriod,
-        List<ExerciseRecord> exerciseRecords) {
-        Map<LocalDate, List<ExerciseRecord>> result = createInitStatusMapByDate(datePeriod);
-        for (ExerciseRecord exerciseRecord : exerciseRecords) {
-            if (!result.containsKey(exerciseRecord.getRecordDate())) {
+    private Map<LocalDate, List<ExerciseRecordInfo>> convertListToMapByDate(DatePeriod datePeriod,
+        List<ExerciseRecordInfo> exerciseRecords) {
+        Map<LocalDate, List<ExerciseRecordInfo>> result = createInitStatusMapByDate(datePeriod);
+        for (ExerciseRecordInfo exerciseRecord : exerciseRecords) {
+            if (!result.containsKey(exerciseRecord.recordDate())) {
                 throw new IllegalArgumentException("year와 month가 일치하지 않는 운동 결과가 발생했습니다.");
             }
-            result.get(exerciseRecord.getRecordDate()).add(exerciseRecord);
+            result.get(exerciseRecord.recordDate()).add(exerciseRecord);
         }
         return result;
     }
 
-    private Map<LocalDate, List<ExerciseRecord>> createInitStatusMapByDate(DatePeriod datePeriod) {
-        Map<LocalDate, List<ExerciseRecord>> result = new HashMap<>();
+    private Map<LocalDate, List<ExerciseRecordInfo>> createInitStatusMapByDate(DatePeriod datePeriod) {
+        Map<LocalDate, List<ExerciseRecordInfo>> result = new HashMap<>();
         LocalDate cursor = datePeriod.getStartDate();
         while (!cursor.isAfter(datePeriod.getLastDate())) {
             result.put(cursor, new ArrayList<>());
