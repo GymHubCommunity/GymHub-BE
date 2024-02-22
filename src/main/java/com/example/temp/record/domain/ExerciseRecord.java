@@ -1,6 +1,8 @@
 package com.example.temp.record.domain;
 
 import com.example.temp.common.entity.BaseTimeEntity;
+import com.example.temp.common.exception.ApiException;
+import com.example.temp.common.exception.ErrorCode;
 import com.example.temp.member.domain.Member;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -16,6 +18,7 @@ import jakarta.persistence.Table;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -45,10 +48,18 @@ public class ExerciseRecord extends BaseTimeEntity {
 
     @Builder
     private ExerciseRecord(Member member, List<Track> tracks, LocalDate recordDate) {
+        validate(tracks);
         this.member = member;
         this.recordDate = recordDate;
         this.tracks = new ArrayList<>();
         tracks.forEach(track -> track.relate(this));
+    }
+
+    private void validate(List<Track> tracks) {
+        Objects.requireNonNull(tracks);
+        if (tracks.isEmpty()) {
+            throw new ApiException(ErrorCode.TRACK_CANT_EMPTY);
+        }
     }
 
     public static ExerciseRecord create(Member member, List<Track> tracks) {
@@ -56,5 +67,19 @@ public class ExerciseRecord extends BaseTimeEntity {
             .member(member)
             .tracks(tracks)
             .build();
+    }
+
+    public boolean isOwnedBy(Member member) {
+        Objects.requireNonNull(member);
+        return Objects.equals(member, getMember());
+    }
+
+    /**
+     * ExerciseRecord를 입력받아, 내부의 Track을 변경합니다. ConcurrentModificationException 으로 인해 updated의 tracks를 복사한 뒤 사용합니다.
+     */
+    public void update(ExerciseRecord updated) {
+        this.tracks.clear();
+        List<Track> copies = List.copyOf(updated.getTracks());
+        copies.forEach(track -> track.relate(this));
     }
 }
