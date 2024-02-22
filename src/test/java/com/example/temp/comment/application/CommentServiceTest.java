@@ -162,6 +162,25 @@ class CommentServiceTest {
         assertThat(commentResponse.comments()).isEmpty();
     }
 
+    @DisplayName("로그인에 문제가 생기면 댓글을 조회할 수 없다.")
+    @Test
+    void findCommentsByPostWithInvalidUserContext() {
+        //given
+        Member member1 = createMember("user1", "user1@gymhub.run");
+        Post post = createPost(member1, "게시글1");
+        UserContext userContext = UserContext.builder()
+            .id(999999999L)
+            .role(Role.NORMAL)
+            .build();
+        createComment(member1, "댓글1", post);
+
+        //when, then
+        assertThatThrownBy(() -> commentService.findCommentsByPost(
+            post.getId(), userContext, PageRequest.of(0, 1)))
+            .isInstanceOf(ApiException.class)
+            .hasMessage(AUTHENTICATED_FAIL.getMessage());
+    }
+
     @DisplayName("존재하지 않는 게시글의 댓글을 조회할 수 없다.")
     @Test
     void findCommentsByPostWithInvalidPost() {
