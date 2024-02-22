@@ -118,10 +118,8 @@ class MachineRepositoryTest {
         Machine machine = Machine.builder()
             .name(name)
             .machineBodyParts(machineBodyParts)
+            .majorBodyPart(bodyParts.get(0))
             .build();
-        for (MachineBodyPart machineBodyPart : machineBodyParts) {
-            machineBodyPart.relate(machine);
-        }
         machineRepository.save(machine);
         return machine;
     }

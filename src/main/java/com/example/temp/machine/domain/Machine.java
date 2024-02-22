@@ -3,6 +3,8 @@ package com.example.temp.machine.domain;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -10,6 +12,7 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -32,22 +35,25 @@ public class Machine {
     @OneToMany(mappedBy = "machine", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<MachineBodyPart> machineBodyParts = new ArrayList<>();
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private BodyPart majorBodyPart;
+
     @Builder
-    private Machine(String name, List<MachineBodyPart> machineBodyParts) {
+    private Machine(String name, List<MachineBodyPart> machineBodyParts, BodyPart majorBodyPart) {
+        Objects.requireNonNull(machineBodyParts);
         this.name = name;
-        if (machineBodyParts != null) {
-            this.machineBodyParts = new ArrayList<>();
-            this.machineBodyParts.addAll(machineBodyParts);
-        }
+        this.machineBodyParts = new ArrayList<>();
+        machineBodyParts.forEach(machineBodyPart -> machineBodyPart.relate(this));
+        this.majorBodyPart = majorBodyPart;
     }
 
     public static Machine create(String name, List<BodyPart> bodyParts) {
-        Machine machine = Machine.builder()
+        return Machine.builder()
             .name(name)
+            .machineBodyParts(createMachineBodyParts(bodyParts))
+            .majorBodyPart(bodyParts.get(0))
             .build();
-        createMachineBodyParts(bodyParts)
-            .forEach(machineBodyPart -> machineBodyPart.relate(machine));
-        return machine;
     }
 
     private static List<MachineBodyPart> createMachineBodyParts(List<BodyPart> bodyParts) {

@@ -176,19 +176,16 @@ class MachineServiceTest {
         MachineBodyPart machineBodyPart = MachineBodyPart.create(bodyPart);
         Machine machine = Machine.builder()
             .name(name)
+            .machineBodyParts(List.of(machineBodyPart))
+            .majorBodyPart(bodyPart)
             .build();
-        machineBodyPart.relate(machine);
         em.persist(machine);
         return machine;
     }
 
 
     private Machine saveMachine(String name) {
-        Machine machine = Machine.builder()
-            .name(name)
-            .build();
-        em.persist(machine);
-        return machine;
+        return saveMachine(name, BodyPart.BACK);
     }
 
 }
