@@ -20,3 +20,8 @@ VALUES (1, 'CHEST'),
        (2, 'CHEST'),
        (3, 'BACK'),
        (4, 'BACK');
+
+INSERT INTO follows(from_id, to_id, status)
+VALUES (1, 2, 'APPROVED'),
+       (1, 3, 'APPROVED'),
+       (2, 1, 'APPROVED');
