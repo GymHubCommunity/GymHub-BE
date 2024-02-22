@@ -34,7 +34,8 @@ public class ExerciseRecordService {
     public RetrievePeriodExerciseRecordsResponse retrievePeriodExerciseRecords(UserContext userContext,
         int year, int month) {
         Member member = findMember(userContext);
-        List<ExerciseRecord> exerciseRecords = exerciseRecordRepository.findAll(); //TODO 특정 회원, 특정 일자 데이터만 가져오도록 변경
+
+        List<ExerciseRecord> exerciseRecords = exerciseRecordRepository.findAllByMember(member);
         return RetrievePeriodExerciseRecordsResponse.of(year, month, exerciseRecords);
     }
 

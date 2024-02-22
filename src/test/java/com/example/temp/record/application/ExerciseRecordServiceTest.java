@@ -182,7 +182,31 @@ class ExerciseRecordServiceTest {
             .filter(each -> each.id().equals(recordDate.toString()))
             .findAny()
             .get();
-        assertThat(periodRecordsElement).isNotNull();
+        assertThat(periodRecordsElement.exerciseRecords()).isNotEmpty();
+    }
+
+    @Test
+    @DisplayName("기간별 운동기록을 조회하면 내가 등록한 기록만 볼 수 있다.")
+    void retrievePeriodExerciseRecordsOnlyMyRecord() throws Exception {
+        // given
+        int year = 2024;
+        int month = 1;
+        LocalDate recordDate = LocalDate.of(year, month, 1);
+        Member anotherMember = saveMember("nick2");
+        saveExerciseRecord(anotherMember, recordDate);
+
+        // when
+        RetrievePeriodExerciseRecordsResponse response =
+            exerciseRecordService.retrievePeriodExerciseRecords(loginUserContext, year, month);
+
+        // then
+        int totalCntInMonth = LocalDate.of(year, month, 1).lengthOfMonth();
+        assertThat(response.results()).hasSize(totalCntInMonth);
+        RetrievePeriodRecordsElement periodRecordsElement = response.results().stream()
+            .filter(each -> each.id().equals(recordDate.toString()))
+            .findAny()
+            .get();
+        assertThat(periodRecordsElement.exerciseRecords()).isEmpty();
     }
 
     @Test
