@@ -28,7 +28,7 @@ public class CommentService {
     @Transactional
     public Long createComment(Long postId, UserContext userContext, CommentCreateRequest commentCreateRequest) {
         Post post = findPostBy(postId);
-        Member member = findMemberBy(userContext);
+        Member member = findMemberBy(userContext.id());
 
         Comment comment = Comment.create(member, commentCreateRequest.content(), post);
         Comment savedComment = commentRepository.save(comment);
@@ -41,8 +41,8 @@ public class CommentService {
             .orElseThrow(() -> new ApiException(POST_NOT_FOUND));
     }
 
-    private Member findMemberBy(UserContext userContext) {
-        return memberRepository.findById(userContext.id())
+    private Member findMemberBy(Long userContextId) {
+        return memberRepository.findById(userContextId)
             .orElseThrow(() -> new ApiException(AUTHENTICATED_FAIL));
     }
 }
