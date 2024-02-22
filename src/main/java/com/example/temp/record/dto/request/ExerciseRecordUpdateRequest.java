@@ -11,6 +11,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public record ExerciseRecordUpdateRequest(
 
@@ -18,9 +19,9 @@ public record ExerciseRecordUpdateRequest(
     List<@Valid TrackUpdateRequest> tracks
 ) {
 
-    public ExerciseRecord toEntityWith(Member member) {
+    public ExerciseRecord toEntityWith(Member member, Map<String, BodyPart> machineToMajorBodyPartMap) {
         List<Track> tracks = this.tracks.stream()
-            .map(TrackUpdateRequest::toEntity)
+            .map(trackUpdateRequest -> trackUpdateRequest.toEntityUsing(machineToMajorBodyPartMap))
             .toList();
         return ExerciseRecord.create(member, tracks);
     }
@@ -34,13 +35,14 @@ public record ExerciseRecordUpdateRequest(
         List<@Valid SetInTrackUpdateRequest> sets
     ) {
 
-        public Track toEntity() {
+        public Track toEntityUsing(Map<String, BodyPart> machineToMajorBodyPartMap) {
             int order = 1;
             List<SetInTrack> setInTracks = new ArrayList<>();
             for (SetInTrackUpdateRequest set : this.sets) {
                 setInTracks.add(set.toEntityWithOrder(order++));
             }
-            return Track.createWithoutRecord(machineName, BodyPart.CARDIO, setInTracks); // TODO
+            return Track.createWithoutRecord(machineName,
+                machineToMajorBodyPartMap.getOrDefault(machineName, BodyPart.ETC), setInTracks);
         }
 
         public record SetInTrackUpdateRequest(

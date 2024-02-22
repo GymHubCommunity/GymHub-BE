@@ -14,6 +14,7 @@ import com.example.temp.record.domain.ExerciseRecordRepository;
 import com.example.temp.record.dto.request.ExerciseRecordCreateRequest;
 import com.example.temp.record.dto.request.ExerciseRecordCreateRequest.TrackCreateRequest;
 import com.example.temp.record.dto.request.ExerciseRecordUpdateRequest;
+import com.example.temp.record.dto.request.ExerciseRecordUpdateRequest.TrackUpdateRequest;
 import com.example.temp.record.dto.response.ExerciseRecordInfo;
 import com.example.temp.record.dto.response.RetrievePeriodExerciseRecordsResponse;
 import java.time.LocalDate;
@@ -38,17 +39,13 @@ public class ExerciseRecordService {
     @Transactional
     public long create(UserContext userContext, ExerciseRecordCreateRequest request) {
         Member member = findMember(userContext);
-        List<String> machineNames = extractMachineNames(request.tracks());
+        List<String> machineNames = request.tracks().stream()
+            .map(TrackCreateRequest::machineName)
+            .toList();
         Map<String, BodyPart> machineToMajorBodyPartMap = createMachineToMajorBodyPartMap(machineNames);
         ExerciseRecord exerciseRecord = request.toEntityWith(member, machineToMajorBodyPartMap);
         exerciseRecordRepository.save(exerciseRecord);
         return exerciseRecord.getId();
-    }
-
-    private static List<String> extractMachineNames(List<TrackCreateRequest> tracks) {
-        return tracks.stream()
-            .map(TrackCreateRequest::machineName)
-            .toList();
     }
 
     private Map<String, BodyPart> createMachineToMajorBodyPartMap(List<String> machineNames) {
@@ -99,12 +96,17 @@ public class ExerciseRecordService {
     @Transactional
     public void update(UserContext userContext, long targetId, ExerciseRecordUpdateRequest request) {
         Member member = findMember(userContext);
+        List<String> machineNames = request.tracks().stream()
+            .map(TrackUpdateRequest::machineName)
+            .toList();
+        Map<String, BodyPart> machineToMajorBodyPartMap = createMachineToMajorBodyPartMap(machineNames);
+
         ExerciseRecord exerciseRecord = exerciseRecordRepository.findById(targetId)
             .orElseThrow(() -> new ApiException(ErrorCode.RECORD_NOT_FOUND));
         if (!exerciseRecord.isOwnedBy(member)) {
             throw new ApiException(ErrorCode.AUTHORIZED_FAIL);
         }
-        exerciseRecord.update(request.toEntityWith(member));
+        exerciseRecord.update(request.toEntityWith(member, machineToMajorBodyPartMap));
     }
 
     @Transactional
