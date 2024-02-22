@@ -30,8 +30,9 @@ public class ExerciseRecordService {
         return exerciseRecord.getId();
     }
 
-    public RetrievePeriodExerciseRecordsResponse retrievePeriodExerciseRecords(int year, int month) {
-
+    public RetrievePeriodExerciseRecordsResponse retrievePeriodExerciseRecords(UserContext userContext,
+        int year, int month) {
+        Member member = findMember(userContext);
         return RetrievePeriodExerciseRecordsResponse.of(year, month);
     }
 

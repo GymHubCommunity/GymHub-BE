@@ -171,10 +171,24 @@ class ExerciseRecordServiceTest {
 
         // when
         RetrievePeriodExerciseRecordsResponse response =
-            exerciseRecordService.retrievePeriodExerciseRecords(year, month);
+            exerciseRecordService.retrievePeriodExerciseRecords(loginUserContext, year, month);
 
         // then
         assertThat(response.results()).hasSize(LocalDate.of(year, month, 1).lengthOfMonth());
+    }
+
+    @Test
+    @DisplayName("인증되지 않은 사용자는 월별 운동기록을 조회할 수 없다.")
+    void retrievePeriodExerciseRecordsFailNoAuthN() throws Exception {
+        // given
+        int year = 2024;
+        int month = 1;
+        saveExerciseRecord(loginMember, LocalDate.of(year, month, 1));
+
+        // when & then
+        assertThatThrownBy(() -> exerciseRecordService.retrievePeriodExerciseRecords(noLoginUserContext, year, month))
+            .isInstanceOf(ApiException.class)
+            .hasMessageContaining(ErrorCode.AUTHENTICATED_FAIL.getMessage());
     }
 
     private Track createTrack(String machineName, List<SetInTrack> setsInTrack) {
