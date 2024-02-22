@@ -10,6 +10,7 @@ public record PostElementResponse(
     WriterInfo writerInfo,
     String content,
     String imageUrl,
+    int commentCount,
     LocalDateTime registeredAt
 ) {
 
@@ -19,6 +20,7 @@ public record PostElementResponse(
             .writerInfo(WriterInfo.from(post.getMember()))
             .content(post.getContent())
             .imageUrl(post.getImageUrl().orElse(null))
+            .commentCount(post.getCommentCount())
             .registeredAt(post.getRegisteredAt())
             .build();
     }
