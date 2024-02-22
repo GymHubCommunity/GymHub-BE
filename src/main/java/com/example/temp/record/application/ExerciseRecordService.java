@@ -1,5 +1,6 @@
 package com.example.temp.record.application;
 
+import com.example.temp.common.domain.period.DatePeriod;
 import com.example.temp.common.dto.UserContext;
 import com.example.temp.common.exception.ApiException;
 import com.example.temp.common.exception.ErrorCode;
@@ -9,7 +10,6 @@ import com.example.temp.record.domain.ExerciseRecord;
 import com.example.temp.record.domain.ExerciseRecordRepository;
 import com.example.temp.record.dto.request.ExerciseRecordCreateRequest;
 import com.example.temp.record.dto.request.ExerciseRecordUpdateRequest;
-import com.example.temp.record.dto.request.DatePeriod;
 import com.example.temp.record.dto.response.RetrievePeriodExerciseRecordsResponse;
 import java.time.LocalDate;
 import java.util.List;
@@ -33,7 +33,8 @@ public class ExerciseRecordService {
         return exerciseRecord.getId();
     }
 
-    public RetrievePeriodExerciseRecordsResponse retrievePeriodExerciseRecords(UserContext userContext, DatePeriod datePeriod) {
+    public RetrievePeriodExerciseRecordsResponse retrievePeriodExerciseRecords(UserContext userContext,
+        DatePeriod datePeriod) {
         Member member = findMember(userContext);
         LocalDate firstDate = datePeriod.getFirstDate();
         List<ExerciseRecord> exerciseRecords = exerciseRecordRepository.findAllByMemberAndRecordDateBetween(member,

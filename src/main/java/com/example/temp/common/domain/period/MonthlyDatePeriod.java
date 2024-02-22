@@ -1,4 +1,4 @@
-package com.example.temp.record.dto.request;
+package com.example.temp.common.domain.period;
 
 import java.time.LocalDate;
 import lombok.AccessLevel;
