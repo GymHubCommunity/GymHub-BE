@@ -6,6 +6,7 @@ import static com.example.temp.common.exception.ErrorCode.POST_NOT_FOUND;
 import com.example.temp.comment.domain.Comment;
 import com.example.temp.comment.domain.CommentRepository;
 import com.example.temp.comment.dto.request.CommentCreateRequest;
+import com.example.temp.comment.dto.response.SliceCommentResponse;
 import com.example.temp.common.dto.UserContext;
 import com.example.temp.common.exception.ApiException;
 import com.example.temp.member.domain.Member;
@@ -14,6 +15,8 @@ import com.example.temp.post.domain.Post;
 import com.example.temp.post.domain.PostRepository;
 import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,6 +39,14 @@ public class CommentService {
         Comment savedComment = commentRepository.save(comment);
 
         return savedComment.getId();
+    }
+
+    public SliceCommentResponse findCommentsByPost(Long postId, UserContext userContext, Pageable pageable) {
+        findMemberBy(userContext.id());
+        Post post = findPostBy(postId);
+        Slice<Comment> sliceComments = commentRepository.findByPostId(post.getId(), pageable);
+        return SliceCommentResponse.from(sliceComments);
+
     }
 
     private Post findPostBy(Long postId) {
