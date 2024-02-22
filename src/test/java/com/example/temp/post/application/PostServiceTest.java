@@ -2,6 +2,7 @@ package com.example.temp.post.application;
 
 import static com.example.temp.common.exception.ErrorCode.IMAGE_NOT_FOUND;
 import static com.example.temp.common.exception.ErrorCode.POST_NOT_FOUND;
+import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.groups.Tuple.tuple;
@@ -343,6 +344,17 @@ class PostServiceTest {
         assertThatThrownBy(() -> postService.findPost(post.getId(), userContext))
             .isInstanceOf(ApiException.class)
             .hasMessage(POST_NOT_FOUND.getMessage());
+    }
+
+    @DisplayName("게시글을 작성하면 최초 댓글 수는 0개이다")
+    @Test
+    void createPostInitialCommentCountEqualsZero() {
+        //given
+        Member member = saveMember("user1@gymhub.run", "user1");
+        Post post = savePost(member, "게시글1", new ArrayList<>());
+
+        //when, then
+        assertThat(post.getCommentCount()).isZero();
     }
 
     private Member saveMember(String email, String nickname) {

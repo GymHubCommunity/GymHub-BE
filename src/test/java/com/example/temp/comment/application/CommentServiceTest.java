@@ -59,9 +59,10 @@ class CommentServiceTest {
 
         //when
         Long commentId = commentService.createComment(post.getId(), userContext, request, LocalDateTime.now());
+        Comment comment = commentRepository.findById(commentId).orElseThrow();
 
         //then
-        Comment comment = commentRepository.findById(commentId).orElseThrow();
+        assertThat(post.getCommentCount()).isEqualTo(1);
         assertThat(comment.getPost()).isEqualTo(post);
         assertThat(comment.getMember()).isEqualTo(member);
         assertThat(comment.getContent()).isEqualTo(request.content());

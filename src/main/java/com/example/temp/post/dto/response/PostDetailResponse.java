@@ -13,6 +13,7 @@ public record PostDetailResponse(
     String content,
     List<String> imageUrls,
     List<String> hashtags,
+    int commentCount,
     LocalDateTime registeredAt
 ) {
 
@@ -23,6 +24,7 @@ public record PostDetailResponse(
             .content(post.getContent())
             .imageUrls(getImageUrls(post))
             .hashtags(getHashtags(post))
+            .commentCount(post.getCommentCount())
             .registeredAt(post.getRegisteredAt())
             .build();
     }
