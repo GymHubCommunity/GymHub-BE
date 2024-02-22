@@ -60,4 +60,8 @@ public class Comment extends BaseTimeEntity {
     public void relatePost(Post post) {
         this.post = post;
     }
+
+    public String getContent() {
+        return this.content.getValue();
+    }
 }
