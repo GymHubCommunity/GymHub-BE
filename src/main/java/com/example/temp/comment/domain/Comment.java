@@ -52,14 +52,12 @@ public class Comment extends BaseTimeEntity {
     }
 
     public static Comment create(Member member, String content, Post post, LocalDateTime registeredAt) {
-        Comment comment = Comment.builder()
+        return Comment.builder()
             .member(member)
             .content(Content.create(content))
             .post(post)
             .registeredAt(registeredAt)
             .build();
-        post.addComment(comment);
-        return comment;
     }
 
     public void relatePost(Post post) {
