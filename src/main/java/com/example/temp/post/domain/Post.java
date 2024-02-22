@@ -54,6 +54,8 @@ public class Post extends BaseTimeEntity {
 
     private LocalDateTime registeredAt;
 
+    private int commentCount;
+
     @Builder
     public Post(Member member, Content content, LocalDateTime registeredAt) {
         this.member = member;
@@ -80,5 +82,9 @@ public class Post extends BaseTimeEntity {
 
     public void updateContent(String content) {
         this.content = Content.create(content);
+    }
+
+    public void addCommentCount() {
+        this.commentCount++;
     }
 }
