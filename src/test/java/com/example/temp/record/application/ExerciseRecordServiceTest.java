@@ -252,16 +252,23 @@ class ExerciseRecordServiceTest {
             .hasMessageContaining(ErrorCode.AUTHORIZED_FAIL.getMessage());
     }
 
-    private ExerciseRecord saveExerciseRecord(Member member) {
+    private ExerciseRecord saveExerciseRecord(Member member, LocalDate date) {
         Track tracks = createTrack("머신1", List.of(createSetInTrack(1)));
-        return saveExerciseRecord(member, tracks);
+        return saveExerciseRecordHelper(member, tracks, date);
+    }
+    private ExerciseRecord saveExerciseRecord(Member member) {
+        return saveExerciseRecord(member, LocalDate.now());
     }
 
     private ExerciseRecord saveExerciseRecord(Member member, Track track) {
+        return saveExerciseRecordHelper(member, track, LocalDate.now());
+    }
+
+    private ExerciseRecord saveExerciseRecordHelper(Member member, Track track, LocalDate date) {
         ExerciseRecord record = ExerciseRecord.builder()
             .member(member)
             .tracks(List.of(track))
-            .recordDate(LocalDate.now())
+            .recordDate(date)
             .build();
         em.persist(record);
         return record;
