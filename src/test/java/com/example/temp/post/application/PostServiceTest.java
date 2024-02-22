@@ -28,7 +28,6 @@ import com.example.temp.post.domain.PostImage;
 import com.example.temp.post.domain.PostRepository;
 import com.example.temp.post.dto.request.PostCreateRequest;
 import com.example.temp.post.dto.request.PostUpdateRequest;
-import com.example.temp.post.dto.response.PostCreateResponse;
 import com.example.temp.post.dto.response.PostDetailResponse;
 import com.example.temp.post.dto.response.PostElementResponse;
 import com.example.temp.post.dto.response.SlicePostResponse;
@@ -188,13 +187,10 @@ class PostServiceTest {
         LocalDateTime registeredAt = LocalDateTime.now();
 
         //when
-        PostCreateResponse response = postService.createPost(userContext, request, registeredAt);
+        Long postId = postService.createPost(userContext, request, registeredAt);
 
         //then
-        assertThat(response).isNotNull();
-        assertThat(response.writerInfo().writerId()).isEqualTo(member.getId());
-        assertThat(response.content()).isEqualTo(request.content());
-        assertThat(response.postImages()).containsExactlyElementsOf(imageUrls);
+        assertThat(postId).isNotNull();
     }
 
     @DisplayName("이미지 url로 해당 이미지를 찾지 못하면 예외를 발생시킨다.")
@@ -223,14 +219,15 @@ class PostServiceTest {
         PostCreateRequest postCreateRequest = new PostCreateRequest("content", null, new ArrayList<>());
 
         //when
-        PostCreateResponse postCreateResponse = postService.createPost(userContext, postCreateRequest,
+        Long postId = postService.createPost(userContext, postCreateRequest,
             LocalDateTime.now());
+        Post post = postRepository.findById(postId).orElseThrow();
 
         //then
-        assertThat(postCreateResponse).isNotNull()
-            .satisfies(response -> {
-                assertThat(response.content()).isEqualTo("content");
-                assertThat(response.postImages()).isEmpty();
+        assertThat(post).isNotNull()
+            .satisfies(savedPost -> {
+                assertThat(savedPost.getContent()).isEqualTo("content");
+                assertThat(savedPost.getPostImages()).isEmpty();
             });
     }
 
@@ -245,15 +242,16 @@ class PostServiceTest {
         List<String> hashtags = List.of("#hashtag1", "#hashtag2");
         List<String> savedHashtags = saveHashtagsAndGet(hashtags);
         PostCreateRequest request = new PostCreateRequest("content1", savedImageUrls, savedHashtags);
-        PostCreateResponse savedPost = postService.createPost(userContext, request, LocalDateTime.now());
+        Long postId = postService.createPost(userContext, request, LocalDateTime.now());
+        Post savedPost = postRepository.findById(postId).orElseThrow();
 
         // When
-        PostDetailResponse response = postService.findPost(savedPost.postId(), userContext);
+        PostDetailResponse response = postService.findPost(savedPost.getId(), userContext);
 
         // Then
         assertThat(response).isNotNull()
             .extracting("postId", "writerInfo", "content", "imageUrls", "hashtags")
-            .containsExactly(savedPost.postId(), WriterInfo.from(member), "content1", savedImageUrls, savedHashtags);
+            .containsExactly(savedPost.getId(), WriterInfo.from(member), "content1", savedImageUrls, savedHashtags);
     }
 
     @DisplayName("이미지와 해시태그가 없는 게시글을 조회할 수 있다.")
@@ -264,15 +262,16 @@ class PostServiceTest {
         UserContext userContext = UserContext.fromMember(member);
         List<String> emptyList = Collections.emptyList();
         PostCreateRequest request = new PostCreateRequest("content1", emptyList, emptyList);
-        PostCreateResponse savedPost = postService.createPost(userContext, request, LocalDateTime.now());
+        Long postId = postService.createPost(userContext, request, LocalDateTime.now());
+        Post savedPost = postRepository.findById(postId).orElseThrow();
 
         // When
-        PostDetailResponse response = postService.findPost(savedPost.postId(), userContext);
+        PostDetailResponse response = postService.findPost(savedPost.getId(), userContext);
 
         // Then
         assertThat(response).isNotNull()
             .extracting("postId", "writerInfo", "content", "imageUrls", "hashtags")
-            .containsExactly(savedPost.postId(), WriterInfo.from(member), "content1", emptyList, emptyList);
+            .containsExactly(savedPost.getId(), WriterInfo.from(member), "content1", emptyList, emptyList);
     }
 
     @DisplayName("작성자가 아닌 사람이 게시글 수정을 요청하면 예외를 발생시킨다.")
@@ -304,14 +303,14 @@ class PostServiceTest {
 
         PostCreateRequest request = new PostCreateRequest("content1", savedImageUrls, savedHashtags);
         LocalDateTime registeredAt = LocalDateTime.now();
-        PostCreateResponse response = postService.createPost(userContext, request, registeredAt);
+        Long postId = postService.createPost(userContext, request, registeredAt);
 
         List<String> updateImageUrl = List.of("updateImage");
         List<String> savedUpdateUrl = saveImagesAndGetUrls(updateImageUrl);
         List<String> updateHashtag = List.of("#updateHashtag");
         List<String> savedUpdateHashtag = saveHashtagsAndGet(updateHashtag);
         PostUpdateRequest updateRequest = new PostUpdateRequest("updateContent", savedUpdateUrl, savedUpdateHashtag);
-        Post post = postRepository.findById(response.postId()).orElseThrow();
+        Post post = postRepository.findById(postId).orElseThrow();
 
         //when
         postService.updatePost(post.getId(), userContext, updateRequest);
