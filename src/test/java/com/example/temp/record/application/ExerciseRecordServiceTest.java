@@ -22,6 +22,7 @@ import com.example.temp.record.dto.request.ExerciseRecordCreateRequest.TrackCrea
 import com.example.temp.record.dto.request.ExerciseRecordUpdateRequest;
 import com.example.temp.record.dto.request.ExerciseRecordUpdateRequest.TrackUpdateRequest;
 import com.example.temp.record.dto.request.ExerciseRecordUpdateRequest.TrackUpdateRequest.SetInTrackUpdateRequest;
+import com.example.temp.record.dto.request.MonthlyDatePeriod;
 import com.example.temp.record.dto.response.RetrievePeriodExerciseRecordsResponse;
 import com.example.temp.record.dto.response.RetrievePeriodExerciseRecordsResponse.RetrievePeriodRecordsElement;
 import jakarta.persistence.EntityManager;
@@ -173,7 +174,7 @@ class ExerciseRecordServiceTest {
 
         // when
         RetrievePeriodExerciseRecordsResponse response =
-            exerciseRecordService.retrievePeriodExerciseRecords(loginUserContext, year, month);
+            exerciseRecordService.retrievePeriodExerciseRecords(loginUserContext, MonthlyDatePeriod.of(year, month));
 
         // then
         int totalCntInMonth = LocalDate.of(year, month, 1).lengthOfMonth();
@@ -195,8 +196,7 @@ class ExerciseRecordServiceTest {
 
         // when
         RetrievePeriodExerciseRecordsResponse response =
-            exerciseRecordService.retrievePeriodExerciseRecords(loginUserContext, year, month);
-
+            exerciseRecordService.retrievePeriodExerciseRecords(loginUserContext, MonthlyDatePeriod.of(year, month));
         // then
         int totalCntInMonth = LocalDate.of(year, month, 1).lengthOfMonth();
         assertThat(response.results()).hasSize(totalCntInMonth);
@@ -219,7 +219,7 @@ class ExerciseRecordServiceTest {
 
         // when
         RetrievePeriodExerciseRecordsResponse response =
-            exerciseRecordService.retrievePeriodExerciseRecords(loginUserContext, year, month);
+            exerciseRecordService.retrievePeriodExerciseRecords(loginUserContext, MonthlyDatePeriod.of(year, month));
 
         // then
         int totalCntInMonth = LocalDate.of(year, month, 1).lengthOfMonth();
@@ -240,7 +240,8 @@ class ExerciseRecordServiceTest {
         saveExerciseRecord(loginMember, LocalDate.of(year, month, 1));
 
         // when & then
-        assertThatThrownBy(() -> exerciseRecordService.retrievePeriodExerciseRecords(noLoginUserContext, year, month))
+        assertThatThrownBy(() -> exerciseRecordService.retrievePeriodExerciseRecords(noLoginUserContext,
+            MonthlyDatePeriod.of(year, month)))
             .isInstanceOf(ApiException.class)
             .hasMessageContaining(ErrorCode.AUTHENTICATED_FAIL.getMessage());
     }

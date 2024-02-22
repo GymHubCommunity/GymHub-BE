@@ -9,6 +9,7 @@ import com.example.temp.record.domain.ExerciseRecord;
 import com.example.temp.record.domain.ExerciseRecordRepository;
 import com.example.temp.record.dto.request.ExerciseRecordCreateRequest;
 import com.example.temp.record.dto.request.ExerciseRecordUpdateRequest;
+import com.example.temp.record.dto.request.DatePeriod;
 import com.example.temp.record.dto.response.RetrievePeriodExerciseRecordsResponse;
 import java.time.LocalDate;
 import java.util.List;
@@ -32,13 +33,13 @@ public class ExerciseRecordService {
         return exerciseRecord.getId();
     }
 
-    public RetrievePeriodExerciseRecordsResponse retrievePeriodExerciseRecords(UserContext userContext,
-        int year, int month) {
+    public RetrievePeriodExerciseRecordsResponse retrievePeriodExerciseRecords(UserContext userContext, DatePeriod datePeriod) {
         Member member = findMember(userContext);
-        LocalDate start = LocalDate.of(year, month, 1);
-        LocalDate end = start.withDayOfMonth(start.lengthOfMonth());
-        List<ExerciseRecord> exerciseRecords = exerciseRecordRepository.findAllByMemberAndRecordDateBetween(member, start, end);
-        return RetrievePeriodExerciseRecordsResponse.of(year, month, exerciseRecords);
+        LocalDate firstDate = datePeriod.getFirstDate();
+        List<ExerciseRecord> exerciseRecords = exerciseRecordRepository.findAllByMemberAndRecordDateBetween(member,
+            datePeriod.getFirstDate(), datePeriod.getLastDate());
+        return RetrievePeriodExerciseRecordsResponse.of(firstDate.getYear(), firstDate.getMonthValue(),
+            exerciseRecords);
     }
 
     /**
