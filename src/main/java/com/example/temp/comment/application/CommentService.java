@@ -1,7 +1,9 @@
 package com.example.temp.comment.application;
 
 import static com.example.temp.common.exception.ErrorCode.AUTHENTICATED_FAIL;
+import static com.example.temp.common.exception.ErrorCode.COMMENT_NOT_FOUND;
 import static com.example.temp.common.exception.ErrorCode.POST_NOT_FOUND;
+import static com.example.temp.common.exception.ErrorCode.UNAUTHORIZED_COMMENT;
 
 import com.example.temp.comment.domain.Comment;
 import com.example.temp.comment.domain.CommentRepository;
@@ -45,8 +47,21 @@ public class CommentService {
     public SliceCommentResponse findCommentsByPost(Long postId, UserContext userContext, Pageable pageable) {
         findMemberBy(userContext.id());
         Post post = findPostBy(postId);
-        Slice<Comment> sliceComments = commentRepository.findByPostId(post.getId(), pageable);
+        Slice<Comment> sliceComments = commentRepository.findAllByPostId(post.getId(), pageable);
         return SliceCommentResponse.from(sliceComments);
+    }
+
+    @Transactional
+    public void deleteComment(Long postId, Long commentId, UserContext userContext) {
+        findPostBy(postId);
+        Comment comment = findCommentByPost(postId);
+        validateOwner(userContext, comment);
+        commentRepository.delete(comment);
+    }
+
+    private Member findMemberBy(Long userContextId) {
+        return memberRepository.findById(userContextId)
+            .orElseThrow(() -> new ApiException(AUTHENTICATED_FAIL));
     }
 
     private Post findPostBy(Long postId) {
@@ -54,8 +69,14 @@ public class CommentService {
             .orElseThrow(() -> new ApiException(POST_NOT_FOUND));
     }
 
-    private Member findMemberBy(Long userContextId) {
-        return memberRepository.findById(userContextId)
-            .orElseThrow(() -> new ApiException(AUTHENTICATED_FAIL));
+    private Comment findCommentByPost(Long postId) {
+        return commentRepository.findById(postId)
+            .orElseThrow(() -> new ApiException(COMMENT_NOT_FOUND));
+    }
+
+    private void validateOwner(UserContext userContext, Comment comment) {
+        if (!comment.isOwner(userContext.id())) {
+            throw new ApiException(UNAUTHORIZED_COMMENT);
+        }
     }
 }
