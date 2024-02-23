@@ -2,6 +2,7 @@ package com.example.temp.record.domain;
 
 import com.example.temp.common.exception.ApiException;
 import com.example.temp.common.exception.ErrorCode;
+import com.example.temp.machine.domain.BodyPart;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -40,16 +41,21 @@ public class Track {
     @Column(nullable = false)
     private String machineName;
 
+    @Column(nullable = false)
+    private BodyPart majorBodyPart;
+
     @OneToMany(mappedBy = "track", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<SetInTrack> setsInTrack = new ArrayList<>();
 
     @Builder
-    public Track(ExerciseRecord exerciseRecord, String machineName, List<SetInTrack> setsInTrack) {
+    public Track(ExerciseRecord exerciseRecord, String machineName, BodyPart majorBodyPart,
+        List<SetInTrack> setsInTrack) {
         machineName = machineName.trim();
         validate(machineName, setsInTrack);
         this.exerciseRecord = exerciseRecord;
         this.machineName = machineName;
         this.setsInTrack = new ArrayList<>();
+        this.majorBodyPart = majorBodyPart;
         setsInTrack.forEach(set -> set.relate(this));
     }
 
@@ -83,9 +89,10 @@ public class Track {
     /**
      * Track 엔티티를 생성합니다. 추후 relate 메서드를 사용해 Record 객체를 연결해야 합니다.
      */
-    public static Track createWithoutRecord(String machineName, List<SetInTrack> setInTracks) {
+    public static Track createWithoutRecord(String machineName, BodyPart majorBodyPart, List<SetInTrack> setInTracks) {
         return Track.builder()
             .machineName(machineName)
+            .majorBodyPart(majorBodyPart)
             .setsInTrack(setInTracks)
             .build();
     }

@@ -43,7 +43,6 @@ public class ExerciseRecord extends BaseTimeEntity {
     @OneToMany(mappedBy = "exerciseRecord", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Track> tracks = new ArrayList<>();
 
-    @CreatedDate
     private LocalDate recordDate;
 
     @Builder
@@ -65,6 +64,7 @@ public class ExerciseRecord extends BaseTimeEntity {
     public static ExerciseRecord create(Member member, List<Track> tracks) {
         return ExerciseRecord.builder()
             .member(member)
+            .recordDate(LocalDate.now())
             .tracks(tracks)
             .build();
     }

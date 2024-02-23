@@ -87,6 +87,31 @@ class MachineRepositoryTest {
             );
     }
 
+    @Test
+    @DisplayName("머신 이름 목록을 통해 머신들을 조회한다.")
+    void findAllByNameIn() throws Exception {
+        // given
+        saveMachine("레그 프레스", BodyPart.LEG);
+        saveMachine("레그 컬", List.of(BodyPart.LEG, BodyPart.SHOULDER));
+        saveMachine("벤치 프레스", BodyPart.SHOULDER);
+        saveMachine("시티드 체스트 프레스 머신", BodyPart.CHEST);
+
+        em.flush();
+        em.clear();
+        // when
+        List<Machine> machines = machineRepository.findAllByNameIn(List.of("레그 프레스", "레그 컬", "존재하지 않음"));
+
+        // then
+        assertThat(machines).hasSize(2)
+            .extracting(
+                Machine::getName,
+                extractBodyParts())
+            .containsExactlyInAnyOrder(
+                tuple("레그 프레스", Set.of(BodyPart.LEG)),
+                tuple("레그 컬", Set.of(BodyPart.LEG, BodyPart.SHOULDER))
+            );
+    }
+
     private static Function<Machine, Set<BodyPart>> extractBodyParts() {
         return machine -> machine.getMachineBodyParts().stream()
             .map(MachineBodyPart::getBodyPart)
@@ -118,10 +143,8 @@ class MachineRepositoryTest {
         Machine machine = Machine.builder()
             .name(name)
             .machineBodyParts(machineBodyParts)
+            .majorBodyPart(bodyParts.get(0))
             .build();
-        for (MachineBodyPart machineBodyPart : machineBodyParts) {
-            machineBodyPart.relate(machine);
-        }
         machineRepository.save(machine);
         return machine;
     }

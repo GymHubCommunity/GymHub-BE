@@ -9,11 +9,11 @@ VALUES ('https://avatars.githubusercontent.com/u/87960006?v=4', true),
        ('https://avatars.githubusercontent.com/u/49686619?v=4', true),
         ('https://avatars.githubusercontent.com/u/52947668?v=4', true);
 
-INSERT INTO machines(name)
-VALUES ('덤벨 벤치 프레스'),
-       ('체스트 프레스 머신'),
-       ('인버티드 로우'),
-       ('하이 로우 머신');
+INSERT INTO machines(name, major_body_part)
+VALUES ('덤벨 벤치 프레스', 'CHEST'),
+       ('체스트 프레스 머신', 'CHEST'),
+       ('인버티드 로우', 'BACK'),
+       ('하이 로우 머신', 'BACK');
 
 INSERT INTO machine_bodyparts(machine_id, body_part)
 VALUES (1, 'CHEST'),

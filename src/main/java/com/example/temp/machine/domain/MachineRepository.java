@@ -18,4 +18,7 @@ public interface MachineRepository extends JpaRepository<Machine, Long> {
     @Query("SELECT m From Machine m JOIN m.machineBodyParts mb"
         + " WHERE mb.bodyPart in (:bodyParts)")
     List<Machine> findAllBelongTo(@Param("bodyParts") List<BodyPart> bodyParts);
+
+    List<Machine> findAllByNameIn(List<String> machineNames);
+
 }

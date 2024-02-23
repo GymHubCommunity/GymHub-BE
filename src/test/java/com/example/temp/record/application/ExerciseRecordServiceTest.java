@@ -5,10 +5,12 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.tuple;
 
 import com.example.temp.auth.domain.Role;
+import com.example.temp.common.domain.period.MonthlyDatePeriod;
 import com.example.temp.common.dto.UserContext;
 import com.example.temp.common.entity.Email;
 import com.example.temp.common.exception.ApiException;
 import com.example.temp.common.exception.ErrorCode;
+import com.example.temp.machine.domain.BodyPart;
 import com.example.temp.member.domain.FollowStrategy;
 import com.example.temp.member.domain.Member;
 import com.example.temp.member.domain.PrivacyPolicy;
@@ -22,6 +24,8 @@ import com.example.temp.record.dto.request.ExerciseRecordCreateRequest.TrackCrea
 import com.example.temp.record.dto.request.ExerciseRecordUpdateRequest;
 import com.example.temp.record.dto.request.ExerciseRecordUpdateRequest.TrackUpdateRequest;
 import com.example.temp.record.dto.request.ExerciseRecordUpdateRequest.TrackUpdateRequest.SetInTrackUpdateRequest;
+import com.example.temp.record.dto.response.RetrievePeriodExerciseRecordsResponse;
+import com.example.temp.record.dto.response.RetrievePeriodExerciseRecordsResponse.RetrievePeriodRecordsElement;
 import jakarta.persistence.EntityManager;
 import java.time.LocalDate;
 import java.util.Collections;
@@ -160,10 +164,94 @@ class ExerciseRecordServiceTest {
         }
     }
 
+    @Test
+    @DisplayName("기간별 운동기록을 조회한다.")
+    void retrievePeriodExerciseRecords() throws Exception {
+        // given
+        int year = 2024;
+        int month = 1;
+        LocalDate recordDate = LocalDate.of(year, month, 1);
+        saveExerciseRecord(loginMember, recordDate);
+
+        // when
+        RetrievePeriodExerciseRecordsResponse response =
+            exerciseRecordService.retrievePeriodExerciseRecords(loginUserContext, MonthlyDatePeriod.of(year, month));
+
+        // then
+        int totalCntInMonth = LocalDate.of(year, month, 1).lengthOfMonth();
+        assertThat(response.results()).hasSize(totalCntInMonth);
+        RetrievePeriodRecordsElement periodRecordsElement = response.results().stream()
+            .filter(each -> each.date().equals(recordDate.toString()))
+            .findAny()
+            .get();
+        assertThat(periodRecordsElement.exerciseRecords()).isNotEmpty();
+    }
+
+    @Test
+    @DisplayName("기간별 운동 기록을 조회할 때, 해당 기간에 포함되지 않으면 조회되지 않는다")
+    void retrievePeriodExerciseRecordsOutOfRange() throws Exception {
+        // given
+        int year = 2024;
+        int month = 1;
+        saveExerciseRecord(loginMember, LocalDate.of(year, month + 1, 1));
+
+        // when
+        RetrievePeriodExerciseRecordsResponse response =
+            exerciseRecordService.retrievePeriodExerciseRecords(loginUserContext, MonthlyDatePeriod.of(year, month));
+        // then
+        int totalCntInMonth = LocalDate.of(year, month, 1).lengthOfMonth();
+        assertThat(response.results()).hasSize(totalCntInMonth);
+        RetrievePeriodRecordsElement periodRecordsElement = response.results().stream()
+            .filter(each -> each.date().equals(LocalDate.of(year, month, 1).toString()))
+            .findAny()
+            .get();
+        assertThat(periodRecordsElement.exerciseRecords()).isEmpty();
+    }
+
+    @Test
+    @DisplayName("기간별 운동기록을 조회하면 내가 등록한 기록만 볼 수 있다.")
+    void retrievePeriodExerciseRecordsOnlyMyRecord() throws Exception {
+        // given
+        int year = 2024;
+        int month = 1;
+        LocalDate recordDate = LocalDate.of(year, month, 1);
+        Member anotherMember = saveMember("nick2");
+        saveExerciseRecord(anotherMember, recordDate);
+
+        // when
+        RetrievePeriodExerciseRecordsResponse response =
+            exerciseRecordService.retrievePeriodExerciseRecords(loginUserContext, MonthlyDatePeriod.of(year, month));
+
+        // then
+        int totalCntInMonth = LocalDate.of(year, month, 1).lengthOfMonth();
+        assertThat(response.results()).hasSize(totalCntInMonth);
+        RetrievePeriodRecordsElement periodRecordsElement = response.results().stream()
+            .filter(each -> each.date().equals(recordDate.toString()))
+            .findAny()
+            .get();
+        assertThat(periodRecordsElement.exerciseRecords()).isEmpty();
+    }
+
+    @Test
+    @DisplayName("인증되지 않은 사용자는 월별 운동기록을 조회할 수 없다.")
+    void retrievePeriodExerciseRecordsFailNoAuthN() throws Exception {
+        // given
+        int year = 2024;
+        int month = 1;
+        saveExerciseRecord(loginMember, LocalDate.of(year, month, 1));
+
+        // when & then
+        assertThatThrownBy(() -> exerciseRecordService.retrievePeriodExerciseRecords(noLoginUserContext,
+            MonthlyDatePeriod.of(year, month)))
+            .isInstanceOf(ApiException.class)
+            .hasMessageContaining(ErrorCode.AUTHENTICATED_FAIL.getMessage());
+    }
+
     private Track createTrack(String machineName, List<SetInTrack> setsInTrack) {
         return Track.builder()
             .machineName(machineName)
             .setsInTrack(setsInTrack)
+            .majorBodyPart(BodyPart.CARDIO)
             .build();
     }
 
@@ -252,16 +340,24 @@ class ExerciseRecordServiceTest {
             .hasMessageContaining(ErrorCode.AUTHORIZED_FAIL.getMessage());
     }
 
-    private ExerciseRecord saveExerciseRecord(Member member) {
+    private ExerciseRecord saveExerciseRecord(Member member, LocalDate date) {
         Track tracks = createTrack("머신1", List.of(createSetInTrack(1)));
-        return saveExerciseRecord(member, tracks);
+        return saveExerciseRecordHelper(member, tracks, date);
+    }
+
+    private ExerciseRecord saveExerciseRecord(Member member) {
+        return saveExerciseRecord(member, LocalDate.now());
     }
 
     private ExerciseRecord saveExerciseRecord(Member member, Track track) {
+        return saveExerciseRecordHelper(member, track, LocalDate.now());
+    }
+
+    private ExerciseRecord saveExerciseRecordHelper(Member member, Track track, LocalDate date) {
         ExerciseRecord record = ExerciseRecord.builder()
             .member(member)
             .tracks(List.of(track))
-            .recordDate(LocalDate.now())
+            .recordDate(date)
             .build();
         em.persist(record);
         return record;

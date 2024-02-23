@@ -1,21 +1,25 @@
 package com.example.temp.record.presentation;
 
 import com.example.temp.common.annotation.Login;
+import com.example.temp.common.domain.period.MonthlyDatePeriod;
 import com.example.temp.common.dto.CreatedResponse;
 import com.example.temp.common.dto.UserContext;
 import com.example.temp.record.application.ExerciseRecordService;
 import com.example.temp.record.dto.request.ExerciseRecordCreateRequest;
 import com.example.temp.record.dto.request.ExerciseRecordUpdateRequest;
+import com.example.temp.record.dto.response.RetrievePeriodExerciseRecordsResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -44,5 +48,13 @@ public class ExerciseRecordController {
     public ResponseEntity<Void> delete(@Login UserContext userContext, @PathVariable long recordId) {
         exerciseRecordService.delete(userContext, recordId);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping
+    public ResponseEntity<RetrievePeriodExerciseRecordsResponse> retrievePeriodExerciseRecords(
+        @Login UserContext userContext, @RequestParam int year, @RequestParam int month) {
+        RetrievePeriodExerciseRecordsResponse response = exerciseRecordService.retrievePeriodExerciseRecords(
+            userContext, MonthlyDatePeriod.of(year, month));
+        return ResponseEntity.ok(response);
     }
 }

@@ -21,7 +21,8 @@ public enum BodyPart {
     LEG("다리", LOWER),
     HIP("엉덩이", LOWER),
     CORE("코어", WHOLE),
-    CARDIO("유산소", WHOLE);
+    CARDIO("유산소", WHOLE),
+    ETC("기타", null);
 
     private final String text;
     private final BodyCategory category;
@@ -42,6 +43,7 @@ public enum BodyPart {
      * 해당 BodyPart가 category에 포함되는지 확인합니다.
      */
     private boolean isBelongTo(BodyCategory category) {
+        Objects.requireNonNull(category);
         return Objects.equals(getCategory(), category);
     }
 
