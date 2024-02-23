@@ -54,7 +54,7 @@ public class CommentService {
     @Transactional
     public void deleteComment(Long postId, Long commentId, UserContext userContext) {
         findPostBy(postId);
-        Comment comment = findCommentByPost(postId);
+        Comment comment = findCommentBy(commentId);
         validateOwner(userContext, comment);
         commentRepository.delete(comment);
     }
@@ -69,8 +69,8 @@ public class CommentService {
             .orElseThrow(() -> new ApiException(POST_NOT_FOUND));
     }
 
-    private Comment findCommentByPost(Long postId) {
-        return commentRepository.findById(postId)
+    private Comment findCommentBy(Long commentId) {
+        return commentRepository.findById(commentId)
             .orElseThrow(() -> new ApiException(COMMENT_NOT_FOUND));
     }
 
