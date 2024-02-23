@@ -8,7 +8,7 @@ import static com.example.temp.common.exception.ErrorCode.UNAUTHORIZED_COMMENT;
 import com.example.temp.comment.domain.Comment;
 import com.example.temp.comment.domain.CommentRepository;
 import com.example.temp.comment.dto.request.CommentCreateRequest;
-import com.example.temp.comment.dto.response.SliceCommentResponse;
+import com.example.temp.comment.dto.response.CommentsResponse;
 import com.example.temp.common.dto.UserContext;
 import com.example.temp.common.exception.ApiException;
 import com.example.temp.member.domain.Member;
@@ -44,11 +44,11 @@ public class CommentService {
         return savedComment.getId();
     }
 
-    public SliceCommentResponse findCommentsByPost(Long postId, UserContext userContext, Pageable pageable) {
+    public CommentsResponse findCommentsByPost(Long postId, UserContext userContext, Pageable pageable) {
         findMemberBy(userContext.id());
         Post post = findPostBy(postId);
-        Slice<Comment> sliceComments = commentRepository.findAllByPostId(post.getId(), pageable);
-        return SliceCommentResponse.from(sliceComments);
+        Slice<Comment> comments = commentRepository.findAllByPostId(post.getId(), pageable);
+        return CommentsResponse.from(comments);
     }
 
     @Transactional

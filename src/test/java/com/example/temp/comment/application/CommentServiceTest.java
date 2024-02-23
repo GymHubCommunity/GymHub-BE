@@ -11,7 +11,7 @@ import com.example.temp.auth.domain.Role;
 import com.example.temp.comment.domain.Comment;
 import com.example.temp.comment.domain.CommentRepository;
 import com.example.temp.comment.dto.request.CommentCreateRequest;
-import com.example.temp.comment.dto.response.SliceCommentResponse;
+import com.example.temp.comment.dto.response.CommentsResponse;
 import com.example.temp.common.dto.UserContext;
 import com.example.temp.common.entity.Email;
 import com.example.temp.common.exception.ApiException;
@@ -114,7 +114,7 @@ class CommentServiceTest {
         createComment(member2, "댓글3", post);
 
         //when
-        SliceCommentResponse commentResponse = commentService.findCommentsByPost(post.getId(), userContext,
+        CommentsResponse commentResponse = commentService.findCommentsByPost(post.getId(), userContext,
             PageRequest.of(0, 10));
 
         //then
@@ -140,7 +140,7 @@ class CommentServiceTest {
         createComment(member2, "댓글2", post);
 
         //when
-        SliceCommentResponse commentResponse = commentService.findCommentsByPost(post.getId(), userContext,
+        CommentsResponse commentResponse = commentService.findCommentsByPost(post.getId(), userContext,
             PageRequest.of(0, 1));
 
         //then
@@ -157,7 +157,7 @@ class CommentServiceTest {
         UserContext userContext = UserContext.fromMember(member2);
 
         //when
-        SliceCommentResponse commentResponse = commentService.findCommentsByPost(post.getId(), userContext,
+        CommentsResponse commentResponse = commentService.findCommentsByPost(post.getId(), userContext,
             PageRequest.of(0, 1));
 
         //then

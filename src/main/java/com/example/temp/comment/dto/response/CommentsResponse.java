@@ -4,15 +4,15 @@ import com.example.temp.comment.domain.Comment;
 import java.util.List;
 import org.springframework.data.domain.Slice;
 
-public record SliceCommentResponse(
+public record CommentsResponse(
     List<CommentElementResponse> comments,
     boolean hasNext
 ) {
 
-    public static SliceCommentResponse from(Slice<Comment> comments) {
+    public static CommentsResponse from(Slice<Comment> comments) {
         List<CommentElementResponse> commentElements = comments.stream()
             .map(CommentElementResponse::from)
             .toList();
-        return new SliceCommentResponse(commentElements, comments.hasNext());
+        return new CommentsResponse(commentElements, comments.hasNext());
     }
 }
