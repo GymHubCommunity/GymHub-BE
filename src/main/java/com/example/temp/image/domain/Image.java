@@ -1,5 +1,6 @@
 package com.example.temp.image.domain;
 
+import com.example.temp.common.entity.BaseTimeEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -15,7 +16,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "images")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
-public class Image {
+public class Image extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
