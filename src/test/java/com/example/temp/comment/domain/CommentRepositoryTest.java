@@ -49,7 +49,7 @@ class CommentRepositoryTest {
         commentRepository.saveAll(List.of(comment1, comment2, comment3));
 
         //when
-        Slice<Comment> comments = commentRepository.findByPostId(post.getId(), PageRequest.of(0, 10));
+        Slice<Comment> comments = commentRepository.findAllByPostId(post.getId(), PageRequest.of(0, 10));
 
         //then
         assertThat(comments.hasNext()).isFalse();
