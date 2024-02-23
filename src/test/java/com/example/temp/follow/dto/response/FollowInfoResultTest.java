@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.example.temp.follow.domain.Follow;
 import com.example.temp.member.domain.Member;
+import com.example.temp.member.domain.nickname.Nickname;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -16,8 +17,8 @@ class FollowInfoResultTest {
     @DisplayName("Following 목록 생성 테스트")
     void createFollowings() throws Exception {
         // given
-        Member member1 = Member.builder().build();
-        Member member2 = Member.builder().build();
+        Member member1 = createMember("nick1");
+        Member member2 = createMember("nick2");
 
         Follow follow1 = createFollow(member1, member2);
         Follow follow2 = createFollow(member2, member1);
@@ -32,12 +33,19 @@ class FollowInfoResultTest {
         assertThat(result.hasNext()).isFalse();
     }
 
+    private static Member createMember(String nickname) {
+        return Member.builder()
+            .nickname(Nickname.create(nickname))
+            .build();
+    }
+
     @Test
     @DisplayName("Follower 목록 생성 테스트")
     void createFollowers() throws Exception {
         // given
-        Member member1 = Member.builder().build();
-        Member member2 = Member.builder().build();
+        Member member1 = createMember("nick1");
+        Member member2 = createMember("nick2");
+
 
         Follow follow1 = createFollow(member1, member2);
         Follow follow2 = createFollow(member2, member1);
