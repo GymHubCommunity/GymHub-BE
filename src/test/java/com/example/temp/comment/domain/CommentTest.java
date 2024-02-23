@@ -49,6 +49,23 @@ class CommentTest {
 
     }
 
+    @DisplayName("댓글 내용을 수정할 수 있다.")
+    @Test
+    void updateCommentContent() {
+        //given
+        Member member = createMember("user1", "user1@gymhub.run");
+        Post post = createPost(member, "게시글1");
+        String content = "수정전 댓글";
+        String updatedContent = "수정 후 댓글";
+        Comment comment = Comment.create(member, content, post, LocalDateTime.now());
+
+        //when
+        comment.updateContent(updatedContent);
+
+        //then
+        assertThat(comment.getContent()).isEqualTo(updatedContent);
+    }
+
     private Post createPost(Member savedMember, String content) {
         return Post.builder()
             .member(savedMember)
