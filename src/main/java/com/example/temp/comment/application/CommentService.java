@@ -37,7 +37,7 @@ public class CommentService {
 
         Comment comment = Comment.create(member, commentCreateRequest.content(), post, registeredAt);
         Comment savedComment = commentRepository.save(comment);
-        post.addCommentCount();
+        post.increaseCommentCount();
 
         return savedComment.getId();
     }
