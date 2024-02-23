@@ -4,7 +4,6 @@ import static com.example.temp.common.exception.ErrorCode.AUTHENTICATED_FAIL;
 import static com.example.temp.common.exception.ErrorCode.COMMENT_NOT_FOUND;
 import static com.example.temp.common.exception.ErrorCode.POST_NOT_FOUND;
 import static com.example.temp.common.exception.ErrorCode.UNAUTHORIZED_COMMENT;
-import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
