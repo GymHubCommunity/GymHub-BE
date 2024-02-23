@@ -1,8 +1,9 @@
 package com.example.temp.comment.application;
 
 import static com.example.temp.common.exception.ErrorCode.AUTHENTICATED_FAIL;
+import static com.example.temp.common.exception.ErrorCode.COMMENT_NOT_FOUND;
 import static com.example.temp.common.exception.ErrorCode.POST_NOT_FOUND;
-import static org.assertj.core.api.Assertions.*;
+import static com.example.temp.common.exception.ErrorCode.UNAUTHORIZED_COMMENT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -10,7 +11,7 @@ import com.example.temp.auth.domain.Role;
 import com.example.temp.comment.domain.Comment;
 import com.example.temp.comment.domain.CommentRepository;
 import com.example.temp.comment.dto.request.CommentCreateRequest;
-import com.example.temp.comment.dto.response.SliceCommentResponse;
+import com.example.temp.comment.dto.response.CommentsResponse;
 import com.example.temp.common.dto.UserContext;
 import com.example.temp.common.entity.Email;
 import com.example.temp.common.exception.ApiException;
@@ -113,7 +114,7 @@ class CommentServiceTest {
         createComment(member2, "댓글3", post);
 
         //when
-        SliceCommentResponse commentResponse = commentService.findCommentsByPost(post.getId(), userContext,
+        CommentsResponse commentResponse = commentService.findCommentsByPost(post.getId(), userContext,
             PageRequest.of(0, 10));
 
         //then
@@ -139,7 +140,7 @@ class CommentServiceTest {
         createComment(member2, "댓글2", post);
 
         //when
-        SliceCommentResponse commentResponse = commentService.findCommentsByPost(post.getId(), userContext,
+        CommentsResponse commentResponse = commentService.findCommentsByPost(post.getId(), userContext,
             PageRequest.of(0, 1));
 
         //then
@@ -156,7 +157,7 @@ class CommentServiceTest {
         UserContext userContext = UserContext.fromMember(member2);
 
         //when
-        SliceCommentResponse commentResponse = commentService.findCommentsByPost(post.getId(), userContext,
+        CommentsResponse commentResponse = commentService.findCommentsByPost(post.getId(), userContext,
             PageRequest.of(0, 1));
 
         //then
@@ -193,6 +194,78 @@ class CommentServiceTest {
         assertThatThrownBy(() -> commentService.findCommentsByPost(1L, userContext, PageRequest.of(0, 1)))
             .isInstanceOf(ApiException.class)
             .hasMessage(POST_NOT_FOUND.getMessage());
+    }
+
+    @DisplayName("댓글을 삭제할 수 있다.")
+    @Test
+    void deleteComment() {
+        //given
+        Member member1 = createMember("유저1", "user1@gymhub.run");
+        Member member2 = createMember("유저2", "user2@gymhub.run");
+        Post post = createPost(member1, "게시글1");
+        UserContext userContext = UserContext.fromMember(member2);
+        Comment comment = createComment(member2, "댓글1", post);
+
+        //when
+        commentService.deleteComment(post.getId(), comment.getId(), userContext);
+
+        //then
+        assertThat(post.getCommentCount()).isZero();
+        assertThatThrownBy(() -> commentRepository.findById(comment.getId())
+            .orElseThrow(() -> new ApiException(COMMENT_NOT_FOUND)))
+            .isInstanceOf(ApiException.class)
+            .hasMessage(COMMENT_NOT_FOUND.getMessage());
+    }
+
+    @DisplayName("댓글 삭제시 권한이 없으면 삭제할 수 없다.")
+    @Test
+    void deleteCommentNotAuthentication() {
+        //given
+        Member member1 = createMember("유저1", "user1@gymhub.run");
+        Member member2 = createMember("유저2", "user2@gymhub.run");
+        Post post = createPost(member1, "게시글1");
+        UserContext userContext = UserContext.fromMember(member1);
+        Comment comment = createComment(member2, "댓글1", post);
+
+        //when, then
+        assertThatThrownBy(() -> commentService.deleteComment(post.getId(), comment.getId(), userContext))
+            .isInstanceOf(ApiException.class)
+            .hasMessage(UNAUTHORIZED_COMMENT.getMessage());
+    }
+
+    @DisplayName("존재하지 않는 댓글을 삭제할 수 없다.")
+    @Test
+    void deleteCommentNotFound() {
+        //given
+        Member member1 = createMember("유저1", "user1@gymhub.run");
+        Member member2 = createMember("유저2", "user2@gymhub.run");
+        Post post = createPost(member1, "게시글1");
+        UserContext userContext = UserContext.fromMember(member1);
+        createComment(member2, "댓글1", post);
+
+        //when, then
+        assertThatThrownBy(() -> commentService.deleteComment(post.getId(), 99L, userContext))
+            .isInstanceOf(ApiException.class)
+            .hasMessage(COMMENT_NOT_FOUND.getMessage());
+    }
+
+    @DisplayName("댓글 삭제 시 로그인에 문제가 발생하면 삭제할 수 없다.")
+    @Test
+    void deleteCommentWhenLoginError() {
+        //given
+        Member member1 = createMember("유저1", "user1@gymhub.run");
+        Member member2 = createMember("유저2", "user2@gymhub.run");
+        Post post = createPost(member1, "게시글1");
+        UserContext userContext = UserContext.builder()
+            .id(123412341234L)
+            .role(Role.NORMAL)
+            .build();
+        Comment comment = createComment(member2, "댓글1", post);
+
+        //when, then
+        assertThatThrownBy(() -> commentService.deleteComment(post.getId(), comment.getId(), userContext))
+            .isInstanceOf(ApiException.class)
+            .hasMessage(AUTHENTICATED_FAIL.getMessage());
     }
 
     private Post createPost(Member savedMember, String content) {

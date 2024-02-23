@@ -4,7 +4,7 @@ import static org.springframework.data.domain.Sort.Direction.DESC;
 
 import com.example.temp.comment.application.CommentService;
 import com.example.temp.comment.dto.request.CommentCreateRequest;
-import com.example.temp.comment.dto.response.SliceCommentResponse;
+import com.example.temp.comment.dto.response.CommentsResponse;
 import com.example.temp.common.annotation.Login;
 import com.example.temp.common.dto.CreatedResponse;
 import com.example.temp.common.dto.UserContext;
@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -35,12 +36,22 @@ public class CommentController {
     }
 
     @GetMapping("/posts/{postId}/comments")
-    public ResponseEntity<SliceCommentResponse> getCommentsByPost(
+    public ResponseEntity<CommentsResponse> getCommentsByPost(
         @PathVariable Long postId,
         @Login UserContext userContext,
         @PageableDefault(sort = "registeredAt", direction = DESC) Pageable pageable
     ) {
-        SliceCommentResponse sliceComments = commentService.findCommentsByPost(postId, userContext, pageable);
-        return ResponseEntity.ok(sliceComments);
+        CommentsResponse comments = commentService.findCommentsByPost(postId, userContext, pageable);
+        return ResponseEntity.ok(comments);
+    }
+
+    @DeleteMapping("/posts/{postId}/comments/{commentId}")
+    public ResponseEntity<Void> deleteComment(
+        @PathVariable Long postId,
+        @PathVariable Long commentId,
+        @Login UserContext userContext
+    ) {
+        commentService.deleteComment(postId, commentId, userContext);
+        return ResponseEntity.noContent().build();
     }
 }

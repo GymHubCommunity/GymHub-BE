@@ -1,12 +1,14 @@
 package com.example.temp.comment.application;
 
 import static com.example.temp.common.exception.ErrorCode.AUTHENTICATED_FAIL;
+import static com.example.temp.common.exception.ErrorCode.COMMENT_NOT_FOUND;
 import static com.example.temp.common.exception.ErrorCode.POST_NOT_FOUND;
+import static com.example.temp.common.exception.ErrorCode.UNAUTHORIZED_COMMENT;
 
 import com.example.temp.comment.domain.Comment;
 import com.example.temp.comment.domain.CommentRepository;
 import com.example.temp.comment.dto.request.CommentCreateRequest;
-import com.example.temp.comment.dto.response.SliceCommentResponse;
+import com.example.temp.comment.dto.response.CommentsResponse;
 import com.example.temp.common.dto.UserContext;
 import com.example.temp.common.exception.ApiException;
 import com.example.temp.member.domain.Member;
@@ -37,16 +39,31 @@ public class CommentService {
 
         Comment comment = Comment.create(member, commentCreateRequest.content(), post, registeredAt);
         Comment savedComment = commentRepository.save(comment);
-        post.addCommentCount();
+        post.increaseCommentCount();
 
         return savedComment.getId();
     }
 
-    public SliceCommentResponse findCommentsByPost(Long postId, UserContext userContext, Pageable pageable) {
+    public CommentsResponse findCommentsByPost(Long postId, UserContext userContext, Pageable pageable) {
         findMemberBy(userContext.id());
         Post post = findPostBy(postId);
-        Slice<Comment> sliceComments = commentRepository.findByPostId(post.getId(), pageable);
-        return SliceCommentResponse.from(sliceComments);
+        Slice<Comment> comments = commentRepository.findAllByPostId(post.getId(), pageable);
+        return CommentsResponse.from(comments);
+    }
+
+    @Transactional
+    public void deleteComment(Long postId, Long commentId, UserContext userContext) {
+        findMemberBy(userContext.id());
+        Post post = findPostBy(postId);
+        Comment comment = findCommentBy(commentId);
+        validateOwner(userContext, comment);
+        commentRepository.delete(comment);
+        post.decreaseCommentCount();
+    }
+
+    private Member findMemberBy(Long userContextId) {
+        return memberRepository.findById(userContextId)
+            .orElseThrow(() -> new ApiException(AUTHENTICATED_FAIL));
     }
 
     private Post findPostBy(Long postId) {
@@ -54,8 +71,14 @@ public class CommentService {
             .orElseThrow(() -> new ApiException(POST_NOT_FOUND));
     }
 
-    private Member findMemberBy(Long userContextId) {
-        return memberRepository.findById(userContextId)
-            .orElseThrow(() -> new ApiException(AUTHENTICATED_FAIL));
+    private Comment findCommentBy(Long commentId) {
+        return commentRepository.findById(commentId)
+            .orElseThrow(() -> new ApiException(COMMENT_NOT_FOUND));
+    }
+
+    private void validateOwner(UserContext userContext, Comment comment) {
+        if (!comment.isOwner(userContext.id())) {
+            throw new ApiException(UNAUTHORIZED_COMMENT);
+        }
     }
 }
