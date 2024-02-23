@@ -25,7 +25,9 @@ public interface FollowRepository extends JpaRepository<Follow, Long> {
      * @param lastId   입력된 lastId보다 id가 큰 Follow만 조회가 가능합니다.
      * @param pageable page는 0이어야 합니다.(PageRequest.ofSize를 사용해 객체를 만들어주세요)
      */
-    @Query("SELECT f FROM Follow f JOIN FETCH f.to "
+    @Query("SELECT f FROM Follow f "
+        + "JOIN FETCH f.from "
+        + "JOIN FETCH f.to "
         + "WHERE f.from.id = :fromId "
         + "AND f.status = :status "
         + "AND f.id > :lastId "
@@ -46,7 +48,9 @@ public interface FollowRepository extends JpaRepository<Follow, Long> {
      * @param lastId   입력된 lastId보다 id가 큰 Follow만 조회가 가능합니다.
      * @param pageable page는 0이어야 합니다.(PageRequest.ofSize를 사용해 객체를 만들어주세요)
      */
-    @Query("SELECT f FROM Follow f JOIN FETCH f.from "
+    @Query("SELECT f FROM Follow f "
+        + "JOIN FETCH f.from "
+        + "JOIN FETCH f.to "
         + "WHERE f.to.id = :toId "
         + "AND f.status = :status "
         + "AND f.id > :lastId "

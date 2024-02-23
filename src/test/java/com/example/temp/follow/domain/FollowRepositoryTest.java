@@ -1,6 +1,7 @@
 package com.example.temp.follow.domain;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.groups.Tuple.tuple;
 
 import com.example.temp.common.entity.Email;
 import com.example.temp.member.domain.FollowStrategy;
@@ -148,13 +149,22 @@ class FollowRepositoryTest {
         Follow follow2 = saveFollow(fromMember, toMember2, targetStatus);
 
         Pageable pageable = PageRequest.ofSize(2);
+
+        em.flush();
+        em.clear();
         // when
         Slice<Follow> result = followRepository.findAllByFromIdAndStatus(
             fromMember.getId(), targetStatus, -1, pageable);
 
         // then
         assertThat(result).hasSize((int) pageable.getPageSize())
-            .containsExactly(follow1, follow2);
+            .extracting(Follow::getId,
+                x -> x.getFrom().getId(),
+                x -> x.getTo().getId(),
+                Follow::getStatus)
+            .containsExactlyInAnyOrder(
+                tuple(follow1.getId(), fromMember.getId(), toMember1.getId(), targetStatus),
+                tuple(follow2.getId(), fromMember.getId(), toMember2.getId(), targetStatus));
     }
 
     @Test
@@ -217,8 +227,14 @@ class FollowRepositoryTest {
             toMember.getId(), targetStatus, -1, pageable);
 
         // then
-        assertThat(result).hasSize(2)
-            .containsExactly(follow1, follow2);
+        assertThat(result).hasSize((int) pageable.getPageSize())
+            .extracting(Follow::getId,
+                x -> x.getFrom().getId(),
+                x -> x.getTo().getId(),
+                Follow::getStatus)
+            .containsExactlyInAnyOrder(
+                tuple(follow1.getId(), fromMember1.getId(), toMember.getId(), targetStatus),
+                tuple(follow2.getId(), fromMember2.getId(), toMember.getId(), targetStatus));
     }
 
     @Test
