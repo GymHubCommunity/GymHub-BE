@@ -4,6 +4,7 @@ import static org.springframework.data.domain.Sort.Direction.DESC;
 
 import com.example.temp.comment.application.CommentService;
 import com.example.temp.comment.dto.request.CommentCreateRequest;
+import com.example.temp.comment.dto.request.CommentUpdateRequest;
 import com.example.temp.comment.dto.response.CommentsResponse;
 import com.example.temp.common.annotation.Login;
 import com.example.temp.common.dto.CreatedResponse;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -43,6 +45,17 @@ public class CommentController {
     ) {
         CommentsResponse comments = commentService.findCommentsByPost(postId, userContext, pageable);
         return ResponseEntity.ok(comments);
+    }
+
+    @PutMapping("/posts/{postId}/comments/{commentId}")
+    public ResponseEntity<Void> updateComment(
+        @PathVariable Long postId,
+        @PathVariable Long commentId,
+        @Login UserContext userContext,
+        @RequestBody CommentUpdateRequest commentUpdateRequest
+    ) {
+        commentService.updateComment(postId, commentId, userContext, commentUpdateRequest);
+        return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/posts/{postId}/comments/{commentId}")
