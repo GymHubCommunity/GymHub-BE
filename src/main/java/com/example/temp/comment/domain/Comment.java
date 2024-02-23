@@ -63,4 +63,11 @@ public class Comment extends BaseTimeEntity {
     public String getContent() {
         return this.content.getValue();
     }
+
+    public boolean isOwner(Long memberId) {
+        if (memberId == null) {
+            return false;
+        }
+        return member.getId().equals(memberId);
+    }
 }
