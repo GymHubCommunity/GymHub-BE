@@ -12,8 +12,8 @@ class FollowInfosTest {
     @DisplayName("FollowInfos를 생성한다")
     void create() throws Exception {
         // given
-        FollowInfo followInfo1 = new FollowInfo(1L, 1L, "url");
-        FollowInfo followInfo2 = new FollowInfo(2L, 2L, "url");
+        FollowInfo followInfo1 = new FollowInfo(1L, 1L, "nick1", "url");
+        FollowInfo followInfo2 = new FollowInfo(2L, 2L, "nick2", "url");
         // when
         FollowInfos result = FollowInfos.from(List.of(followInfo1, followInfo2));
 
