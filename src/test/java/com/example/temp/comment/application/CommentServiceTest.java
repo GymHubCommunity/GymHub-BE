@@ -11,6 +11,7 @@ import com.example.temp.auth.domain.Role;
 import com.example.temp.comment.domain.Comment;
 import com.example.temp.comment.domain.CommentRepository;
 import com.example.temp.comment.dto.request.CommentCreateRequest;
+import com.example.temp.comment.dto.request.CommentUpdateRequest;
 import com.example.temp.comment.dto.response.CommentsResponse;
 import com.example.temp.common.dto.UserContext;
 import com.example.temp.common.entity.Email;
@@ -194,6 +195,98 @@ class CommentServiceTest {
         assertThatThrownBy(() -> commentService.findCommentsByPost(1L, userContext, PageRequest.of(0, 1)))
             .isInstanceOf(ApiException.class)
             .hasMessage(POST_NOT_FOUND.getMessage());
+    }
+
+    @DisplayName("댓글을 수정할 수 있다.")
+    @Test
+    void updateComment() {
+        //given
+        Member member1 = createMember("유저1", "user1@gymhub.run");
+        Member member2 = createMember("유저2", "user2@gymhub.run");
+        Post post = createPost(member1, "게시글1");
+        UserContext userContext = UserContext.fromMember(member2);
+        Comment comment = createComment(member2, "댓글1", post);
+        CommentUpdateRequest commentUpdateRequest = new CommentUpdateRequest("수정 후 댓글");
+
+        //when
+        commentService.updateComment(post.getId(), comment.getId(), userContext, commentUpdateRequest);
+
+        //then
+        assertThat(comment.getContent()).isEqualTo(commentUpdateRequest.content());
+    }
+
+    @DisplayName("댓글 수정시 권한이 없으면 삭제할 수 없다.")
+    @Test
+    void updateCommentNotAuthentication() {
+        //given
+        Member member1 = createMember("유저1", "user1@gymhub.run");
+        Member member2 = createMember("유저2", "user2@gymhub.run");
+        Post post = createPost(member1, "게시글1");
+        UserContext userContext = UserContext.fromMember(member1);
+        Comment comment = createComment(member2, "댓글1", post);
+        CommentUpdateRequest commentUpdateRequest = new CommentUpdateRequest("수정 후 댓글");
+
+        //when, then
+        assertThatThrownBy(
+            () -> commentService.updateComment(post.getId(), comment.getId(), userContext, commentUpdateRequest))
+            .isInstanceOf(ApiException.class)
+            .hasMessage(UNAUTHORIZED_COMMENT.getMessage());
+    }
+
+    @DisplayName("존재하지 않는 댓글을 수정할 수 없다.")
+    @Test
+    void updateCommentNotFound() {
+        //given
+        Member member1 = createMember("유저1", "user1@gymhub.run");
+        Member member2 = createMember("유저2", "user2@gymhub.run");
+        Post post = createPost(member1, "게시글1");
+        UserContext userContext = UserContext.fromMember(member1);
+        createComment(member2, "댓글1", post);
+        CommentUpdateRequest commentUpdateRequest = new CommentUpdateRequest("수정 후 댓글");
+
+        //when, then
+        assertThatThrownBy(() -> commentService.updateComment(post.getId(), 99L, userContext, commentUpdateRequest))
+            .isInstanceOf(ApiException.class)
+            .hasMessage(COMMENT_NOT_FOUND.getMessage());
+    }
+
+    @DisplayName("존재하지 않는 게시글에 댓글을 수정할 수 없다.")
+    @Test
+    void updateCommentNotFoundPost() {
+        //given
+        Member member1 = createMember("유저1", "user1@gymhub.run");
+        Member member2 = createMember("유저2", "user2@gymhub.run");
+        Post post = createPost(member1, "게시글1");
+        UserContext userContext = UserContext.fromMember(member1);
+        Comment comment = createComment(member2, "댓글1", post);
+        CommentUpdateRequest commentUpdateRequest = new CommentUpdateRequest("수정 후 댓글");
+
+        //when, then
+        assertThatThrownBy(
+            () -> commentService.updateComment(123123123L, comment.getId(), userContext, commentUpdateRequest))
+            .isInstanceOf(ApiException.class)
+            .hasMessage(POST_NOT_FOUND.getMessage());
+    }
+
+    @DisplayName("댓글 수정 시 로그인에 문제가 발생하면 삭제할 수 없다.")
+    @Test
+    void updateCommentWhenLoginError() {
+        //given
+        Member member1 = createMember("유저1", "user1@gymhub.run");
+        Member member2 = createMember("유저2", "user2@gymhub.run");
+        Post post = createPost(member1, "게시글1");
+        UserContext userContext = UserContext.builder()
+            .id(123412341234L)
+            .role(Role.NORMAL)
+            .build();
+        Comment comment = createComment(member2, "댓글1", post);
+        CommentUpdateRequest commentUpdateRequest = new CommentUpdateRequest("수정 후 댓글");
+
+        //when, then
+        assertThatThrownBy(
+            () -> commentService.updateComment(post.getId(), comment.getId(), userContext, commentUpdateRequest))
+            .isInstanceOf(ApiException.class)
+            .hasMessage(AUTHENTICATED_FAIL.getMessage());
     }
 
     @DisplayName("댓글을 삭제할 수 있다.")
