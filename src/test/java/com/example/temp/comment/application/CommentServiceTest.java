@@ -210,6 +210,7 @@ class CommentServiceTest {
         commentService.deleteComment(post.getId(), comment.getId(), userContext);
 
         //then
+        assertThat(post.getCommentCount()).isZero();
         assertThatThrownBy(() -> commentRepository.findById(comment.getId())
             .orElseThrow(() -> new ApiException(COMMENT_NOT_FOUND)))
             .isInstanceOf(ApiException.class)
