@@ -26,7 +26,7 @@ import com.example.temp.post.domain.PostRepository;
 import com.example.temp.post.dto.request.PostCreateRequest;
 import com.example.temp.post.dto.request.PostUpdateRequest;
 import com.example.temp.post.dto.response.PostDetailResponse;
-import com.example.temp.post.dto.response.SlicePostResponse;
+import com.example.temp.post.dto.response.PostResponse;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -64,12 +64,12 @@ public class PostService {
         return savedPost.getId();
     }
 
-    public SlicePostResponse findMyAndFollowingPosts(UserContext userContext, Pageable pageable) {
+    public PostResponse findMyAndFollowingPosts(UserContext userContext, Pageable pageable) {
         Member member = findMember(userContext);
         List<Member> myselfAndFollowings = findMyselfAndFollowings(member);
         myselfAndFollowings.add(member);
         Slice<Post> posts = postRepository.findByMemberInOrderByRegisteredAtDesc(myselfAndFollowings, pageable);
-        return SlicePostResponse.from(posts);
+        return PostResponse.from(posts);
     }
 
     public PostDetailResponse findPost(Long postId, UserContext userContext) {
