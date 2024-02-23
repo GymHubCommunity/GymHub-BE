@@ -2,7 +2,6 @@ package com.example.temp.post.application;
 
 import static com.example.temp.common.exception.ErrorCode.IMAGE_NOT_FOUND;
 import static com.example.temp.common.exception.ErrorCode.POST_NOT_FOUND;
-import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.groups.Tuple.tuple;
@@ -31,7 +30,7 @@ import com.example.temp.post.dto.request.PostCreateRequest;
 import com.example.temp.post.dto.request.PostUpdateRequest;
 import com.example.temp.post.dto.response.PostDetailResponse;
 import com.example.temp.post.dto.response.PostElementResponse;
-import com.example.temp.post.dto.response.SlicePostResponse;
+import com.example.temp.post.dto.response.PostResponse;
 import com.example.temp.post.dto.response.WriterInfo;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -90,11 +89,11 @@ class PostServiceTest {
         Pageable pageable = PageRequest.of(0, 10);
 
         // When
-        SlicePostResponse slicePostResponse = postService.findMyAndFollowingPosts(userContext, pageable);
+        PostResponse postResponse = postService.findMyAndFollowingPosts(userContext, pageable);
 
         // Then
-        assertThat(slicePostResponse.hasNext()).isFalse();
-        assertThat(slicePostResponse.posts()).hasSize(3)
+        assertThat(postResponse.hasNext()).isFalse();
+        assertThat(postResponse.posts()).hasSize(3)
             .extracting("writerInfo")
             .containsExactlyInAnyOrder(WriterInfo.from(member2), WriterInfo.from(member3), WriterInfo.from(member1));
     }
@@ -125,10 +124,10 @@ class PostServiceTest {
         Pageable pageable = PageRequest.of(0, 5);
 
         // When
-        SlicePostResponse slicePostResponse = postService.findMyAndFollowingPosts(userContext, pageable);
+        PostResponse postResponse = postService.findMyAndFollowingPosts(userContext, pageable);
 
         // Then
-        assertThat(slicePostResponse.posts()).hasSize(3)
+        assertThat(postResponse.posts()).hasSize(3)
             .extracting(post -> post.writerInfo().writerId())
             .containsExactlyInAnyOrder(member2.getId(), member3.getId(), member1.getId())
             .doesNotContain(member4.getId());
@@ -159,7 +158,7 @@ class PostServiceTest {
         Pageable pageable = PageRequest.of(0, 10);
 
         // When
-        SlicePostResponse postsPage = postService.findMyAndFollowingPosts(userContext, pageable);
+        PostResponse postsPage = postService.findMyAndFollowingPosts(userContext, pageable);
         List<PostElementResponse> posts = postsPage.posts();
 
         // Then

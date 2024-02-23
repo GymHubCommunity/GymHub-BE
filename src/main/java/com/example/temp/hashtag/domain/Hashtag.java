@@ -19,7 +19,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "hashtags")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
-@EqualsAndHashCode
+@EqualsAndHashCode(callSuper = false)
 public class Hashtag extends BaseTimeEntity {
 
     /**

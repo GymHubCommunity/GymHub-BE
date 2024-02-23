@@ -1,5 +1,6 @@
 package com.example.temp.post.domain;
 
+import com.example.temp.common.entity.BaseTimeEntity;
 import com.example.temp.hashtag.domain.Hashtag;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -19,7 +20,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "post_hashtags")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
-public class PostHashtag {
+public class PostHashtag extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

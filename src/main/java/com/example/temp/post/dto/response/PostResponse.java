@@ -6,15 +6,15 @@ import lombok.Builder;
 import org.springframework.data.domain.Slice;
 
 @Builder
-public record SlicePostResponse(
+public record PostResponse(
     List<PostElementResponse> posts,
     boolean hasNext
 ) {
 
-    public static SlicePostResponse from(Slice<Post> posts) {
+    public static PostResponse from(Slice<Post> posts) {
         List<PostElementResponse> postElements = posts.stream()
             .map(PostElementResponse::from)
             .toList();
-        return new SlicePostResponse(postElements, posts.hasNext());
+        return new PostResponse(postElements, posts.hasNext());
     }
 }

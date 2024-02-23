@@ -9,7 +9,7 @@ import com.example.temp.post.application.PostService;
 import com.example.temp.post.dto.request.PostCreateRequest;
 import com.example.temp.post.dto.request.PostUpdateRequest;
 import com.example.temp.post.dto.response.PostDetailResponse;
-import com.example.temp.post.dto.response.SlicePostResponse;
+import com.example.temp.post.dto.response.PostResponse;
 import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -41,9 +41,9 @@ public class PostController {
     }
 
     @GetMapping
-    public ResponseEntity<SlicePostResponse> getFollowingPosts(@Login UserContext userContext,
+    public ResponseEntity<PostResponse> getFollowingPosts(@Login UserContext userContext,
         @PageableDefault(sort = "registeredAt", direction = DESC) Pageable pageable) {
-        SlicePostResponse posts = postService.findMyAndFollowingPosts(userContext, pageable);
+        PostResponse posts = postService.findMyAndFollowingPosts(userContext, pageable);
         return ResponseEntity.ok(posts);
     }
 
