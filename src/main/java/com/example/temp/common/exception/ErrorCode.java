@@ -46,6 +46,8 @@ public enum ErrorCode {
 
     //댓글
     COMMENT_TOO_LONG(HttpStatus.BAD_REQUEST, "댓글은 최대 500자 까지 가능합니다."),
+    COMMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "댓글을 찾을 수 없습니다."),
+    UNAUTHORIZED_COMMENT(HttpStatus.FORBIDDEN, "댓글에 대한 권한이 없습니다."),
 
     // 이미지
     IMAGE_TOO_BIG(HttpStatus.BAD_REQUEST, "이미지의 크기가 너무 큽니다"),
