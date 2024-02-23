@@ -3,13 +3,13 @@ package com.example.temp.post.presentation;
 import static org.springframework.data.domain.Sort.Direction.DESC;
 
 import com.example.temp.common.annotation.Login;
+import com.example.temp.common.dto.CreatedResponse;
 import com.example.temp.common.dto.UserContext;
 import com.example.temp.post.application.PostService;
 import com.example.temp.post.dto.request.PostCreateRequest;
 import com.example.temp.post.dto.request.PostUpdateRequest;
 import com.example.temp.post.dto.response.PostDetailResponse;
 import com.example.temp.post.dto.response.SlicePostResponse;
-import java.net.URI;
 import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -33,11 +33,11 @@ public class PostController {
     private final PostService postService;
 
     @PostMapping
-    public ResponseEntity<Void> createPost(@Login UserContext userContext,
+    public ResponseEntity<CreatedResponse> createPost(@Login UserContext userContext,
         @RequestBody PostCreateRequest postCreateRequest) {
         LocalDateTime registeredAt = LocalDateTime.now();
         Long postId = postService.createPost(userContext, postCreateRequest, registeredAt);
-        return ResponseEntity.created(URI.create("/posts/" + postId)).build();
+        return ResponseEntity.ok(CreatedResponse.of(postId));
     }
 
     @GetMapping
