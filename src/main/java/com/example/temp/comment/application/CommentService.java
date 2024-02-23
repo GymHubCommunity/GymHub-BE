@@ -54,10 +54,11 @@ public class CommentService {
     @Transactional
     public void deleteComment(Long postId, Long commentId, UserContext userContext) {
         findMemberBy(userContext.id());
-        findPostBy(postId);
+        Post post = findPostBy(postId);
         Comment comment = findCommentBy(commentId);
         validateOwner(userContext, comment);
         commentRepository.delete(comment);
+        post.decreaseCommentCount();
     }
 
     private Member findMemberBy(Long userContextId) {
