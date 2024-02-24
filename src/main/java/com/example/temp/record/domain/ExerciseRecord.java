@@ -23,7 +23,6 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.CreatedDate;
 
 @Entity
 @Table(name = "records")
@@ -73,11 +72,14 @@ public class ExerciseRecord extends BaseTimeEntity {
             .build();
     }
 
-    public static ExerciseRecord createSnapshot(Member member, List<Track> tracks) {
+    public ExerciseRecord createSnapshot(Member member) {
+        List<Track> tracksCopy = this.tracks.stream()
+            .map(Track::copy)
+            .toList();
         return ExerciseRecord.builder()
             .member(member)
-            .recordDate(LocalDate.now())
-            .tracks(tracks)
+            .recordDate(this.recordDate)
+            .tracks(tracksCopy)
             .isSnapshot(true)
             .build();
     }
