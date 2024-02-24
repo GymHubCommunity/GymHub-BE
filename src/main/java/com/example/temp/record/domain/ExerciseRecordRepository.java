@@ -15,7 +15,7 @@ public interface ExerciseRecordRepository extends JpaRepository<ExerciseRecord, 
     @Query("SELECT er FROM ExerciseRecord er "
         + "WHERE er.isSnapshot = false "
         + "AND er.id = :targetId")
-    Optional<ExerciseRecord> findById(@Param("targetId") long targetId);
+    Optional<ExerciseRecord> findById(@Param("targetId") Long targetId);
 
     @Query("SELECT er FROM ExerciseRecord er "
         + "WHERE er.isSnapshot = false "
