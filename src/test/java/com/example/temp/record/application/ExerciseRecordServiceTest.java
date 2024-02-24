@@ -276,9 +276,24 @@ class ExerciseRecordServiceTest {
         validateAllTrackMachineNameIsSame(tracksInCopy, tracksInOriginal);
     }
 
+    @Test
+    @DisplayName("존재하지 않는 운동기록의 스냅샷은 생성할 수 없다.")
+    void createSnapshotFailExerciseRecordNotFound() throws Exception {
+        // given
+        Member member = saveMember("nick");
+        long notExistExerciseRecordId = 999_999_999L;
+
+        // when & then
+        assertThatThrownBy(
+            () -> exerciseRecordService.createSnapshot(UserContext.fromMember(member), notExistExerciseRecordId))
+            .isInstanceOf(ApiException.class)
+            .hasMessageContaining(ErrorCode.RECORD_NOT_FOUND.getMessage());
+    }
+
     private void validateAllTrackMachineNameIsSame(List<Track> tracksInCopy, List<Track> tracksInOriginal) {
         Set<String> machineNamesInCopy = tracksInCopy.stream().map(Track::getMachineName).collect(Collectors.toSet());
-        Set<String> trackNamesInOriginal = tracksInOriginal.stream().map(Track::getMachineName).collect(Collectors.toSet());
+        Set<String> trackNamesInOriginal = tracksInOriginal.stream().map(Track::getMachineName)
+            .collect(Collectors.toSet());
         for (String trackNameInCopy : machineNamesInCopy) {
             assertThat(trackNamesInOriginal).contains(trackNameInCopy);
         }
