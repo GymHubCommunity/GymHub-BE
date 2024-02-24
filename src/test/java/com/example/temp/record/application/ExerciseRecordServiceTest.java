@@ -24,6 +24,8 @@ import com.example.temp.record.dto.request.ExerciseRecordCreateRequest.TrackCrea
 import com.example.temp.record.dto.request.ExerciseRecordUpdateRequest;
 import com.example.temp.record.dto.request.ExerciseRecordUpdateRequest.TrackUpdateRequest;
 import com.example.temp.record.dto.request.ExerciseRecordUpdateRequest.TrackUpdateRequest.SetInTrackUpdateRequest;
+import com.example.temp.record.dto.response.ExerciseRecordInfo;
+import com.example.temp.record.dto.response.RecordSnapshotsResponse;
 import com.example.temp.record.dto.response.RetrievePeriodExerciseRecordsResponse;
 import com.example.temp.record.dto.response.RetrievePeriodExerciseRecordsResponse.RetrievePeriodRecordsElement;
 import jakarta.persistence.EntityManager;
@@ -37,6 +39,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
@@ -495,6 +498,43 @@ class ExerciseRecordServiceTest {
             () -> exerciseRecordService.deleteSnapshot(UserContext.fromMember(anotherMember), snapshot.getId()))
             .isInstanceOf(ApiException.class)
             .hasMessageContaining(ErrorCode.AUTHORIZED_FAIL.getMessage());
+    }
+
+    @Test
+    @DisplayName("운동기록 스냅샷 목록을 불러온다. 만약 다음 데이터가 존재하면 hasNext 필드에 true를 반환한다.")
+    void retrieveSnapshotsThatHasNextTrue() throws Exception {
+        // given
+        ExerciseRecord snapshot1 = saveSnapshot(loginMember);
+        ExerciseRecord snapshot2 = saveSnapshot(loginMember);
+        ExerciseRecord snapshot3 = saveSnapshot(loginMember);
+
+        // when
+        RecordSnapshotsResponse response = exerciseRecordService.retrieveSnapshots(loginUserContext, null,
+            Pageable.ofSize(2));
+
+        // then
+        assertThat(response.hasNext()).isTrue();
+        assertThat(response.snapshots()).hasSize(2)
+            .extracting(ExerciseRecordInfo::recordId)
+            .containsExactly(snapshot3.getId(), snapshot2.getId());
+    }
+
+    @Test
+    @DisplayName("운동기록 스냅샷 목록을 불러온다. 만약 다음 데이터가 존재하면 hasNext 필드에 false를 반환한다.")
+    void retrieveSnapshotsThatHasNextFalse() throws Exception {
+        // given
+        ExerciseRecord snapshot1 = saveSnapshot(loginMember);
+        ExerciseRecord snapshot2 = saveSnapshot(loginMember);
+
+        // when
+        RecordSnapshotsResponse response = exerciseRecordService.retrieveSnapshots(loginUserContext, null,
+            Pageable.ofSize(2));
+
+        // then
+        assertThat(response.hasNext()).isFalse();
+        assertThat(response.snapshots()).hasSize(2)
+            .extracting(ExerciseRecordInfo::recordId)
+            .containsExactly(snapshot2.getId(), snapshot1.getId());
     }
 
     private ExerciseRecord saveExerciseRecord(Member member, LocalDate date) {

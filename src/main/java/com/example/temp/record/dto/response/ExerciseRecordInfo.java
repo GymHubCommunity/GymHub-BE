@@ -7,6 +7,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 public record ExerciseRecordInfo(
+    Long recordId,
     LocalDate recordDate,
     List<TrackInfo> tracks
 ) {
@@ -15,7 +16,7 @@ public record ExerciseRecordInfo(
         List<TrackInfo> tracks = exerciseRecord.getTracks().stream()
             .map(TrackInfo::from)
             .toList();
-        return new ExerciseRecordInfo(exerciseRecord.getRecordDate(), tracks);
+        return new ExerciseRecordInfo(exerciseRecord.getId(), exerciseRecord.getRecordDate(), tracks);
     }
 
     public record TrackInfo(

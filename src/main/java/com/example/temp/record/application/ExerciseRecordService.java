@@ -16,6 +16,7 @@ import com.example.temp.record.dto.request.ExerciseRecordCreateRequest.TrackCrea
 import com.example.temp.record.dto.request.ExerciseRecordUpdateRequest;
 import com.example.temp.record.dto.request.ExerciseRecordUpdateRequest.TrackUpdateRequest;
 import com.example.temp.record.dto.response.ExerciseRecordInfo;
+import com.example.temp.record.dto.response.RecordSnapshotsResponse;
 import com.example.temp.record.dto.response.RetrievePeriodExerciseRecordsResponse;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -24,6 +25,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -142,6 +145,12 @@ public class ExerciseRecordService {
             throw new ApiException(ErrorCode.AUTHORIZED_FAIL);
         }
         exerciseRecordRepository.delete(snapshot);
+    }
+
+    public RecordSnapshotsResponse retrieveSnapshots(UserContext userContext, Long lastId, Pageable pageable) {
+        Member member = findMember(userContext);
+        Slice<ExerciseRecord> snapshots = exerciseRecordRepository.findPrevSnapshotsByMember(lastId, pageable, member);
+        return RecordSnapshotsResponse.create(snapshots);
     }
 
     private Member findMember(UserContext userContext) {
