@@ -290,6 +290,20 @@ class ExerciseRecordServiceTest {
     }
 
     @Test
+    @DisplayName("자신이 작성하지 않은 운동기록을 사용해서 스냅샷을 만들 수 없다.")
+    void createSnapshotFailExerciseRecordNoAuthZ() throws Exception {
+        // given
+        Member member = saveMember("nick");
+        ExerciseRecord original = saveExerciseRecord(member);
+
+        // when & then
+        assertThatThrownBy(
+            () -> exerciseRecordService.createSnapshot(loginUserContext, original.getId()))
+            .isInstanceOf(ApiException.class)
+            .hasMessageContaining(ErrorCode.AUTHORIZED_FAIL.getMessage());
+    }
+
+    @Test
     @DisplayName("존재하지 않는 운동기록의 스냅샷은 생성할 수 없다.")
     void createSnapshotFailExerciseRecordNotFound() throws Exception {
         // given
