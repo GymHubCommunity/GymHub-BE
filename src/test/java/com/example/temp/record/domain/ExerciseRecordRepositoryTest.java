@@ -180,7 +180,7 @@ class ExerciseRecordRepositoryTest {
         ExerciseRecord snapshot2 = saveExerciseRecord(member, date, true);
         ExerciseRecord snapshot3 = saveExerciseRecord(member, date, true);
 
-        Slice<ExerciseRecord> result = exerciseRecordRepository.findPrevSnapshotsByMember(
+        Slice<ExerciseRecord> result = exerciseRecordRepository.findNextSnapshotsByMember(
             null, Pageable.ofSize(2), member);
 
         assertThat(result.hasNext()).isTrue();
@@ -195,7 +195,7 @@ class ExerciseRecordRepositoryTest {
         ExerciseRecord snapshot1 = saveExerciseRecord(member, date, true);
         ExerciseRecord snapshot2 = saveExerciseRecord(member, date, true);
 
-        Slice<ExerciseRecord> result = exerciseRecordRepository.findPrevSnapshotsByMember(
+        Slice<ExerciseRecord> result = exerciseRecordRepository.findNextSnapshotsByMember(
             null, Pageable.ofSize(2), member);
 
         assertThat(result.hasNext()).isFalse();
@@ -209,7 +209,7 @@ class ExerciseRecordRepositoryTest {
         Member member = saveMember("회원");
         ExerciseRecord snapshot1 = saveExerciseRecord(member, date, false);
 
-        Slice<ExerciseRecord> result = exerciseRecordRepository.findPrevSnapshotsByMember(
+        Slice<ExerciseRecord> result = exerciseRecordRepository.findNextSnapshotsByMember(
             null, Pageable.ofSize(2), member);
 
         assertThat(result.hasNext()).isFalse();

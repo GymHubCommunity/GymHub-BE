@@ -149,7 +149,7 @@ public class ExerciseRecordService {
 
     public RecordSnapshotsResponse retrieveSnapshots(UserContext userContext, Long lastId, Pageable pageable) {
         Member member = findMember(userContext);
-        Slice<ExerciseRecord> snapshots = exerciseRecordRepository.findPrevSnapshotsByMember(lastId, pageable, member);
+        Slice<ExerciseRecord> snapshots = exerciseRecordRepository.findNextSnapshotsByMember(lastId, pageable, member);
         return RecordSnapshotsResponse.create(snapshots);
     }
 
