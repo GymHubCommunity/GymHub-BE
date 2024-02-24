@@ -10,6 +10,7 @@ import com.example.temp.member.domain.nickname.Nickname;
 import jakarta.persistence.EntityManager;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -99,6 +100,7 @@ class ExerciseRecordRepositoryTest {
 
         em.flush();
         em.clear();
+
         // when
         List<ExerciseRecord> results = exerciseRecordRepository.findAllByMemberAndPeriod(member,
             LocalDate.of(2019, 12, 31),
@@ -108,6 +110,34 @@ class ExerciseRecordRepositoryTest {
         assertThat(results).hasSize(1)
             .extracting(ExerciseRecord::getId)
             .containsExactlyInAnyOrder(record.getId());
+    }
+
+    @Test
+    @DisplayName("id를 사용해 snapshot 타입의 운동기록을 찾는다.")
+    void findSnapshotById() throws Exception {
+        // given
+        Member member = saveMember("회원");
+        ExerciseRecord snapshot = saveExerciseRecord(member, LocalDate.of(2019, 12, 31), true);
+
+        // when
+        Optional<ExerciseRecord> resultOpt = exerciseRecordRepository.findSnapshotById(snapshot.getId());
+
+        // then
+        assertThat(resultOpt).isNotEmpty();
+    }
+
+    @Test
+    @DisplayName("운동 기록이 snapshot 타입이 아니라면, findSnapshotById로 해당 엔티티를 가져올 수 없다.")
+    void findSnapshotByIdFailNoSnapshot() throws Exception {
+        // given
+        Member member = saveMember("회원");
+        ExerciseRecord exerciseRecord = saveExerciseRecord(member, LocalDate.of(2019, 12, 31), false);
+
+        // when
+        Optional<ExerciseRecord> resultOpt = exerciseRecordRepository.findSnapshotById(exerciseRecord.getId());
+
+        // then
+        assertThat(resultOpt).isEmpty();
     }
 
     private Member saveMember(String nickname) {

@@ -25,4 +25,9 @@ public interface ExerciseRecordRepository extends JpaRepository<ExerciseRecord, 
     List<ExerciseRecord> findAllByMemberAndPeriod(@Param("member") Member member,
         @Param("startDate") LocalDate startDate, @Param("lastDate") LocalDate lastDate);
 
+
+    @Query("SELECT er FROM ExerciseRecord er "
+        + "WHERE er.isSnapshot = true "
+        + "AND er.id = :targetId")
+    Optional<ExerciseRecord> findSnapshotById(@Param("targetId") long targetId);
 }
