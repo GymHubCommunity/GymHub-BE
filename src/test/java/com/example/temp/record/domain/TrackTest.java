@@ -8,6 +8,7 @@ import com.example.temp.common.exception.ErrorCode;
 import com.example.temp.machine.domain.BodyPart;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -72,6 +73,37 @@ class TrackTest {
         assertThatThrownBy(() -> Track.createWithoutRecord(machineName, BodyPart.HIP, setInTracks))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("트랙 내 세트들의 순서는 1부터 순차적으로 올라가야 합니다.");
+    }
+
+    @Test
+    @DisplayName("트랙을 복사한다.")
+    void copy() throws Exception {
+        // given
+        String machineName = "스쿼트 머신";
+        List<SetInTrack> setInTracks = List.of(createSet(1));
+        Track original = Track.createWithoutRecord(machineName, BodyPart.HIP, setInTracks);
+
+        // when
+        Track copy = original.copy();
+
+        // then
+        assertThat(copy.getMachineName()).isEqualTo(original.getMachineName());
+        assertThat(copy.getMajorBodyPart()).isEqualTo(original.getMajorBodyPart());
+
+        Comparator<SetInTrack> comparator = Comparator
+            .comparing(SetInTrack::getWeight)
+            .thenComparing(SetInTrack::getRepeatCnt)
+            .thenComparing(SetInTrack::getOrder);
+        copy.getSetsInTrack().sort(comparator);
+        original.getSetsInTrack().sort(comparator);
+
+        for (int i = 0; i < copy.getSetsInTrack().size(); i++) {
+            SetInTrack setInTrackAboutCopy = copy.getSetsInTrack().get(i);
+            SetInTrack setInTrackAboutOriginal = original.getSetsInTrack().get(i);
+            assertThat(setInTrackAboutCopy.getRepeatCnt()).isEqualTo(setInTrackAboutOriginal.getRepeatCnt());
+            assertThat(setInTrackAboutCopy.getWeight()).isEqualTo(setInTrackAboutOriginal.getWeight());
+            assertThat(setInTrackAboutCopy.getOrder()).isEqualTo(setInTrackAboutOriginal.getOrder());
+        }
     }
 
     SetInTrack createSet(int order) {
