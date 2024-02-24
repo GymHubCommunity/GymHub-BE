@@ -64,4 +64,11 @@ public class ExerciseRecordController {
         return ResponseEntity.status(HttpStatus.CREATED)
             .body(CreatedResponse.of(createdId));
     }
+
+    @DeleteMapping("/snapshot/{snapshotId}")
+    public ResponseEntity<CreatedResponse> deleteSnapshot(@Login UserContext userContext,
+        @PathVariable long snapshotId) {
+        exerciseRecordService.deleteSnapshot(userContext, snapshotId);
+        return ResponseEntity.noContent().build();
+    }
 }
