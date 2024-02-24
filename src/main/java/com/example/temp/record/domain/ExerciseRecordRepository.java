@@ -13,6 +13,7 @@ public interface ExerciseRecordRepository extends JpaRepository<ExerciseRecord, 
 
     @Query("SELECT er FROM ExerciseRecord er"
         + " WHERE er.member = :member"
+        + " AND er.isSnapshot = false"
         + " AND :startDate <= er.recordDate"
         + " AND er.recordDate <= :lastDate")
     List<ExerciseRecord> findAllByMemberAndPeriod(@Param("member") Member member,
