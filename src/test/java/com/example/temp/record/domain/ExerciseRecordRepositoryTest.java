@@ -16,6 +16,8 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
@@ -27,6 +29,8 @@ class ExerciseRecordRepositoryTest {
 
     @Autowired
     EntityManager em;
+
+    LocalDate date = LocalDate.of(2019, 12, 31);
 
     @Test
     @DisplayName("특정 기한 내에 등록된 운동기록 목록을 조회한다.")
@@ -145,7 +149,7 @@ class ExerciseRecordRepositoryTest {
     void findById() throws Exception {
         // given
         Member member = saveMember("회원");
-        ExerciseRecord snapshot = saveExerciseRecord(member, LocalDate.of(2019, 12, 31), false);
+        ExerciseRecord snapshot = saveExerciseRecord(member, date, false);
 
         // when
         Optional<ExerciseRecord> resultOpt = exerciseRecordRepository.findById(snapshot.getId());
@@ -159,7 +163,7 @@ class ExerciseRecordRepositoryTest {
     void findByIdThatIsSnapshot() throws Exception {
         // given
         Member member = saveMember("회원");
-        ExerciseRecord snapshot = saveExerciseRecord(member, LocalDate.of(2019, 12, 31), true);
+        ExerciseRecord snapshot = saveExerciseRecord(member, date, true);
 
         // when
         Optional<ExerciseRecord> resultOpt = exerciseRecordRepository.findById(snapshot.getId());
@@ -168,6 +172,49 @@ class ExerciseRecordRepositoryTest {
         assertThat(resultOpt).isEmpty();
     }
 
+    @Test
+    @DisplayName("주어진 개수만큼 운동기록 스냅샷을 가져온다. 만약 더 가져올 데이터가 있다면 hasNext에 true를 반환한다.")
+    void findNextSnapshotsByMemberThatHasNextTrue() {
+        Member member = saveMember("회원");
+        ExerciseRecord snapshot1 = saveExerciseRecord(member, date, true);
+        ExerciseRecord snapshot2 = saveExerciseRecord(member, date, true);
+        ExerciseRecord snapshot3 = saveExerciseRecord(member, date, true);
+
+        Slice<ExerciseRecord> result = exerciseRecordRepository.findNextSnapshotsByMember(
+            -1, Pageable.ofSize(2), member);
+
+        assertThat(result.hasNext()).isTrue();
+        assertThat(result.getContent()).hasSize(2)
+            .containsExactlyInAnyOrder(snapshot1, snapshot2);
+    }
+
+    @Test
+    @DisplayName("주어진 개수만큼 운동기록 스냅샷을 가져온다. 만약 더 가져올 데이터가 없다면 hasNext에 false를 반환한다.")
+    void findNextSnapshotsByMember() {
+        Member member = saveMember("회원");
+        ExerciseRecord snapshot1 = saveExerciseRecord(member, date, true);
+        ExerciseRecord snapshot2 = saveExerciseRecord(member, date, true);
+
+        Slice<ExerciseRecord> result = exerciseRecordRepository.findNextSnapshotsByMember(
+            -1, Pageable.ofSize(2), member);
+
+        assertThat(result.hasNext()).isFalse();
+        assertThat(result.getContent()).hasSize(2)
+            .containsExactlyInAnyOrder(snapshot1, snapshot2);
+    }
+
+    @Test
+    @DisplayName("운동기록 스냅샷을 가져올 때, 운동기록을 가져와서는 안된다.")
+    void findNextSnapshotsByMemberNoSnapshot() {
+        Member member = saveMember("회원");
+        ExerciseRecord snapshot1 = saveExerciseRecord(member, date, false);
+
+        Slice<ExerciseRecord> result = exerciseRecordRepository.findNextSnapshotsByMember(
+            -1, Pageable.ofSize(2), member);
+
+        assertThat(result.hasNext()).isFalse();
+        assertThat(result.getContent()).isEmpty();
+    }
 
     private Member saveMember(String nickname) {
         Member member = Member.builder()
