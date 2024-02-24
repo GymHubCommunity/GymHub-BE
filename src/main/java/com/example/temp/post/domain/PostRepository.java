@@ -17,7 +17,13 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
     List<Post> findAllByMemberId(@Param("memberId") Long memberId);
 
-    @Query("SELECT p FROM Post p JOIN p.postHashtags ph JOIN ph.hashtag h WHERE h.id = :hashtagId AND p.member.privacyPolicy = 'PUBLIC' ORDER BY p.registeredAt DESC")
+    @Query("SELECT p "
+        + "FROM Post p "
+        + "JOIN p.postHashtags ph "
+        + "JOIN ph.hashtag h "
+        + "WHERE h.id = :hashtagId "
+        + "AND p.member.privacyPolicy = 'PUBLIC' "
+        + "ORDER BY p.registeredAt DESC")
     Page<Post> findAllPostByHashtag(@Param("hashtagId") Long hashtagId, Pageable pageable);
 
 }
