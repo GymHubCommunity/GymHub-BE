@@ -1,15 +1,20 @@
 package com.example.temp.post.application;
 
+import static com.example.temp.common.exception.ErrorCode.AUTHENTICATED_FAIL;
+import static com.example.temp.common.exception.ErrorCode.HASHTAG_NOT_FOUND;
 import static com.example.temp.common.exception.ErrorCode.IMAGE_NOT_FOUND;
 import static com.example.temp.common.exception.ErrorCode.POST_NOT_FOUND;
+import static com.example.temp.common.exception.ErrorCode.UNAUTHORIZED_POST;
+import static com.example.temp.member.domain.PrivacyPolicy.PRIVATE;
+import static com.example.temp.member.domain.PrivacyPolicy.PUBLIC;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.groups.Tuple.tuple;
 
+import com.example.temp.auth.domain.Role;
 import com.example.temp.common.dto.UserContext;
 import com.example.temp.common.entity.Email;
 import com.example.temp.common.exception.ApiException;
-import com.example.temp.common.exception.ErrorCode;
 import com.example.temp.follow.domain.Follow;
 import com.example.temp.follow.domain.FollowRepository;
 import com.example.temp.follow.domain.FollowStatus;
@@ -20,10 +25,10 @@ import com.example.temp.image.domain.ImageRepository;
 import com.example.temp.member.domain.FollowStrategy;
 import com.example.temp.member.domain.Member;
 import com.example.temp.member.domain.MemberRepository;
-import com.example.temp.member.domain.PrivacyPolicy;
 import com.example.temp.member.domain.nickname.Nickname;
 import com.example.temp.post.domain.Content;
 import com.example.temp.post.domain.Post;
+import com.example.temp.post.domain.PostHashtag;
 import com.example.temp.post.domain.PostImage;
 import com.example.temp.post.domain.PostRepository;
 import com.example.temp.post.dto.request.PostCreateRequest;
@@ -31,6 +36,7 @@ import com.example.temp.post.dto.request.PostUpdateRequest;
 import com.example.temp.post.dto.response.PostDetailResponse;
 import com.example.temp.post.dto.response.PostElementResponse;
 import com.example.temp.post.dto.response.PostResponse;
+import com.example.temp.post.dto.response.PostSearchResponse;
 import com.example.temp.post.dto.response.WriterInfo;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -81,9 +87,9 @@ class PostServiceTest {
         saveImage("image2");
         saveImage("image3");
 
-        savePost(member2, "content1", List.of("image1"));
-        savePost(member3, "content2", List.of("image2"));
-        savePost(member1, "content3", List.of("image3"));
+        savePost(member2, "content1", List.of("image1"), new ArrayList<>());
+        savePost(member3, "content2", List.of("image2"), new ArrayList<>());
+        savePost(member1, "content3", List.of("image3"), new ArrayList<>());
 
         UserContext userContext = UserContext.fromMember(member1);
         Pageable pageable = PageRequest.of(0, 10);
@@ -115,10 +121,10 @@ class PostServiceTest {
         saveImage("image3");
         saveImage("image4");
 
-        savePost(member2, "content1", List.of("image1"));
-        savePost(member3, "content2", List.of("image2"));
-        savePost(member1, "content3", List.of("image3"));
-        savePost(member4, "content4", List.of("image4"));
+        savePost(member2, "content1", List.of("image1"), new ArrayList<>());
+        savePost(member3, "content2", List.of("image2"), new ArrayList<>());
+        savePost(member1, "content3", List.of("image3"), new ArrayList<>());
+        savePost(member4, "content4", List.of("image4"), new ArrayList<>());
 
         UserContext userContext = UserContext.fromMember(member1);
         Pageable pageable = PageRequest.of(0, 5);
@@ -149,10 +155,10 @@ class PostServiceTest {
         saveImage("image3");
         saveImage("image4");
 
-        savePost(member2, "content1", List.of("image1"));
-        savePost(member3, "content2", List.of("image2"));
-        savePost(member2, "content3", List.of("image3"));
-        savePost(member3, "content4", List.of("image4"));
+        savePost(member2, "content1", List.of("image1"), new ArrayList<>());
+        savePost(member3, "content2", List.of("image2"), new ArrayList<>());
+        savePost(member2, "content3", List.of("image3"), new ArrayList<>());
+        savePost(member3, "content4", List.of("image4"), new ArrayList<>());
 
         UserContext userContext = UserContext.fromMember(member1);
         Pageable pageable = PageRequest.of(0, 10);
@@ -279,7 +285,7 @@ class PostServiceTest {
     void isNotOwnerUpdatePost() {
         //given
         Member writer = saveMember("email1@naver.com", "작성자");
-        Post savedPost = savePost(writer, "게시글", new ArrayList<>());
+        Post savedPost = savePost(writer, "게시글", new ArrayList<>(), new ArrayList<>());
         Member reader = saveMember("email2@naver.com", "독자");
         UserContext userContext = UserContext.fromMember(reader);
         PostUpdateRequest updateRequest = new PostUpdateRequest("수정1", new ArrayList<>(), new ArrayList<>());
@@ -287,7 +293,7 @@ class PostServiceTest {
         //then
         assertThatThrownBy(() -> postService.updatePost(savedPost.getId(), userContext, updateRequest))
             .isInstanceOf(ApiException.class)
-            .hasMessage(ErrorCode.UNAUTHORIZED_POST.getMessage());
+            .hasMessage(UNAUTHORIZED_POST.getMessage());
     }
 
     @DisplayName("게시글을 수정할 수 있다.")
@@ -333,8 +339,7 @@ class PostServiceTest {
         List<String> imageUrls = List.of("imageUrl1", "ImageUrl2");
         List<String> savedImageUrls = saveImagesAndGetUrls(imageUrls);
         List<String> hashtags = List.of("#hashtag1", "#hashtag2");
-        List<String> savedHashtags = saveHashtagsAndGet(hashtags);
-        Post post = savePost(member, "게시글1", savedImageUrls);
+        Post post = savePost(member, "게시글1", savedImageUrls, hashtags);
 
         //when
         postService.deletePost(post.getId(), userContext);
@@ -350,10 +355,87 @@ class PostServiceTest {
     void createPostInitialCommentCountEqualsZero() {
         //given
         Member member = saveMember("user1@gymhub.run", "user1");
-        Post post = savePost(member, "게시글1", new ArrayList<>());
+        Post post = savePost(member, "게시글1", new ArrayList<>(), new ArrayList<>());
 
         //when, then
         assertThat(post.getCommentCount()).isZero();
+    }
+
+    @DisplayName("해시태그로 게시글을 검색할 수 있다.")
+    @Test
+    void findPostsByHashtag() {
+        //given
+        Member member = saveMember("email@test.com", "nick");
+        UserContext userContext = UserContext.fromMember(member);
+        List<String> imageUrls = List.of("imageUrl1", "ImageUrl2");
+        List<String> savedImageUrls = saveImagesAndGetUrls(imageUrls);
+        List<String> hashtags = List.of("#hashtag1", "#hashtag2");
+        savePost(member, "게시글1", savedImageUrls, hashtags);
+
+        //when
+        PostSearchResponse posts = postService.findPostsByHashtag("hashtag1", userContext, PageRequest.of(0, 10));
+        List<PostElementResponse> responses = posts.posts();
+        //then
+        assertThat(posts.hasNext()).isFalse();
+        assertThat(responses).extracting("content")
+            .containsExactly("게시글1");
+    }
+
+    @DisplayName("존재하지 않는 해시태그로 게시글을 검색하면 예외가 발생한다.")
+    @Test
+    void findPostsByNonExistentHashtag() {
+        //given
+        Member member = saveMember("email@test.com", "nick");
+        UserContext userContext = UserContext.fromMember(member);
+        List<String> imageUrls = List.of("imageUrl1", "ImageUrl2");
+        List<String> savedImageUrls = saveImagesAndGetUrls(imageUrls);
+        List<String> hashtags = List.of("#hashtag1", "#hashtag2");
+        savePost(member, "게시글1", savedImageUrls, hashtags);
+
+        //then
+        assertThatThrownBy(() -> postService.findPostsByHashtag("hashtag3", userContext, PageRequest.of(0, 5))
+        )
+            .isInstanceOf(ApiException.class)
+            .hasMessage(HASHTAG_NOT_FOUND.getMessage());
+    }
+
+    @DisplayName("로그인에 문제가 생기면 댓글을 조회할 수 없다.")
+    @Test
+    void findPostsByNonExistentUser() {
+        //given
+        Member member = saveMember("email@test.com", "nick");
+        UserContext userContext = UserContext.builder()
+            .id(999999999L)
+            .role(Role.NORMAL)
+            .build();
+        List<String> imageUrls = List.of("imageUrl1", "ImageUrl2");
+        List<String> savedImageUrls = saveImagesAndGetUrls(imageUrls);
+        List<String> hashtags = List.of("#hashtag1", "#hashtag2");
+        savePost(member, "게시글1", savedImageUrls, hashtags);
+
+        //then
+        assertThatThrownBy(() -> postService.findPostsByHashtag("hashtag1", userContext, PageRequest.of(0, 10)))
+            .isInstanceOf(ApiException.class)
+            .hasMessage(AUTHENTICATED_FAIL.getMessage());
+    }
+
+    @DisplayName("비공개 계정의 게시글은 검색되지 않는다.")
+    @Test
+    void notFoundPrivateAccountPost() {
+        //given
+        Member privateMember = saveMember("private@test.com", "nick");
+        privateMember.changePrivacy(PRIVATE);
+        UserContext userContext = UserContext.fromMember(privateMember);
+        List<String> imageUrls = List.of("imageUrl1", "ImageUrl2");
+        List<String> savedImageUrls = saveImagesAndGetUrls(imageUrls);
+        List<String> hashtags = List.of("#hashtag1", "#hashtag2");
+        savePost(privateMember, "게시글1", savedImageUrls, hashtags);
+
+        //when
+        PostSearchResponse response = postService.findPostsByHashtag("hashtag1", userContext, PageRequest.of(0, 10));
+
+        //then
+        assertThat(response.posts()).isEmpty();
     }
 
     private Member saveMember(String email, String nickname) {
@@ -362,7 +444,7 @@ class PostServiceTest {
             .profileUrl("프로필")
             .nickname(Nickname.create(nickname))
             .followStrategy(FollowStrategy.EAGER)
-            .privacyPolicy(PrivacyPolicy.PUBLIC)
+            .privacyPolicy(PUBLIC)
             .build();
         return memberRepository.save(member);
     }
@@ -376,7 +458,7 @@ class PostServiceTest {
         followRepository.save(follow);
     }
 
-    private Post savePost(Member member, String content, List<String> imageUrls) {
+    private Post savePost(Member member, String content, List<String> imageUrls, List<String> hashtags) {
         Post post = Post.builder()
             .member(member)
             .content(Content.builder()
@@ -390,7 +472,13 @@ class PostServiceTest {
             .forEach(image -> {
                 PostImage postImage = PostImage.createPostImage(image);
                 postImage.relate(post);
+            });
 
+        hashtags.stream()
+            .map(hashtag -> hashtagRepository.save(Hashtag.create(hashtag)))
+            .forEach(hashtag -> {
+                PostHashtag postHashtag = PostHashtag.createPostHashtag(hashtag);
+                postHashtag.relatePost(post);
             });
         return postRepository.save(post);
     }
