@@ -30,6 +30,8 @@ import jakarta.persistence.EntityManager;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -245,6 +247,49 @@ class ExerciseRecordServiceTest {
             MonthlyDatePeriod.of(year, month)))
             .isInstanceOf(ApiException.class)
             .hasMessageContaining(ErrorCode.AUTHENTICATED_FAIL.getMessage());
+    }
+
+    @Test
+    @DisplayName("운동기록의 스냅샷을 생성한다.")
+    void createSnapshot() throws Exception {
+        // given
+        Member member = saveMember("nick");
+        ExerciseRecord original = saveExerciseRecord(member);
+        assertThat(original.isSnapshot()).isFalse();
+
+        // when
+        long createdId = exerciseRecordService.createSnapshot(UserContext.fromMember(member), original.getId());
+
+        // then
+        em.flush();
+        em.clear();
+
+        ExerciseRecord copy = em.find(ExerciseRecord.class, createdId);
+
+        assertThat(copy.getId()).isNotEqualTo(original.getId());
+        assertThat(copy.isSnapshot()).isTrue();
+
+        assertThat(copy.getTracks()).hasSize(original.getTracks().size());
+        List<Track> tracksInOriginal = original.getTracks();
+        List<Track> tracksInCopy = copy.getTracks();
+        validateAllTracksIdIsDifferent(tracksInCopy, tracksInOriginal);
+        validateAllTrackMachineNameIsSame(tracksInCopy, tracksInOriginal);
+    }
+
+    private void validateAllTrackMachineNameIsSame(List<Track> tracksInCopy, List<Track> tracksInOriginal) {
+        Set<String> machineNamesInCopy = tracksInCopy.stream().map(Track::getMachineName).collect(Collectors.toSet());
+        Set<String> trackNamesInOriginal = tracksInOriginal.stream().map(Track::getMachineName).collect(Collectors.toSet());
+        for (String trackNameInCopy : machineNamesInCopy) {
+            assertThat(trackNamesInOriginal).contains(trackNameInCopy);
+        }
+    }
+
+    private void validateAllTracksIdIsDifferent(List<Track> tracksInCopy, List<Track> tracksInOriginal) {
+        Set<Long> trackIdsInCopy = tracksInCopy.stream().map(Track::getId).collect(Collectors.toSet());
+        Set<Long> trackIdsInOriginal = tracksInOriginal.stream().map(Track::getId).collect(Collectors.toSet());
+        for (Long trackIdInCopy : trackIdsInCopy) {
+            assertThat(trackIdsInOriginal).doesNotContain(trackIdInCopy);
+        }
     }
 
     private Track createTrack(String machineName, List<SetInTrack> setsInTrack) {

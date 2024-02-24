@@ -121,7 +121,7 @@ public class ExerciseRecordService {
     }
 
     @Transactional
-    public void createSnapshot(UserContext userContext, long targetId) {
+    public long createSnapshot(UserContext userContext, long targetId) {
         Member member = findMember(userContext);
         ExerciseRecord exerciseRecord = exerciseRecordRepository.findById(targetId)
             .orElseThrow(() -> new ApiException(ErrorCode.RECORD_NOT_FOUND));
@@ -130,6 +130,7 @@ public class ExerciseRecordService {
         }
         ExerciseRecord snapshot = exerciseRecord.createSnapshot(member);
         exerciseRecordRepository.save(snapshot);
+        return snapshot.getId();
     }
 
     private Member findMember(UserContext userContext) {
