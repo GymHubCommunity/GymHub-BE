@@ -180,12 +180,12 @@ class ExerciseRecordRepositoryTest {
         ExerciseRecord snapshot2 = saveExerciseRecord(member, date, true);
         ExerciseRecord snapshot3 = saveExerciseRecord(member, date, true);
 
-        Slice<ExerciseRecord> result = exerciseRecordRepository.findNextSnapshotsByMember(
-            -1, Pageable.ofSize(2), member);
+        Slice<ExerciseRecord> result = exerciseRecordRepository.findPrevSnapshotsByMember(
+            null, Pageable.ofSize(2), member);
 
         assertThat(result.hasNext()).isTrue();
         assertThat(result.getContent()).hasSize(2)
-            .containsExactlyInAnyOrder(snapshot1, snapshot2);
+            .containsExactly(snapshot3, snapshot2);
     }
 
     @Test
@@ -195,12 +195,12 @@ class ExerciseRecordRepositoryTest {
         ExerciseRecord snapshot1 = saveExerciseRecord(member, date, true);
         ExerciseRecord snapshot2 = saveExerciseRecord(member, date, true);
 
-        Slice<ExerciseRecord> result = exerciseRecordRepository.findNextSnapshotsByMember(
-            -1, Pageable.ofSize(2), member);
+        Slice<ExerciseRecord> result = exerciseRecordRepository.findPrevSnapshotsByMember(
+            null, Pageable.ofSize(2), member);
 
         assertThat(result.hasNext()).isFalse();
         assertThat(result.getContent()).hasSize(2)
-            .containsExactlyInAnyOrder(snapshot1, snapshot2);
+            .containsExactly(snapshot2, snapshot1);
     }
 
     @Test
@@ -209,8 +209,8 @@ class ExerciseRecordRepositoryTest {
         Member member = saveMember("회원");
         ExerciseRecord snapshot1 = saveExerciseRecord(member, date, false);
 
-        Slice<ExerciseRecord> result = exerciseRecordRepository.findNextSnapshotsByMember(
-            -1, Pageable.ofSize(2), member);
+        Slice<ExerciseRecord> result = exerciseRecordRepository.findPrevSnapshotsByMember(
+            null, Pageable.ofSize(2), member);
 
         assertThat(result.hasNext()).isFalse();
         assertThat(result.getContent()).isEmpty();
