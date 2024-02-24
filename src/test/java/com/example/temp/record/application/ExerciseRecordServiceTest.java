@@ -427,9 +427,79 @@ class ExerciseRecordServiceTest {
             .hasMessageContaining(ErrorCode.AUTHORIZED_FAIL.getMessage());
     }
 
+    @Test
+    @DisplayName("스냅샷을 삭제한다.")
+    void deleteSnapshot() throws Exception {
+        // given
+        Member member = saveMember("nick1");
+        ExerciseRecord record = saveSnapshot(member);
+
+        // when
+        exerciseRecordService.deleteSnapshot(UserContext.fromMember(member), record.getId());
+
+        // then
+        assertThat(em.find(ExerciseRecord.class, record.getId())).isNull();
+    }
+
+    /**
+     * ExerciseRecord(스냅샷), Track, SetInTrack 엔티티들이 DB에 저장되었는지 확인합니다. deleteSnapshot 명령 이후, 해당 엔티티들이 DB에서 삭제되었는지 확인합니다.
+     */
+    @Test
+    @DisplayName("운동기록 스냅샷이 삭제되면 해당 기록에 포함된 Track, Set 엔티티를 함께 삭제한다.")
+    void deleteSnapshotCheckAllChildrenDelete() throws Exception {
+        // given
+        Member member = saveMember("nick1");
+        Track trackBeforeSaved = createTrack("머신1", List.of(createSetInTrack(1), createSetInTrack(2)));
+        ExerciseRecord snapshot = saveSnapshot(member, trackBeforeSaved);
+        Track savedTrack = snapshot.getTracks().get(0);
+        List<SetInTrack> savedSetsInTrack = savedTrack.getSetsInTrack();
+
+        assertThat(em.find(ExerciseRecord.class, snapshot.getId())).isNotNull();
+        assertThat(em.find(Track.class, savedTrack.getId())).isNotNull();
+        for (SetInTrack setInTrack : savedSetsInTrack) {
+            assertThat(em.find(SetInTrack.class, setInTrack.getId())).isNotNull();
+        }
+
+        // when
+        exerciseRecordService.deleteSnapshot(UserContext.fromMember(member), snapshot.getId());
+
+        // then
+        assertThat(em.find(ExerciseRecord.class, snapshot.getId())).isNull();
+        assertThat(em.find(Track.class, savedTrack.getId())).isNull();
+        for (SetInTrack setInTrack : savedSetsInTrack) {
+            assertThat(em.find(SetInTrack.class, setInTrack.getId())).isNull();
+        }
+    }
+
+    @Test
+    @DisplayName("로그인한 사용자만 운동기록 스냅샷을 삭제할 수 있다.")
+    void deleteSnapshotFailNoAuthN() throws Exception {
+        // given
+        ExerciseRecord snapshot = saveSnapshot(loginMember);
+
+        // when & then
+        assertThatThrownBy(() -> exerciseRecordService.deleteSnapshot(noLoginUserContext, snapshot.getId()))
+            .isInstanceOf(ApiException.class)
+            .hasMessageContaining(ErrorCode.AUTHENTICATED_FAIL.getMessage());
+    }
+
+    @Test
+    @DisplayName("인가 권한이 없는 사용자는 운동기록 스냅샷을 삭제할 수 없다.")
+    void deleteSnapshotFailNoAuthZ() throws Exception {
+        // given
+        ExerciseRecord snapshot = saveSnapshot(loginMember);
+        Member anotherMember = saveMember("another1");
+
+        // when & then
+        assertThatThrownBy(
+            () -> exerciseRecordService.deleteSnapshot(UserContext.fromMember(anotherMember), snapshot.getId()))
+            .isInstanceOf(ApiException.class)
+            .hasMessageContaining(ErrorCode.AUTHORIZED_FAIL.getMessage());
+    }
+
     private ExerciseRecord saveExerciseRecord(Member member, LocalDate date) {
         Track tracks = createTrack("머신1", List.of(createSetInTrack(1)));
-        return saveExerciseRecordHelper(member, tracks, date);
+        return saveExerciseRecordHelper(member, tracks, date, false);
     }
 
     private ExerciseRecord saveExerciseRecord(Member member) {
@@ -437,14 +507,24 @@ class ExerciseRecordServiceTest {
     }
 
     private ExerciseRecord saveExerciseRecord(Member member, Track track) {
-        return saveExerciseRecordHelper(member, track, LocalDate.now());
+        return saveExerciseRecordHelper(member, track, LocalDate.now(), false);
     }
 
-    private ExerciseRecord saveExerciseRecordHelper(Member member, Track track, LocalDate date) {
+    private ExerciseRecord saveSnapshot(Member member) {
+        Track track = createTrack("머신1", List.of(createSetInTrack(1)));
+        return saveExerciseRecordHelper(member, track, LocalDate.now(), true);
+    }
+
+    private ExerciseRecord saveSnapshot(Member member, Track track) {
+        return saveExerciseRecordHelper(member, track, LocalDate.now(), true);
+    }
+
+    private ExerciseRecord saveExerciseRecordHelper(Member member, Track track, LocalDate date, boolean isSnapshot) {
         ExerciseRecord record = ExerciseRecord.builder()
             .member(member)
             .tracks(List.of(track))
             .recordDate(date)
+            .isSnapshot(isSnapshot)
             .build();
         em.persist(record);
         return record;

@@ -133,6 +133,17 @@ public class ExerciseRecordService {
         return snapshot.getId();
     }
 
+    @Transactional
+    public void deleteSnapshot(UserContext userContext, long targetId) {
+        Member member = findMember(userContext);
+        ExerciseRecord snapshot = exerciseRecordRepository.findSnapshotById(targetId)
+            .orElseThrow(() -> new ApiException(ErrorCode.RECORD_NOT_FOUND));
+        if (!snapshot.isOwnedBy(member)) {
+            throw new ApiException(ErrorCode.AUTHORIZED_FAIL);
+        }
+        exerciseRecordRepository.delete(snapshot);
+    }
+
     private Member findMember(UserContext userContext) {
         return memberRepository.findById(userContext.id())
             .orElseThrow(() -> new ApiException(ErrorCode.AUTHENTICATED_FAIL));
