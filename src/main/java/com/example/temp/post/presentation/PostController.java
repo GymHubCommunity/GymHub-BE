@@ -10,6 +10,7 @@ import com.example.temp.post.dto.request.PostCreateRequest;
 import com.example.temp.post.dto.request.PostUpdateRequest;
 import com.example.temp.post.dto.response.PostDetailResponse;
 import com.example.temp.post.dto.response.PostResponse;
+import com.example.temp.post.dto.response.PostSearchResponse;
 import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -63,5 +65,14 @@ public class PostController {
     public ResponseEntity<Void> deletePost(@PathVariable Long postId, @Login UserContext userContext) {
         postService.deletePost(postId, userContext);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<PostSearchResponse> getPostsByHashtag(
+        @RequestParam String hashtag,
+        @Login UserContext userContext,
+        @PageableDefault(sort = "registeredAt", direction = DESC) Pageable pageable) {
+        PostSearchResponse posts = postService.findPostsByHashtag(hashtag, userContext, pageable);
+        return ResponseEntity.ok(posts);
     }
 }
