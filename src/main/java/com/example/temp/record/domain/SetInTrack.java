@@ -71,4 +71,11 @@ public class SetInTrack {
         this.track.getSetsInTrack().add(this);
     }
 
+    public SetInTrack copy() {
+        return SetInTrack.builder()
+            .order(this.order)
+            .repeatCnt(this.repeatCnt)
+            .weight(this.weight)
+            .build();
+    }
 }

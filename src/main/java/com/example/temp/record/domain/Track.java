@@ -48,7 +48,7 @@ public class Track {
     private List<SetInTrack> setsInTrack = new ArrayList<>();
 
     @Builder
-    public Track(ExerciseRecord exerciseRecord, String machineName, BodyPart majorBodyPart,
+    private Track(ExerciseRecord exerciseRecord, String machineName, BodyPart majorBodyPart,
         List<SetInTrack> setsInTrack) {
         machineName = machineName.trim();
         validate(machineName, setsInTrack);
@@ -106,5 +106,12 @@ public class Track {
         }
         this.exerciseRecord = exerciseRecord;
         this.exerciseRecord.getTracks().add(this);
+    }
+
+    public Track copy() {
+        List<SetInTrack> setsInTrackCopy = this.setsInTrack.stream()
+            .map(SetInTrack::copy)
+            .toList();
+        return Track.createWithoutRecord(this.machineName, this.majorBodyPart, setsInTrackCopy);
     }
 }

@@ -7,8 +7,10 @@ import com.example.temp.common.dto.UserContext;
 import com.example.temp.record.application.ExerciseRecordService;
 import com.example.temp.record.dto.request.ExerciseRecordCreateRequest;
 import com.example.temp.record.dto.request.ExerciseRecordUpdateRequest;
+import com.example.temp.record.dto.response.RecordSnapshotsResponse;
 import com.example.temp.record.dto.response.RetrievePeriodExerciseRecordsResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -56,5 +58,27 @@ public class ExerciseRecordController {
         RetrievePeriodExerciseRecordsResponse response = exerciseRecordService.retrievePeriodExerciseRecords(
             userContext, MonthlyDatePeriod.of(year, month));
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/{recordId}/snapshots")
+    public ResponseEntity<CreatedResponse> createSnapshot(@Login UserContext userContext, @PathVariable long recordId) {
+        long createdId = exerciseRecordService.createSnapshot(userContext, recordId);
+        return ResponseEntity.status(HttpStatus.CREATED)
+            .body(CreatedResponse.of(createdId));
+    }
+
+    @GetMapping("/snapshots")
+    public ResponseEntity<RecordSnapshotsResponse> retrieveSnapshots(@Login UserContext userContext,
+        @RequestParam(required = false) Long lastId, @RequestParam int size) {
+        RecordSnapshotsResponse response = exerciseRecordService.retrieveSnapshots(userContext,
+            lastId, Pageable.ofSize(size));
+        return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("/snapshots/{snapshotId}")
+    public ResponseEntity<CreatedResponse> deleteSnapshot(@Login UserContext userContext,
+        @PathVariable long snapshotId) {
+        exerciseRecordService.deleteSnapshot(userContext, snapshotId);
+        return ResponseEntity.noContent().build();
     }
 }

@@ -11,7 +11,9 @@ import com.example.temp.member.domain.Member;
 import com.example.temp.member.domain.PrivacyPolicy;
 import com.example.temp.member.domain.nickname.Nickname;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -80,6 +82,27 @@ class ExerciseRecordTest {
         assertThat(record.isOwnedBy(another)).isFalse();
     }
 
+    @Test
+    @DisplayName("운동기록의 스냅샷을 만든다.")
+    void createSnapshot() throws Exception {
+        // given
+        Member member = createMember("nick1");
+        Track track = createTrack("머신1");
+        ExerciseRecord original = ExerciseRecord.create(member, List.of(track));
+        assertThat(original.isSnapshot()).isFalse();
+
+        // when
+        ExerciseRecord snapshot = original.createSnapshot(member);
+
+        // then
+        assertThat(snapshot.isSnapshot()).isTrue();
+        assertThat(snapshot.getRecordDate()).isEqualTo(original.getRecordDate());
+
+        assertThat(snapshot.getTracks()).hasSize(1)
+            .extracting(Track::getMachineName)
+            .containsExactlyInAnyOrder("머신1");
+    }
+
     private Track createTrack(String machineName) {
         return Track.builder()
             .machineName(machineName)
@@ -94,7 +117,6 @@ class ExerciseRecordTest {
             .repeatCnt(5)
             .build();
     }
-
 
     private ExerciseRecord createExerciseRecord(Member member) {
         return ExerciseRecord.builder()

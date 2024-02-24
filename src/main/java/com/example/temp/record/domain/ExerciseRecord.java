@@ -23,7 +23,6 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.CreatedDate;
 
 @Entity
 @Table(name = "records")
@@ -45,13 +44,16 @@ public class ExerciseRecord extends BaseTimeEntity {
 
     private LocalDate recordDate;
 
+    private boolean isSnapshot;
+
     @Builder
-    private ExerciseRecord(Member member, List<Track> tracks, LocalDate recordDate) {
+    private ExerciseRecord(Member member, List<Track> tracks, LocalDate recordDate, boolean isSnapshot) {
         validate(tracks);
         this.member = member;
         this.recordDate = recordDate;
         this.tracks = new ArrayList<>();
         tracks.forEach(track -> track.relate(this));
+        this.isSnapshot = isSnapshot;
     }
 
     private void validate(List<Track> tracks) {
@@ -66,6 +68,19 @@ public class ExerciseRecord extends BaseTimeEntity {
             .member(member)
             .recordDate(LocalDate.now())
             .tracks(tracks)
+            .isSnapshot(false)
+            .build();
+    }
+
+    public ExerciseRecord createSnapshot(Member member) {
+        List<Track> tracksCopy = this.tracks.stream()
+            .map(Track::copy)
+            .toList();
+        return ExerciseRecord.builder()
+            .member(member)
+            .recordDate(this.recordDate)
+            .tracks(tracksCopy)
+            .isSnapshot(true)
             .build();
     }
 

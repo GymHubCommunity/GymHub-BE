@@ -24,17 +24,22 @@ import com.example.temp.record.dto.request.ExerciseRecordCreateRequest.TrackCrea
 import com.example.temp.record.dto.request.ExerciseRecordUpdateRequest;
 import com.example.temp.record.dto.request.ExerciseRecordUpdateRequest.TrackUpdateRequest;
 import com.example.temp.record.dto.request.ExerciseRecordUpdateRequest.TrackUpdateRequest.SetInTrackUpdateRequest;
+import com.example.temp.record.dto.response.ExerciseRecordInfo;
+import com.example.temp.record.dto.response.RecordSnapshotsResponse;
 import com.example.temp.record.dto.response.RetrievePeriodExerciseRecordsResponse;
 import com.example.temp.record.dto.response.RetrievePeriodExerciseRecordsResponse.RetrievePeriodRecordsElement;
 import jakarta.persistence.EntityManager;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
@@ -247,6 +252,91 @@ class ExerciseRecordServiceTest {
             .hasMessageContaining(ErrorCode.AUTHENTICATED_FAIL.getMessage());
     }
 
+    @Test
+    @DisplayName("운동기록의 스냅샷을 생성한다.")
+    void createSnapshot() throws Exception {
+        // given
+        Member member = saveMember("nick");
+        ExerciseRecord original = saveExerciseRecord(member);
+        assertThat(original.isSnapshot()).isFalse();
+
+        // when
+        long createdId = exerciseRecordService.createSnapshot(UserContext.fromMember(member), original.getId());
+
+        // then
+        em.flush();
+        em.clear();
+
+        ExerciseRecord copy = em.find(ExerciseRecord.class, createdId);
+
+        assertThat(copy.getId()).isNotEqualTo(original.getId());
+        assertThat(copy.isSnapshot()).isTrue();
+
+        assertThat(copy.getTracks()).hasSize(original.getTracks().size());
+        List<Track> tracksInOriginal = original.getTracks();
+        List<Track> tracksInCopy = copy.getTracks();
+        validateAllTracksIdIsDifferent(tracksInCopy, tracksInOriginal);
+        validateAllTrackMachineNameIsSame(tracksInCopy, tracksInOriginal);
+    }
+
+    @Test
+    @DisplayName("인증되지 않은 사용자는 운동기록 스냅샷을 만들 수 없다.")
+    void createSnapshotFailExerciseRecordNoAuthN() throws Exception {
+        // given
+        ExerciseRecord original = saveExerciseRecord(loginMember);
+
+        // when & then
+        assertThatThrownBy(
+            () -> exerciseRecordService.createSnapshot(noLoginUserContext, original.getId()))
+            .isInstanceOf(ApiException.class)
+            .hasMessageContaining(ErrorCode.AUTHENTICATED_FAIL.getMessage());
+    }
+
+    @Test
+    @DisplayName("자신이 작성하지 않은 운동기록을 사용해서 스냅샷을 만들 수 없다.")
+    void createSnapshotFailExerciseRecordNoAuthZ() throws Exception {
+        // given
+        Member member = saveMember("nick");
+        ExerciseRecord original = saveExerciseRecord(member);
+
+        // when & then
+        assertThatThrownBy(
+            () -> exerciseRecordService.createSnapshot(loginUserContext, original.getId()))
+            .isInstanceOf(ApiException.class)
+            .hasMessageContaining(ErrorCode.AUTHORIZED_FAIL.getMessage());
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 운동기록의 스냅샷은 생성할 수 없다.")
+    void createSnapshotFailExerciseRecordNotFound() throws Exception {
+        // given
+        Member member = saveMember("nick");
+        long notExistExerciseRecordId = 999_999_999L;
+
+        // when & then
+        assertThatThrownBy(
+            () -> exerciseRecordService.createSnapshot(UserContext.fromMember(member), notExistExerciseRecordId))
+            .isInstanceOf(ApiException.class)
+            .hasMessageContaining(ErrorCode.RECORD_NOT_FOUND.getMessage());
+    }
+
+    private void validateAllTrackMachineNameIsSame(List<Track> tracksInCopy, List<Track> tracksInOriginal) {
+        Set<String> machineNamesInCopy = tracksInCopy.stream().map(Track::getMachineName).collect(Collectors.toSet());
+        Set<String> trackNamesInOriginal = tracksInOriginal.stream().map(Track::getMachineName)
+            .collect(Collectors.toSet());
+        for (String trackNameInCopy : machineNamesInCopy) {
+            assertThat(trackNamesInOriginal).contains(trackNameInCopy);
+        }
+    }
+
+    private void validateAllTracksIdIsDifferent(List<Track> tracksInCopy, List<Track> tracksInOriginal) {
+        Set<Long> trackIdsInCopy = tracksInCopy.stream().map(Track::getId).collect(Collectors.toSet());
+        Set<Long> trackIdsInOriginal = tracksInOriginal.stream().map(Track::getId).collect(Collectors.toSet());
+        for (Long trackIdInCopy : trackIdsInCopy) {
+            assertThat(trackIdsInOriginal).doesNotContain(trackIdInCopy);
+        }
+    }
+
     private Track createTrack(String machineName, List<SetInTrack> setsInTrack) {
         return Track.builder()
             .machineName(machineName)
@@ -340,9 +430,116 @@ class ExerciseRecordServiceTest {
             .hasMessageContaining(ErrorCode.AUTHORIZED_FAIL.getMessage());
     }
 
+    @Test
+    @DisplayName("스냅샷을 삭제한다.")
+    void deleteSnapshot() throws Exception {
+        // given
+        Member member = saveMember("nick1");
+        ExerciseRecord record = saveSnapshot(member);
+
+        // when
+        exerciseRecordService.deleteSnapshot(UserContext.fromMember(member), record.getId());
+
+        // then
+        assertThat(em.find(ExerciseRecord.class, record.getId())).isNull();
+    }
+
+    /**
+     * ExerciseRecord(스냅샷), Track, SetInTrack 엔티티들이 DB에 저장되었는지 확인합니다. deleteSnapshot 명령 이후, 해당 엔티티들이 DB에서 삭제되었는지 확인합니다.
+     */
+    @Test
+    @DisplayName("운동기록 스냅샷이 삭제되면 해당 기록에 포함된 Track, Set 엔티티를 함께 삭제한다.")
+    void deleteSnapshotCheckAllChildrenDelete() throws Exception {
+        // given
+        Member member = saveMember("nick1");
+        Track trackBeforeSaved = createTrack("머신1", List.of(createSetInTrack(1), createSetInTrack(2)));
+        ExerciseRecord snapshot = saveSnapshot(member, trackBeforeSaved);
+        Track savedTrack = snapshot.getTracks().get(0);
+        List<SetInTrack> savedSetsInTrack = savedTrack.getSetsInTrack();
+
+        assertThat(em.find(ExerciseRecord.class, snapshot.getId())).isNotNull();
+        assertThat(em.find(Track.class, savedTrack.getId())).isNotNull();
+        for (SetInTrack setInTrack : savedSetsInTrack) {
+            assertThat(em.find(SetInTrack.class, setInTrack.getId())).isNotNull();
+        }
+
+        // when
+        exerciseRecordService.deleteSnapshot(UserContext.fromMember(member), snapshot.getId());
+
+        // then
+        assertThat(em.find(ExerciseRecord.class, snapshot.getId())).isNull();
+        assertThat(em.find(Track.class, savedTrack.getId())).isNull();
+        for (SetInTrack setInTrack : savedSetsInTrack) {
+            assertThat(em.find(SetInTrack.class, setInTrack.getId())).isNull();
+        }
+    }
+
+    @Test
+    @DisplayName("로그인한 사용자만 운동기록 스냅샷을 삭제할 수 있다.")
+    void deleteSnapshotFailNoAuthN() throws Exception {
+        // given
+        ExerciseRecord snapshot = saveSnapshot(loginMember);
+
+        // when & then
+        assertThatThrownBy(() -> exerciseRecordService.deleteSnapshot(noLoginUserContext, snapshot.getId()))
+            .isInstanceOf(ApiException.class)
+            .hasMessageContaining(ErrorCode.AUTHENTICATED_FAIL.getMessage());
+    }
+
+    @Test
+    @DisplayName("인가 권한이 없는 사용자는 운동기록 스냅샷을 삭제할 수 없다.")
+    void deleteSnapshotFailNoAuthZ() throws Exception {
+        // given
+        ExerciseRecord snapshot = saveSnapshot(loginMember);
+        Member anotherMember = saveMember("another1");
+
+        // when & then
+        assertThatThrownBy(
+            () -> exerciseRecordService.deleteSnapshot(UserContext.fromMember(anotherMember), snapshot.getId()))
+            .isInstanceOf(ApiException.class)
+            .hasMessageContaining(ErrorCode.AUTHORIZED_FAIL.getMessage());
+    }
+
+    @Test
+    @DisplayName("운동기록 스냅샷 목록을 불러온다. 만약 다음 데이터가 존재하면 hasNext 필드에 true를 반환한다.")
+    void retrieveSnapshotsThatHasNextTrue() throws Exception {
+        // given
+        ExerciseRecord snapshot1 = saveSnapshot(loginMember);
+        ExerciseRecord snapshot2 = saveSnapshot(loginMember);
+        ExerciseRecord snapshot3 = saveSnapshot(loginMember);
+
+        // when
+        RecordSnapshotsResponse response = exerciseRecordService.retrieveSnapshots(loginUserContext, null,
+            Pageable.ofSize(2));
+
+        // then
+        assertThat(response.hasNext()).isTrue();
+        assertThat(response.snapshots()).hasSize(2)
+            .extracting(ExerciseRecordInfo::recordId)
+            .containsExactly(snapshot3.getId(), snapshot2.getId());
+    }
+
+    @Test
+    @DisplayName("운동기록 스냅샷 목록을 불러온다. 만약 다음 데이터가 존재하면 hasNext 필드에 false를 반환한다.")
+    void retrieveSnapshotsThatHasNextFalse() throws Exception {
+        // given
+        ExerciseRecord snapshot1 = saveSnapshot(loginMember);
+        ExerciseRecord snapshot2 = saveSnapshot(loginMember);
+
+        // when
+        RecordSnapshotsResponse response = exerciseRecordService.retrieveSnapshots(loginUserContext, null,
+            Pageable.ofSize(2));
+
+        // then
+        assertThat(response.hasNext()).isFalse();
+        assertThat(response.snapshots()).hasSize(2)
+            .extracting(ExerciseRecordInfo::recordId)
+            .containsExactly(snapshot2.getId(), snapshot1.getId());
+    }
+
     private ExerciseRecord saveExerciseRecord(Member member, LocalDate date) {
         Track tracks = createTrack("머신1", List.of(createSetInTrack(1)));
-        return saveExerciseRecordHelper(member, tracks, date);
+        return saveExerciseRecordHelper(member, tracks, date, false);
     }
 
     private ExerciseRecord saveExerciseRecord(Member member) {
@@ -350,14 +547,24 @@ class ExerciseRecordServiceTest {
     }
 
     private ExerciseRecord saveExerciseRecord(Member member, Track track) {
-        return saveExerciseRecordHelper(member, track, LocalDate.now());
+        return saveExerciseRecordHelper(member, track, LocalDate.now(), false);
     }
 
-    private ExerciseRecord saveExerciseRecordHelper(Member member, Track track, LocalDate date) {
+    private ExerciseRecord saveSnapshot(Member member) {
+        Track track = createTrack("머신1", List.of(createSetInTrack(1)));
+        return saveExerciseRecordHelper(member, track, LocalDate.now(), true);
+    }
+
+    private ExerciseRecord saveSnapshot(Member member, Track track) {
+        return saveExerciseRecordHelper(member, track, LocalDate.now(), true);
+    }
+
+    private ExerciseRecord saveExerciseRecordHelper(Member member, Track track, LocalDate date, boolean isSnapshot) {
         ExerciseRecord record = ExerciseRecord.builder()
             .member(member)
             .tracks(List.of(track))
             .recordDate(date)
+            .isSnapshot(isSnapshot)
             .build();
         em.persist(record);
         return record;

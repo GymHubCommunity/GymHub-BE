@@ -69,6 +69,24 @@ class SetInTrackTest {
             .hasMessageContaining(ErrorCode.SET_REPEAT_CNT_INVALID.getMessage());
     }
 
+    @Test
+    @DisplayName("세트를 복사한다.")
+    void copy() throws Exception {
+        // given
+        int order = 1;
+        int weight = 1;
+        int repeatCnt = 1;
+        SetInTrack original = createSet(order, weight, repeatCnt);
+
+        // when
+        SetInTrack copy = original.copy();
+
+        // then
+        assertThat(copy.getOrder()).isEqualTo(original.getOrder());
+        assertThat(copy.getWeight()).isEqualTo(original.getWeight());
+        assertThat(copy.getRepeatCnt()).isEqualTo(original.getRepeatCnt());
+    }
+
     private SetInTrack createSet(int order, int weight, int repeatCnt) {
         return SetInTrack.builder()
             .order(order)
