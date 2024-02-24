@@ -1,5 +1,6 @@
 package com.example.temp.post.application;
 
+import static com.example.temp.common.exception.ErrorCode.*;
 import static com.example.temp.common.exception.ErrorCode.AUTHENTICATED_FAIL;
 import static com.example.temp.common.exception.ErrorCode.IMAGE_NOT_FOUND;
 import static com.example.temp.common.exception.ErrorCode.POST_NOT_FOUND;
@@ -12,6 +13,7 @@ import com.example.temp.follow.domain.FollowRepository;
 import com.example.temp.follow.domain.FollowStatus;
 import com.example.temp.hashtag.application.HashtagService;
 import com.example.temp.hashtag.domain.Hashtag;
+import com.example.temp.hashtag.domain.HashtagRepository;
 import com.example.temp.image.domain.Image;
 import com.example.temp.image.domain.ImageRepository;
 import com.example.temp.member.domain.Member;
@@ -27,12 +29,14 @@ import com.example.temp.post.dto.request.PostCreateRequest;
 import com.example.temp.post.dto.request.PostUpdateRequest;
 import com.example.temp.post.dto.response.PostDetailResponse;
 import com.example.temp.post.dto.response.PostResponse;
+import com.example.temp.post.dto.response.PostSearchResponse;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.event.EventListener;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
@@ -47,9 +51,10 @@ public class PostService {
     private final MemberRepository memberRepository;
     private final FollowRepository followRepository;
     private final ImageRepository imageRepository;
-    private final HashtagService hashtagService;
     private final PostImageRepository postImageRepository;
     private final PostHashtagRepository postHashtagRepository;
+    private final HashtagRepository hashtagRepository;
+    private final HashtagService hashtagService;
 
     @Transactional
     public Long createPost(UserContext userContext, PostCreateRequest postCreateRequest,
@@ -68,7 +73,7 @@ public class PostService {
         Member member = findMember(userContext);
         List<Member> myselfAndFollowings = findMyselfAndFollowings(member);
         myselfAndFollowings.add(member);
-        Slice<Post> posts = postRepository.findByMemberInOrderByRegisteredAtDesc(myselfAndFollowings, pageable);
+        Slice<Post> posts = postRepository.findAllByMemberInOrderByRegisteredAtDesc(myselfAndFollowings, pageable);
         return PostResponse.from(posts);
     }
 
@@ -95,6 +100,13 @@ public class PostService {
 
         disableImage(post);
         postRepository.delete(post);
+    }
+
+    public PostSearchResponse findPostsByHashtag(String hashtag, UserContext userContext, Pageable pageable) {
+        findMember(userContext);
+        Hashtag findHashtag = findHashtag(hashtag);
+        Page<Post> posts = postRepository.findAllPostByHashtag(findHashtag.getId(), pageable);
+        return PostSearchResponse.from(posts);
     }
 
     private void updatePostImages(PostUpdateRequest request, Post post) {
@@ -163,6 +175,11 @@ public class PostService {
             .map(PostImage::getImageUrl)
             .toList());
         images.forEach(Image::deactivate);
+    }
+
+    private Hashtag findHashtag(String hashtag) {
+        return hashtagRepository.findByName("#" + hashtag)
+            .orElseThrow(() -> new ApiException(HASHTAG_NOT_FOUND));
     }
 
     private void validateOwner(UserContext userContext, Post post) {
