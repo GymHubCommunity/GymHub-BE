@@ -140,6 +140,35 @@ class ExerciseRecordRepositoryTest {
         assertThat(resultOpt).isEmpty();
     }
 
+    @Test
+    @DisplayName("id를 사용해 운동기록을 찾는다.")
+    void findById() throws Exception {
+        // given
+        Member member = saveMember("회원");
+        ExerciseRecord snapshot = saveExerciseRecord(member, LocalDate.of(2019, 12, 31), false);
+
+        // when
+        Optional<ExerciseRecord> resultOpt = exerciseRecordRepository.findById(snapshot.getId());
+
+        // then
+        assertThat(resultOpt).isNotEmpty();
+    }
+
+    @Test
+    @DisplayName("운동 기록이 snapshot이라면, findById로 해당 엔티티를 가져올 수 없다.")
+    void findByIdThatIsSnapshot() throws Exception {
+        // given
+        Member member = saveMember("회원");
+        ExerciseRecord snapshot = saveExerciseRecord(member, LocalDate.of(2019, 12, 31), true);
+
+        // when
+        Optional<ExerciseRecord> resultOpt = exerciseRecordRepository.findById(snapshot.getId());
+
+        // then
+        assertThat(resultOpt).isEmpty();
+    }
+
+
     private Member saveMember(String nickname) {
         Member member = Member.builder()
             .email(Email.create("이메일"))
