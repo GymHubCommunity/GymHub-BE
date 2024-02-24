@@ -57,4 +57,11 @@ public class ExerciseRecordController {
             userContext, MonthlyDatePeriod.of(year, month));
         return ResponseEntity.ok(response);
     }
+
+    @PostMapping("/{recordId}/snapshot")
+    public ResponseEntity<CreatedResponse> createSnapshot(@Login UserContext userContext, @PathVariable long recordId) {
+        long createdId = exerciseRecordService.createSnapshot(userContext, recordId);
+        return ResponseEntity.status(HttpStatus.CREATED)
+            .body(CreatedResponse.of(createdId));
+    }
 }
