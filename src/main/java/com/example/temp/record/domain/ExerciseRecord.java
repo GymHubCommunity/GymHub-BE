@@ -45,13 +45,16 @@ public class ExerciseRecord extends BaseTimeEntity {
 
     private LocalDate recordDate;
 
+    private boolean isSnapshot;
+
     @Builder
-    private ExerciseRecord(Member member, List<Track> tracks, LocalDate recordDate) {
+    private ExerciseRecord(Member member, List<Track> tracks, LocalDate recordDate, boolean isSnapshot) {
         validate(tracks);
         this.member = member;
         this.recordDate = recordDate;
         this.tracks = new ArrayList<>();
         tracks.forEach(track -> track.relate(this));
+        this.isSnapshot = isSnapshot;
     }
 
     private void validate(List<Track> tracks) {
@@ -66,6 +69,16 @@ public class ExerciseRecord extends BaseTimeEntity {
             .member(member)
             .recordDate(LocalDate.now())
             .tracks(tracks)
+            .isSnapshot(false)
+            .build();
+    }
+
+    public static ExerciseRecord createSnapshot(Member member, List<Track> tracks) {
+        return ExerciseRecord.builder()
+            .member(member)
+            .recordDate(LocalDate.now())
+            .tracks(tracks)
+            .isSnapshot(true)
             .build();
     }
 
