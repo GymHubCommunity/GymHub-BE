@@ -7,8 +7,8 @@ import com.example.temp.common.dto.UserContext;
 import com.example.temp.record.application.ExerciseRecordService;
 import com.example.temp.record.dto.request.ExerciseRecordCreateRequest;
 import com.example.temp.record.dto.request.ExerciseRecordUpdateRequest;
-import com.example.temp.record.dto.response.RecordSnapshotsResponse;
 import com.example.temp.record.dto.response.RetrievePeriodExerciseRecordsResponse;
+import com.example.temp.record.dto.response.RetrieveRecordSnapshotsResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -68,9 +68,9 @@ public class ExerciseRecordController {
     }
 
     @GetMapping("/snapshots")
-    public ResponseEntity<RecordSnapshotsResponse> retrieveSnapshots(@Login UserContext userContext,
+    public ResponseEntity<RetrieveRecordSnapshotsResponse> retrieveSnapshots(@Login UserContext userContext,
         @RequestParam(required = false) Long lastId, @RequestParam int size) {
-        RecordSnapshotsResponse response = exerciseRecordService.retrieveSnapshots(userContext,
+        RetrieveRecordSnapshotsResponse response = exerciseRecordService.retrieveSnapshots(userContext,
             lastId, Pageable.ofSize(size));
         return ResponseEntity.ok(response);
     }

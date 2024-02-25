@@ -24,10 +24,10 @@ import com.example.temp.record.dto.request.ExerciseRecordCreateRequest.TrackCrea
 import com.example.temp.record.dto.request.ExerciseRecordUpdateRequest;
 import com.example.temp.record.dto.request.ExerciseRecordUpdateRequest.TrackUpdateRequest;
 import com.example.temp.record.dto.request.ExerciseRecordUpdateRequest.TrackUpdateRequest.SetInTrackUpdateRequest;
-import com.example.temp.record.dto.response.ExerciseRecordInfo;
-import com.example.temp.record.dto.response.RecordSnapshotsResponse;
+import com.example.temp.record.dto.response.ExerciseRecordResponse;
 import com.example.temp.record.dto.response.RetrievePeriodExerciseRecordsResponse;
 import com.example.temp.record.dto.response.RetrievePeriodExerciseRecordsResponse.RetrievePeriodRecordsElement;
+import com.example.temp.record.dto.response.RetrieveRecordSnapshotsResponse;
 import jakarta.persistence.EntityManager;
 import java.time.LocalDate;
 import java.util.Collections;
@@ -509,13 +509,13 @@ class ExerciseRecordServiceTest {
         ExerciseRecord snapshot3 = saveSnapshot(loginMember);
 
         // when
-        RecordSnapshotsResponse response = exerciseRecordService.retrieveSnapshots(loginUserContext, null,
+        RetrieveRecordSnapshotsResponse response = exerciseRecordService.retrieveSnapshots(loginUserContext, null,
             Pageable.ofSize(2));
 
         // then
         assertThat(response.hasNext()).isTrue();
         assertThat(response.snapshots()).hasSize(2)
-            .extracting(ExerciseRecordInfo::recordId)
+            .extracting(ExerciseRecordResponse::recordId)
             .containsExactly(snapshot3.getId(), snapshot2.getId());
     }
 
@@ -527,13 +527,13 @@ class ExerciseRecordServiceTest {
         ExerciseRecord snapshot2 = saveSnapshot(loginMember);
 
         // when
-        RecordSnapshotsResponse response = exerciseRecordService.retrieveSnapshots(loginUserContext, null,
+        RetrieveRecordSnapshotsResponse response = exerciseRecordService.retrieveSnapshots(loginUserContext, null,
             Pageable.ofSize(2));
 
         // then
         assertThat(response.hasNext()).isFalse();
         assertThat(response.snapshots()).hasSize(2)
-            .extracting(ExerciseRecordInfo::recordId)
+            .extracting(ExerciseRecordResponse::recordId)
             .containsExactly(snapshot2.getId(), snapshot1.getId());
     }
 
