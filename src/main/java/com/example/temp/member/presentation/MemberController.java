@@ -54,6 +54,12 @@ public class MemberController {
         return ResponseEntity.ok(memberInfo);
     }
 
+    @GetMapping("/me")
+    public ResponseEntity<MemberInfo> retrieveMemberInfo(@Login UserContext userContext) {
+        MemberInfo memberInfo = memberService.retrieveMemberInfo(userContext.id());
+        return ResponseEntity.ok(memberInfo);
+    }
+
     @PutMapping("/me")
     public ResponseEntity<Void> updateMemberInfo(@Login UserContext userContext,
         @RequestBody MemberUpdateRequest request) {
