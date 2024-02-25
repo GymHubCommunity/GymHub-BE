@@ -38,5 +38,6 @@ public interface ExerciseRecordRepository extends JpaRepository<ExerciseRecord, 
         + "AND (:lastId IS NULL OR er.id < :lastId) "
         + "AND er.member = :member "
         + "ORDER BY er.id DESC")
-    Slice<ExerciseRecord> findNextSnapshotsByMember(Long lastId, Pageable pageable, @Param("member") Member member);
+    Slice<ExerciseRecord> findNextSnapshotsByMember(@Param("lastId") Long lastId, Pageable pageable,
+        @Param("member") Member member);
 }
