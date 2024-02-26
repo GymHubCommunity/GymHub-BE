@@ -227,6 +227,26 @@ class PostRepositoryTest {
         assertThat(posts.getTotalElements()).isZero();
     }
 
+    @DisplayName("공개 계정의 글을 전부 조회할 수 있다.")
+    @Test
+    void findAllPostByPublic() {
+        Member member1 = saveMember("email1@naver.com", "작성자1");
+        Member member2 = saveMember("email2@naver.com", "작성자2");
+        member2.changePrivacy(PrivacyPolicy.PRIVATE);
+        saveImage("이미지1");
+        saveImage("이미지2");
+        saveImage("이미지3");
+        savePost(member1, "게시글1", List.of("이미지1"), List.of());
+        savePost(member1, "게시글2", List.of("이미지2"), List.of());
+        savePost(member2, "게시글3", List.of("이미지3"), List.of());
+
+        //when
+        Page<Post> posts = postRepository.findAllPost(PageRequest.of(0, 5));
+
+        //then
+        assertThat(posts.getTotalElements()).isEqualTo(2);
+    }
+
     @DisplayName("게시글은 등록일자 내림차순으로 정렬된다.")
     @Test
     void postsAreOrderedByRegisteredAtDesc() {
