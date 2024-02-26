@@ -7,6 +7,7 @@ import static com.example.temp.common.exception.ErrorCode.POST_NOT_FOUND;
 import static com.example.temp.common.exception.ErrorCode.UNAUTHORIZED_POST;
 import static com.example.temp.member.domain.PrivacyPolicy.PRIVATE;
 import static com.example.temp.member.domain.PrivacyPolicy.PUBLIC;
+import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.groups.Tuple.tuple;
@@ -381,7 +382,7 @@ class PostServiceTest {
             .containsExactly("게시글1");
     }
 
-    @DisplayName("존재하지 않는 해시태그로 게시글을 검색하면 예외가 발생한다.")
+    @DisplayName("존재하지 않는 해시태그로 게시글을 검색하면 빈 결과를 반환한다.")
     @Test
     void findPostsByNonExistentHashtag() {
         //given
@@ -392,11 +393,31 @@ class PostServiceTest {
         List<String> hashtags = List.of("#hashtag1", "#hashtag2");
         savePost(member, "게시글1", savedImageUrls, hashtags);
 
+        //when
+        PostSearchResponse posts = postService.findPostsByHashtag("hashtag3", userContext, PageRequest.of(0, 5));
+
         //then
-        assertThatThrownBy(() -> postService.findPostsByHashtag("hashtag3", userContext, PageRequest.of(0, 5))
-        )
-            .isInstanceOf(ApiException.class)
-            .hasMessage(HASHTAG_NOT_FOUND.getMessage());
+        assertThat(posts.totalPostCount()).isZero();
+        assertThat(posts.posts()).isEmpty();
+    }
+
+    @DisplayName("파라미터로 해시태그가 넘어오지 않으면 전체 게시글을 조회한다.")
+    @Test
+    void findPostsByNotContainHashtag() {
+        //given
+        Member member = saveMember("email@test.com", "nick");
+        UserContext userContext = UserContext.fromMember(member);
+        List<String> imageUrls = List.of("imageUrl1", "ImageUrl2");
+        List<String> savedImageUrls = saveImagesAndGetUrls(imageUrls);
+        savePost(member, "게시글1", savedImageUrls, new ArrayList<>());
+        savePost(member, "게시글2", savedImageUrls, new ArrayList<>());
+
+        //when
+        PostSearchResponse posts = postService.findPostsByHashtag(null, userContext, PageRequest.of(0, 5));
+
+        //then
+        assertThat(posts.totalPostCount()).isEqualTo(2);
+        assertThat(posts.posts()).hasSize(2);
     }
 
     @DisplayName("로그인에 문제가 생기면 댓글을 조회할 수 없다.")

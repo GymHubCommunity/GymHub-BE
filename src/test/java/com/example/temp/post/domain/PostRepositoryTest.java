@@ -185,7 +185,7 @@ class PostRepositoryTest {
         savePost(member, "게시글3", List.of("이미지1", "이미지2", "이미지3"), List.of("#해시태그1", "#해시태그4"));
 
         //when
-        Page<Post> posts = postRepository.findAllPostByHashtag(hashtag.getId(), PageRequest.of(0, 5));
+        Page<Post> posts = postRepository.findAllPostByHashtag(hashtag.getName(), PageRequest.of(0, 5));
         List<Post> postContents = posts.getContent();
 
         //then
@@ -206,7 +206,7 @@ class PostRepositoryTest {
         savePost(privateMember, "비공개계정 게시글", List.of("이미지1"), List.of("#privateHashtag"));
 
         //when
-        Page<Post> posts = postRepository.findAllPostByHashtag(hashtag.getId(), PageRequest.of(0, 5));
+        Page<Post> posts = postRepository.findAllPostByHashtag(hashtag.getName(), PageRequest.of(0, 5));
 
         //then
         assertThat(posts.getTotalElements()).isZero();
@@ -221,7 +221,7 @@ class PostRepositoryTest {
         savePost(member, "게시글4", List.of("이미지4"), List.of());
 
         //when
-        Page<Post> posts = postRepository.findAllPostByHashtag(999L, PageRequest.of(0, 5)); // 존재하지 않는 해시태그 ID
+        Page<Post> posts = postRepository.findAllPostByHashtag("#해시태그2", PageRequest.of(0, 5));
 
         //then
         assertThat(posts.getTotalElements()).isZero();
@@ -241,7 +241,7 @@ class PostRepositoryTest {
         savePost(member, "게시글7", List.of("이미지7"), List.of("#hashtag5"));
 
         //when
-        Page<Post> posts = postRepository.findAllPostByHashtag(hashtag.getId(), PageRequest.of(0, 5));
+        Page<Post> posts = postRepository.findAllPostByHashtag(hashtag.getName(), PageRequest.of(0, 5));
         List<Post> postContents = posts.getContent();
 
         //then
