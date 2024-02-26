@@ -69,7 +69,7 @@ public class PostController {
 
     @GetMapping("/search")
     public ResponseEntity<PostSearchResponse> getPostsByHashtag(
-        @RequestParam String hashtag,
+        @RequestParam(required = false) String hashtag,
         @Login UserContext userContext,
         @PageableDefault(sort = "registeredAt", direction = DESC) Pageable pageable) {
         PostSearchResponse posts = postService.findPostsByHashtag(hashtag, userContext, pageable);
