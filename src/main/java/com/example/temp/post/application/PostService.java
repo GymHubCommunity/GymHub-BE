@@ -1,6 +1,5 @@
 package com.example.temp.post.application;
 
-import static com.example.temp.common.exception.ErrorCode.*;
 import static com.example.temp.common.exception.ErrorCode.AUTHENTICATED_FAIL;
 import static com.example.temp.common.exception.ErrorCode.IMAGE_NOT_FOUND;
 import static com.example.temp.common.exception.ErrorCode.POST_NOT_FOUND;
@@ -33,6 +32,7 @@ import com.example.temp.post.dto.response.PostSearchResponse;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.event.EventListener;
@@ -104,8 +104,9 @@ public class PostService {
 
     public PostSearchResponse findPostsByHashtag(String hashtag, UserContext userContext, Pageable pageable) {
         findMember(userContext);
-        Hashtag findHashtag = findHashtag(hashtag);
-        Page<Post> posts = postRepository.findAllPostByHashtag(findHashtag.getId(), pageable);
+        Page<Post> posts = Optional.ofNullable(hashtag)
+            .map(tag -> postRepository.findAllPostByHashtag("#" + tag, pageable))
+            .orElseGet(() -> postRepository.findAllPost(pageable));
         return PostSearchResponse.from(posts);
     }
 
@@ -175,11 +176,6 @@ public class PostService {
             .map(PostImage::getImageUrl)
             .toList());
         images.forEach(Image::deactivate);
-    }
-
-    private Hashtag findHashtag(String hashtag) {
-        return hashtagRepository.findByName("#" + hashtag)
-            .orElseThrow(() -> new ApiException(HASHTAG_NOT_FOUND));
     }
 
     private void validateOwner(UserContext userContext, Post post) {
