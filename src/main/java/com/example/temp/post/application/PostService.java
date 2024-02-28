@@ -5,6 +5,7 @@ import static com.example.temp.common.exception.ErrorCode.IMAGE_NOT_FOUND;
 import static com.example.temp.common.exception.ErrorCode.POST_NOT_FOUND;
 import static com.example.temp.common.exception.ErrorCode.UNAUTHORIZED_POST;
 
+import com.example.temp.comment.domain.CommentRepository;
 import com.example.temp.common.dto.UserContext;
 import com.example.temp.common.exception.ApiException;
 import com.example.temp.follow.domain.Follow;
@@ -55,6 +56,7 @@ public class PostService {
     private final PostHashtagRepository postHashtagRepository;
     private final HashtagRepository hashtagRepository;
     private final HashtagService hashtagService;
+    private final CommentRepository commentRepository;
 
     @Transactional
     public Long createPost(UserContext userContext, PostCreateRequest postCreateRequest,
@@ -187,10 +189,10 @@ public class PostService {
     /**
      * 회원이 삭제되었을 때, 해당 회원이 작성한 게시글을 삭제합니다.
      */
-    @Transactional
     @EventListener
     public void handleMemberDeletedEvent(MemberDeletedEvent event) {
         List<Post> posts = postRepository.findAllByMemberId(event.getMemberId());
+        commentRepository.deleteAllInBatchByPosts(posts);
         postHashtagRepository.deleteAllInBatchByPostIn(posts);
         postImageRepository.deleteAllInBatchByPostIn(posts);
         postRepository.deleteAllInBatch(posts);
