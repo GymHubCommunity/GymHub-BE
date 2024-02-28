@@ -14,10 +14,13 @@ import com.example.temp.common.dto.UserContext;
 import com.example.temp.common.exception.ApiException;
 import com.example.temp.member.domain.Member;
 import com.example.temp.member.domain.MemberRepository;
+import com.example.temp.member.event.MemberDeletedEvent;
 import com.example.temp.post.domain.Post;
 import com.example.temp.post.domain.PostRepository;
 import java.time.LocalDateTime;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.event.EventListener;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
@@ -70,6 +73,16 @@ public class CommentService {
         validateOwner(userContext, comment);
         commentRepository.delete(comment);
         post.decreaseCommentCount();
+    }
+
+
+    /**
+     * 회원이 삭제되었을 때, 해당 회원이 달았던 모든 댓글을 삭제합니다.
+     */
+    @EventListener
+    public void handleMemberDeletedEvent(MemberDeletedEvent event) {
+        List<Comment> comments = commentRepository.findAllByMemberId(event.getMemberId());
+        commentRepository.deleteAllInBatch(comments);
     }
 
     private Member findMemberBy(Long userContextId) {
