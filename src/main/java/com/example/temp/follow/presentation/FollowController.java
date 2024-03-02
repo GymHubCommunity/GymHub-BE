@@ -35,6 +35,13 @@ public class FollowController {
         return ResponseEntity.ok(result);
     }
 
+    @GetMapping("/follows/pending")
+    public ResponseEntity<FollowInfoResult> getPendingStatusFollows(@Login UserContext userContext,
+        @RequestParam(required = false) Long lastId, @RequestParam int size) {
+        FollowInfoResult result = followService.getPendingStatusFollows(userContext, lastId, PageRequest.ofSize(size));
+        return ResponseEntity.ok(result);
+    }
+
     @PostMapping("/members/{memberId}/follow")
     public ResponseEntity<FollowResponse> follow(@Login UserContext userContext, @PathVariable Long memberId) {
         FollowResponse response = followService.follow(userContext, memberId);
