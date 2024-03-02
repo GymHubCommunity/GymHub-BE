@@ -154,7 +154,7 @@ class FollowRepositoryTest {
         em.clear();
         // when
         Slice<Follow> result = followRepository.findAllByFromIdAndStatus(
-            fromMember.getId(), targetStatus, -1, pageable);
+            fromMember.getId(), targetStatus, null, pageable);
 
         // then
         assertThat(result).hasSize((int) pageable.getPageSize())
@@ -181,7 +181,7 @@ class FollowRepositoryTest {
 
         // when
         Slice<Follow> result = followRepository.findAllByFromIdAndStatus(target.getId(), targetStatus,
-            -1, pageable);
+            null, pageable);
 
         // then
         assertThat(result).isEmpty();
@@ -224,7 +224,7 @@ class FollowRepositoryTest {
 
         // when
         Slice<Follow> result = followRepository.findAllByToIdAndStatus(
-            toMember.getId(), targetStatus, -1, pageable);
+            toMember.getId(), targetStatus, null, pageable);
 
         // then
         assertThat(result).hasSize((int) pageable.getPageSize())
@@ -252,7 +252,7 @@ class FollowRepositoryTest {
 
         // when
         Slice<Follow> result = followRepository.findAllByToIdAndStatus(
-            target.getId(), targetStatus, -1, pageable);
+            target.getId(), targetStatus, null, pageable);
 
         // then
         assertThat(result).isEmpty();

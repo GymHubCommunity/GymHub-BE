@@ -23,14 +23,14 @@ public class FollowController {
 
     @GetMapping("/members/{memberId}/followings")
     public ResponseEntity<FollowInfoResult> getFollowings(@Login UserContext userContext, @PathVariable Long memberId,
-        @RequestParam(defaultValue = "-1") Long lastId, @RequestParam int size) {
+        @RequestParam(required = false) Long lastId, @RequestParam int size) {
         FollowInfoResult result = followService.getFollowings(userContext, memberId, lastId, PageRequest.ofSize(size));
         return ResponseEntity.ok(result);
     }
 
     @GetMapping("/members/{memberId}/followers")
     public ResponseEntity<FollowInfoResult> getFollowers(@Login UserContext userContext, @PathVariable Long memberId,
-        @RequestParam(defaultValue = "-1") Long lastId, @RequestParam int size) {
+        @RequestParam(required = false) Long lastId, @RequestParam int size) {
         FollowInfoResult result = followService.getFollowers(userContext, memberId, lastId, PageRequest.ofSize(size));
         return ResponseEntity.ok(result);
     }
