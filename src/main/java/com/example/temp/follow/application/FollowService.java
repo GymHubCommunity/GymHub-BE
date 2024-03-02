@@ -77,6 +77,12 @@ public class FollowService {
         return FollowInfoResult.createFollowersResult(follows);
     }
 
+    public FollowInfoResult getPendingStatusFollows(UserContext userContext, Long lastId, Pageable pageable) {
+        Slice<Follow> follows = followRepository.findAllByToIdAndStatus(userContext.id(),
+            FollowStatus.PENDING, lastId, pageable);
+        return FollowInfoResult.createFollowersResult(follows);
+    }
+
     private void validateViewAuthorization(long targetId, long executorId) {
         if (isMyAccount(targetId, executorId)) {
             return;

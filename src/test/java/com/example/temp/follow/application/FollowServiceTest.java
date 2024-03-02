@@ -575,6 +575,28 @@ class FollowServiceTest {
             .hasMessageContaining(AUTHORIZED_FAIL.getMessage());
     }
 
+    @Test
+    @DisplayName("PENDING 상태의 팔로우 요청들을 조회한다. 이 때, lastId에 값이 없다면 가장 최신 팔로우 요청들을 반환한다.")
+    void getPendingStatusFollows() throws Exception {
+        // given
+        Member member = saveMember();
+        Member another1 = saveMember();
+        Member another2 = saveMember();
+        UserContext userContext = UserContext.fromMember(member);
+
+        Follow follow1 = saveFollow(another1, member, FollowStatus.PENDING);
+        saveFollow(another2, member, FollowStatus.APPROVED);
+
+        // when
+        FollowInfoResult result = followService.getPendingStatusFollows(userContext, null, pageable);
+
+        // then
+        assertThat(result.hasNext()).isFalse();
+        assertThat(result.follows()).hasSize(1)
+            .extracting("id")
+            .containsExactly(follow1.getId());
+    }
+
     private List<Follow> saveTargetFollowings(FollowStatus followStatus, Member target, List<Member> members, int start,
         int repeatCnt) {
         List<Follow> follows = new ArrayList<>();
