@@ -597,6 +597,25 @@ class FollowServiceTest {
             .containsExactly(follow1.getId());
     }
 
+    @Test
+    @DisplayName("PENDING 상태의 팔로우 요청들을 조회했을 때, 마지막 데이터가 포함되지 않았다면 hasNext에 true를 반환한다.")
+    void getPendingStatusFollowsThatHasNextTrue() throws Exception {
+        // given
+        Member member = saveMember();
+        Member another1 = saveMember();
+        Member another2 = saveMember();
+        UserContext userContext = UserContext.fromMember(member);
+
+        saveFollow(another1, member, FollowStatus.PENDING);
+        saveFollow(another2, member, FollowStatus.PENDING);
+
+        // when
+        FollowInfoResult result = followService.getPendingStatusFollows(userContext, null, PageRequest.ofSize(1));
+
+        // then
+        assertThat(result.hasNext()).isTrue();
+    }
+
     private List<Follow> saveTargetFollowings(FollowStatus followStatus, Member target, List<Member> members, int start,
         int repeatCnt) {
         List<Follow> follows = new ArrayList<>();
