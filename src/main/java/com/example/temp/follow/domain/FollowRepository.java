@@ -30,11 +30,11 @@ public interface FollowRepository extends JpaRepository<Follow, Long> {
         + "JOIN FETCH f.to "
         + "WHERE f.from.id = :fromId "
         + "AND f.status = :status "
-        + "AND f.id > :lastId "
+        + "AND (:lastId IS NULL OR f.id > :lastId) "
         + "ORDER BY f.id ASC")
     Slice<Follow> findAllByFromIdAndStatus(@Param("fromId") long fromId,
         @Param("status") FollowStatus status,
-        @Param("lastId") long lastId,
+        @Param("lastId") Long lastId,
         Pageable pageable);
 
     @Query("SELECT f FROM Follow f JOIN FETCH f.from WHERE f.to.id = :toId AND f.status = :status")
@@ -53,11 +53,11 @@ public interface FollowRepository extends JpaRepository<Follow, Long> {
         + "JOIN FETCH f.to "
         + "WHERE f.to.id = :toId "
         + "AND f.status = :status "
-        + "AND f.id > :lastId "
+        + "AND (:lastId IS NULL OR f.id > :lastId) "
         + "ORDER BY f.id ASC")
     Slice<Follow> findAllByToIdAndStatus(@Param("toId") long toId,
         @Param("status") FollowStatus status,
-        @Param("lastId") long lastId,
+        @Param("lastId") Long lastId,
         Pageable pageable);
 
 
