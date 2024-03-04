@@ -1,8 +1,12 @@
 package com.example.temp.common.exception;
 
+import com.example.temp.common.dto.UserContext;
 import com.example.temp.common.infrastructure.exceptionsender.ExceptionSender;
+import com.example.temp.common.interceptor.AuthenticationInterceptor;
 import com.example.temp.member.exception.NicknameDuplicatedException;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.servlet.http.HttpServletRequest;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -73,11 +77,27 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleServerException(Exception exception, HttpServletRequest request) {
-        log.warn(exception.getMessage());
-        exceptionSender.send(exception, request);
-
+        log.error(exception.getMessage());
+        sendExceptionInfo(exception, request);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
             .body(ErrorResponse.createServerError());
+    }
+
+    private void sendExceptionInfo(Exception exception, HttpServletRequest request){
+        UserContext userContext = (UserContext) request.getAttribute(AuthenticationInterceptor.MEMBER_INFO);
+        ExceptionInfo exceptionInfo = ExceptionInfo.builder()
+            .clazz(exception.getClass().getName())
+            .message(exception.getMessage())
+            .requestUri(request.getRequestURI())
+            .method(request.getMethod())
+            .userContextOpt(Optional.ofNullable(userContext))
+            .build();
+        try {
+            exceptionSender.send(exceptionInfo);
+        } catch (JsonProcessingException e) {
+            log.warn("예외 메세지 파싱에 실패했습니다.");
+            log.warn(e.getMessage());
+        }
     }
 
 }
