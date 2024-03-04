@@ -1,8 +1,8 @@
 package com.example.temp.common.infrastructure.exceptionsender;
 
-import jakarta.servlet.http.HttpServletRequest;
+import com.example.temp.common.exception.ExceptionInfo;
 
 public interface ExceptionSender {
 
-    void send(Exception exception, HttpServletRequest request);
+    void send(ExceptionInfo exceptionInfo);
 }

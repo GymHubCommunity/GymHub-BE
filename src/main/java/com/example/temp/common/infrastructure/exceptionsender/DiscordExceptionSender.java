@@ -1,6 +1,6 @@
 package com.example.temp.common.infrastructure.exceptionsender;
 
-import jakarta.servlet.http.HttpServletRequest;
+import com.example.temp.common.exception.ExceptionInfo;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.BodyInserters;
@@ -12,8 +12,8 @@ public class DiscordExceptionSender implements ExceptionSender {
     String webhookUrl;
 
     @Override
-    public void send(Exception exception, HttpServletRequest request) {
-        String message = "예외 발생: " + exception.getMessage();
+    public void send(ExceptionInfo exceptionInfo) {
+        String message = "예외 발생: " + exceptionInfo.getMessage();
         WebClient client = WebClient.builder()
             .baseUrl(webhookUrl)
             .build();

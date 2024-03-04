@@ -11,7 +11,7 @@ public class TestConfig {
 
     @Bean
     ExceptionSender dummyExceptionSender() {
-        return (exception, request) -> {
+        return (exceptionInfo) -> {
 
         };
     }

@@ -45,10 +45,12 @@ class GlobalExceptionHandlerUnitTest {
     void handleException() throws Exception {
         // given
         Exception exception = new Exception("에러에러");
+        HttpServletRequest requestMock = Mockito.mock(HttpServletRequest.class);
+        Mockito.when(requestMock.getRequestURI()).thenReturn("https://test");
+        Mockito.when(requestMock.getMethod()).thenReturn("POST");
 
         // when
-        ResponseEntity<ErrorResponse> response = handler.handleServerException(exception,
-            Mockito.mock(HttpServletRequest.class));
+        ResponseEntity<ErrorResponse> response = handler.handleServerException(exception, requestMock);
 
         // then
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
