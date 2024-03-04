@@ -1,11 +1,11 @@
 package com.example.temp.common.exception;
 
+import com.example.temp.common.infrastructure.exceptionsender.ExceptionSender;
 import com.example.temp.member.exception.NicknameDuplicatedException;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.BindingResult;
@@ -15,15 +15,13 @@ import org.springframework.web.bind.MissingRequestCookieException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
-import org.springframework.web.reactive.function.BodyInserters;
-import org.springframework.web.reactive.function.client.WebClient;
 
 @RestControllerAdvice
+@RequiredArgsConstructor
 @Slf4j
 public class GlobalExceptionHandler {
 
-    @Value("${webhookUrl}")
-    String webhookUrl;
+    private final ExceptionSender exceptionSender;
 
     @ExceptionHandler(ApiException.class)
     public ResponseEntity<ErrorResponse> handleApiException(ApiException exception) {
@@ -76,16 +74,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleServerException(Exception exception, HttpServletRequest request) {
         log.warn(exception.getMessage());
-        String message = "예외 발생: " + exception.getMessage();
-        WebClient client = WebClient.builder()
-            .baseUrl(webhookUrl)
-            .build();
-        client.post()
-            .contentType(MediaType.APPLICATION_JSON)
-            .body(BodyInserters.fromValue("{\"content\":\"" + message + "\"}"))
-            .retrieve()
-            .bodyToMono(Void.class)
-            .block();
+        exceptionSender.send(exception, request);
+
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
             .body(ErrorResponse.createServerError());
     }

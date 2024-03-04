@@ -6,14 +6,22 @@ import com.example.temp.common.exception.ApiException;
 import com.example.temp.common.exception.ErrorCode;
 import com.example.temp.common.exception.ErrorResponse;
 import com.example.temp.common.exception.GlobalExceptionHandler;
+import com.example.temp.common.infrastructure.exceptionsender.ExceptionSender;
+import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+@ExtendWith(MockitoExtension.class)
 class GlobalExceptionHandlerUnitTest {
 
-    GlobalExceptionHandler handler = new GlobalExceptionHandler();
+    ExceptionSender exceptionSender = Mockito.mock(ExceptionSender.class);
+
+    GlobalExceptionHandler handler = new GlobalExceptionHandler(exceptionSender);
 
     @Test
     @DisplayName("handleApiException이 실행되면 ErrorCode가 들고 있는 status와 message를 반환한다.")
@@ -39,7 +47,8 @@ class GlobalExceptionHandlerUnitTest {
         Exception exception = new Exception("에러에러");
 
         // when
-        ResponseEntity<ErrorResponse> response = handler.handleServerException(exception);
+        ResponseEntity<ErrorResponse> response = handler.handleServerException(exception,
+            Mockito.mock(HttpServletRequest.class));
 
         // then
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
