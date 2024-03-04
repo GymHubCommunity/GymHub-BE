@@ -134,6 +134,7 @@ public class Member {
 
     public void changePrivacy(PrivacyPolicy privacyPolicy) {
         this.privacyPolicy = privacyPolicy;
+        this.followStrategy = privacyPolicy.getDefaultFollowStrategy();
     }
 
     public boolean isPublicAccount() {

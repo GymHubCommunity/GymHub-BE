@@ -110,6 +110,7 @@ class MemberTest {
 
         // then
         assertThat(member.getPrivacyPolicy()).isEqualTo(PUBLIC);
+        assertThat(member.getFollowStrategy()).isEqualTo(PUBLIC.getDefaultFollowStrategy());
     }
 
     @ParameterizedTest
@@ -126,5 +127,6 @@ class MemberTest {
 
         // then
         assertThat(member.getPrivacyPolicy()).isEqualTo(PRIVATE);
+        assertThat(member.getFollowStrategy()).isEqualTo(PRIVATE.getDefaultFollowStrategy());
     }
 }
