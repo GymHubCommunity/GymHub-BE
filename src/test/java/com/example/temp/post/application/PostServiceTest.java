@@ -1,5 +1,6 @@
 package com.example.temp.post.application;
 
+import static com.example.temp.common.exception.ErrorCode.*;
 import static com.example.temp.common.exception.ErrorCode.AUTHENTICATED_FAIL;
 import static com.example.temp.common.exception.ErrorCode.HASHTAG_NOT_FOUND;
 import static com.example.temp.common.exception.ErrorCode.IMAGE_NOT_FOUND;
@@ -16,6 +17,7 @@ import com.example.temp.auth.domain.Role;
 import com.example.temp.common.dto.UserContext;
 import com.example.temp.common.entity.Email;
 import com.example.temp.common.exception.ApiException;
+import com.example.temp.common.exception.ErrorCode;
 import com.example.temp.follow.domain.Follow;
 import com.example.temp.follow.domain.FollowRepository;
 import com.example.temp.follow.domain.FollowStatus;
@@ -39,6 +41,7 @@ import com.example.temp.post.dto.response.PostElementResponse;
 import com.example.temp.post.dto.response.PostResponse;
 import com.example.temp.post.dto.response.PostSearchResponse;
 import com.example.temp.post.dto.response.WriterInfo;
+import jakarta.persistence.Tuple;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -457,6 +460,80 @@ class PostServiceTest {
 
         //then
         assertThat(response.posts()).isEmpty();
+    }
+
+    @DisplayName("memberId로 해당 유저가 작성한 게시글 리스트를 조회할 수 있다.")
+    @Test
+    void findPostsByMember() {
+        //given
+        Member loginMember = saveMember("login@test.com", "login");
+        Member writer = saveMember("writer@test.com", "writer");
+        UserContext userContext = UserContext.fromMember(loginMember);
+        List<String> imageUrls = List.of("imageUrl1", "ImageUrl2");
+        List<String> savedImageUrls = saveImagesAndGetUrls(imageUrls);
+        List<String> hashtags = List.of("#hashtag1", "#hashtag2");
+        savePost(writer, "게시글1", savedImageUrls, hashtags);
+        savePost(writer, "게시글2", Collections.emptyList(), Collections.emptyList());
+
+        //when
+        PostResponse postResponse = postService.findPostsByMember(writer.getId(), userContext, PageRequest.of(0, 5));
+
+        //then
+        assertThat(postResponse.hasNext()).isFalse();
+        assertThat(postResponse.posts()).hasSize(2)
+            .extracting("writerInfo", "content")
+            .containsExactlyInAnyOrder(
+                tuple(WriterInfo.from(writer), "게시글2"),
+                tuple(WriterInfo.from(writer), "게시글1")
+            );
+    }
+
+    @DisplayName("로그인에 문제가 생기면 memberId로 예외를 발생시킨다.")
+    @Test
+    void findPostsByMemberWhenLoginError() {
+        //given
+        Member writer = saveMember("writer@test.com", "writer");
+        UserContext userContext = UserContext.builder()
+            .id(123445672L)
+            .role(Role.NORMAL)
+            .build();
+        savePost(writer, "게시글1", Collections.emptyList(), Collections.emptyList());
+
+        //when, then
+        assertThatThrownBy(() -> postService.findPostsByMember(writer.getId(), userContext, PageRequest.of(0, 5)))
+            .isInstanceOf(ApiException.class)
+            .hasMessage(AUTHENTICATED_FAIL.getMessage());
+    }
+
+    @DisplayName("존재하지 않은 memberId로 조회 시 예외를 발생 시킨다.")
+    @Test
+    void findPostsByMemberWhenNotFoundMemberId() {
+        //given
+        Member loginUser = saveMember("login@test.com", "login");
+        Member writer = saveMember("writer@test.com", "writer");
+        UserContext userContext = UserContext.fromMember(loginUser);
+        savePost(writer, "게시글1", Collections.emptyList(), Collections.emptyList());
+
+        //when, then
+        assertThatThrownBy(() -> postService.findPostsByMember(9999999L, userContext, PageRequest.of(0, 5)))
+            .isInstanceOf(ApiException.class)
+            .hasMessage(MEMBER_NOT_FOUND.getMessage());
+    }
+
+    @DisplayName("memberId로 작성된 게시글이 없으면 빈 리스트를 반환한다.")
+    @Test
+    void findPostsByMemberWhenPostZero() {
+        //given
+        Member loginMember = saveMember("login@test.com", "login");
+        Member writer = saveMember("writer@test.com", "writer");
+        UserContext userContext = UserContext.fromMember(loginMember);
+
+        //when
+        PostResponse postResponse = postService.findPostsByMember(writer.getId(), userContext, PageRequest.of(0, 5));
+
+        //then
+        assertThat(postResponse.hasNext()).isFalse();
+        assertThat(postResponse.posts()).isEmpty();
     }
 
     private Member saveMember(String email, String nickname) {
