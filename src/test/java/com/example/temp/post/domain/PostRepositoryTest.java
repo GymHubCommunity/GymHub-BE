@@ -1,5 +1,6 @@
 package com.example.temp.post.domain;
 
+import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.groups.Tuple.tuple;
 
@@ -266,6 +267,67 @@ class PostRepositoryTest {
 
         //then
         assertThat(postContents).isSortedAccordingTo(Comparator.comparing(Post::getRegisteredAt).reversed());
+    }
+
+    @DisplayName("memberId로 사용자가 작성한 게시글 리스트를 조회할 수 있다.")
+    @Test
+    void findAllByMemberIdOrderByRegisteredAtDesc() {
+        //given
+        Member member = saveMember("user@email.com", "유저1");
+        Hashtag hashtag = saveHashtag("#hashtag");
+        saveImage("이미지1");
+        saveImage("이미지2");
+        saveImage("이미지3");
+        savePost(member, "게시글1", List.of("이미지1"), List.of("#hashtag"));
+        savePost(member, "게시글2", List.of("이미지2"), List.of("#hashtag"));
+        savePost(member, "게시글3", List.of("이미지3"), List.of("#hashtag"));
+
+        //when
+        Slice<Post> posts = postRepository.findAllByMemberIdOrderByRegisteredAtDesc(member.getId(),
+            PageRequest.of(0, 5));
+
+        //then
+        assertThat(posts.getContent()).hasSize(3)
+            .extracting("content")
+            .containsExactly("게시글3", "게시글2", "게시글1");
+    }
+
+    @DisplayName("존재하지 않는 memberId로 조회 시 반환된 게시글은 0이다.")
+    @Test
+    void findAllByNotFoundMember() {
+        //given
+        Member member = saveMember("user@email.com", "유저1");
+        Hashtag hashtag = saveHashtag("#hashtag");
+        saveImage("이미지1");
+        savePost(member, "게시글1", List.of("이미지1"), List.of("#hashtag"));
+
+        //when
+        Slice<Post> posts = postRepository.findAllByMemberIdOrderByRegisteredAtDesc(member.getId() - 1,
+            PageRequest.of(0, 5));
+
+        //then
+        assertThat(posts.getContent()).isEmpty();
+    }
+
+    @DisplayName("게시글은 최신 순으로 조회된다.")
+    @Test
+    void postsOrderByRegisteredAtDesc() {
+        //given
+        Member member = saveMember("user@email.com", "유저1");
+        Hashtag hashtag = saveHashtag("#hashtag");
+        saveImage("이미지1");
+        saveImage("이미지2");
+        saveImage("이미지3");
+        savePost(member, "게시글1", List.of("이미지1"), List.of("#hashtag"));
+        savePost(member, "게시글2", List.of("이미지2"), List.of("#hashtag"));
+        savePost(member, "게시글3", List.of("이미지3"), List.of("#hashtag"));
+
+        //when
+        Slice<Post> posts = postRepository.findAllByMemberIdOrderByRegisteredAtDesc(member.getId(),
+            PageRequest.of(0, 5));
+
+        //then
+        assertThat(posts.getContent()).isSortedAccordingTo(Comparator.comparing(Post::getRegisteredAt).reversed());
     }
 
     private Member saveMember(String email, String nickname) {
