@@ -1,5 +1,6 @@
 package com.example.temp.post.application;
 
+import static com.example.temp.common.exception.ErrorCode.*;
 import static com.example.temp.common.exception.ErrorCode.AUTHENTICATED_FAIL;
 import static com.example.temp.common.exception.ErrorCode.IMAGE_NOT_FOUND;
 import static com.example.temp.common.exception.ErrorCode.POST_NOT_FOUND;
@@ -113,9 +114,15 @@ public class PostService {
 
     public PostResponse findPostsByMember(Long memberId, UserContext userContext, Pageable pageable) {
         validateLoginUser(userContext);
+        Member findMember = validateMember(memberId);
         Slice<Post> posts = postRepository.findAllByMemberIdOrderByRegisteredAtDesc(
-            memberId, pageable);
+            findMember.getId(), pageable);
         return PostResponse.from(posts);
+    }
+
+    private Member validateMember(Long memberId) {
+        return memberRepository.findById(memberId)
+            .orElseThrow(() -> new ApiException(MEMBER_NOT_FOUND));
     }
 
     private void updatePostImages(PostUpdateRequest request, Post post) {
