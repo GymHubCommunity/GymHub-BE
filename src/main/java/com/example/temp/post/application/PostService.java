@@ -13,7 +13,6 @@ import com.example.temp.follow.domain.FollowRepository;
 import com.example.temp.follow.domain.FollowStatus;
 import com.example.temp.hashtag.application.HashtagService;
 import com.example.temp.hashtag.domain.Hashtag;
-import com.example.temp.hashtag.domain.HashtagRepository;
 import com.example.temp.image.domain.Image;
 import com.example.temp.image.domain.ImageRepository;
 import com.example.temp.member.domain.Member;
@@ -54,7 +53,6 @@ public class PostService {
     private final ImageRepository imageRepository;
     private final PostImageRepository postImageRepository;
     private final PostHashtagRepository postHashtagRepository;
-    private final HashtagRepository hashtagRepository;
     private final HashtagService hashtagService;
     private final CommentRepository commentRepository;
 
@@ -110,6 +108,13 @@ public class PostService {
             .map(tag -> postRepository.findAllPostByHashtag("#" + tag, pageable))
             .orElseGet(() -> postRepository.findAllPost(pageable));
         return PostSearchResponse.from(posts);
+    }
+
+    public PostResponse findPostsByMember(Long memberId, UserContext userContext, Pageable pageable) {
+        findMember(userContext);
+        Slice<Post> posts = postRepository.findAllByMemberIdOrderByRegisteredAtDesc(
+            memberId, pageable);
+        return PostResponse.from(posts);
     }
 
     private void updatePostImages(PostUpdateRequest request, Post post) {
