@@ -17,6 +17,8 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
     List<Post> findAllByMemberId(@Param("memberId") Long memberId);
 
+    Slice<Post> findAllByMemberIdOrderByRegisteredAtDesc(@Param("memberId") Long memberId, Pageable pageable);
+
     @Query("SELECT p "
         + "FROM Post p "
         + "WHERE p.member.privacyPolicy = 'PUBLIC' "
