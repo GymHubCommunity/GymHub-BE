@@ -8,6 +8,7 @@ import static com.example.temp.common.exception.ErrorCode.UNAUTHORIZED_POST;
 import com.example.temp.comment.domain.CommentRepository;
 import com.example.temp.common.dto.UserContext;
 import com.example.temp.common.exception.ApiException;
+import com.example.temp.common.exception.ErrorCode;
 import com.example.temp.follow.domain.Follow;
 import com.example.temp.follow.domain.FollowRepository;
 import com.example.temp.follow.domain.FollowStatus;
@@ -59,7 +60,7 @@ public class PostService {
     @Transactional
     public Long createPost(UserContext userContext, PostCreateRequest postCreateRequest,
         LocalDateTime registeredAt) {
-        Member member = findMember(userContext);
+        Member member = validateLoginUser(userContext);
         Post post = postCreateRequest.toEntity(member, registeredAt);
 
         createPostImages(postCreateRequest.imageUrls(), post);
@@ -70,7 +71,7 @@ public class PostService {
     }
 
     public PostResponse findMyAndFollowingPosts(UserContext userContext, Pageable pageable) {
-        Member member = findMember(userContext);
+        Member member = validateLoginUser(userContext);
         List<Member> myselfAndFollowings = findMyselfAndFollowings(member);
         myselfAndFollowings.add(member);
         Slice<Post> posts = postRepository.findAllByMemberInOrderByRegisteredAtDesc(myselfAndFollowings, pageable);
@@ -78,7 +79,7 @@ public class PostService {
     }
 
     public PostDetailResponse findPost(Long postId, UserContext userContext) {
-        findMember(userContext);
+        validateLoginUser(userContext);
         Post findPost = findPostBy(postId);
         return PostDetailResponse.from(findPost);
     }
@@ -103,7 +104,7 @@ public class PostService {
     }
 
     public PostSearchResponse findPostsByHashtag(String hashtag, UserContext userContext, Pageable pageable) {
-        findMember(userContext);
+        validateLoginUser(userContext);
         Page<Post> posts = Optional.ofNullable(hashtag)
             .map(tag -> postRepository.findAllPostByHashtag("#" + tag, pageable))
             .orElseGet(() -> postRepository.findAllPost(pageable));
@@ -111,7 +112,7 @@ public class PostService {
     }
 
     public PostResponse findPostsByMember(Long memberId, UserContext userContext, Pageable pageable) {
-        findMember(userContext);
+        validateLoginUser(userContext);
         Slice<Post> posts = postRepository.findAllByMemberIdOrderByRegisteredAtDesc(
             memberId, pageable);
         return PostResponse.from(posts);
@@ -128,7 +129,7 @@ public class PostService {
         createPostHashtags(request.hashTags(), post);
     }
 
-    private Member findMember(UserContext userContext) {
+    private Member validateLoginUser(UserContext userContext) {
         return memberRepository.findById(userContext.id())
             .orElseThrow(() -> new ApiException(AUTHENTICATED_FAIL));
     }
