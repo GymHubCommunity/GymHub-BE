@@ -1,5 +1,6 @@
 package com.example.temp.post.application;
 
+import static com.example.temp.common.exception.ErrorCode.*;
 import static com.example.temp.common.exception.ErrorCode.AUTHENTICATED_FAIL;
 import static com.example.temp.common.exception.ErrorCode.IMAGE_NOT_FOUND;
 import static com.example.temp.common.exception.ErrorCode.POST_NOT_FOUND;
@@ -13,7 +14,6 @@ import com.example.temp.follow.domain.FollowRepository;
 import com.example.temp.follow.domain.FollowStatus;
 import com.example.temp.hashtag.application.HashtagService;
 import com.example.temp.hashtag.domain.Hashtag;
-import com.example.temp.hashtag.domain.HashtagRepository;
 import com.example.temp.image.domain.Image;
 import com.example.temp.image.domain.ImageRepository;
 import com.example.temp.member.domain.Member;
@@ -54,14 +54,13 @@ public class PostService {
     private final ImageRepository imageRepository;
     private final PostImageRepository postImageRepository;
     private final PostHashtagRepository postHashtagRepository;
-    private final HashtagRepository hashtagRepository;
     private final HashtagService hashtagService;
     private final CommentRepository commentRepository;
 
     @Transactional
     public Long createPost(UserContext userContext, PostCreateRequest postCreateRequest,
         LocalDateTime registeredAt) {
-        Member member = findMember(userContext);
+        Member member = findLoginUser(userContext);
         Post post = postCreateRequest.toEntity(member, registeredAt);
 
         createPostImages(postCreateRequest.imageUrls(), post);
@@ -72,7 +71,7 @@ public class PostService {
     }
 
     public PostResponse findMyAndFollowingPosts(UserContext userContext, Pageable pageable) {
-        Member member = findMember(userContext);
+        Member member = findLoginUser(userContext);
         List<Member> myselfAndFollowings = findMyselfAndFollowings(member);
         myselfAndFollowings.add(member);
         Slice<Post> posts = postRepository.findAllByMemberInOrderByRegisteredAtDesc(myselfAndFollowings, pageable);
@@ -80,7 +79,7 @@ public class PostService {
     }
 
     public PostDetailResponse findPost(Long postId, UserContext userContext) {
-        findMember(userContext);
+        findLoginUser(userContext);
         Post findPost = findPostBy(postId);
         return PostDetailResponse.from(findPost);
     }
@@ -105,11 +104,24 @@ public class PostService {
     }
 
     public PostSearchResponse findPostsByHashtag(String hashtag, UserContext userContext, Pageable pageable) {
-        findMember(userContext);
+        findLoginUser(userContext);
         Page<Post> posts = Optional.ofNullable(hashtag)
             .map(tag -> postRepository.findAllPostByHashtag("#" + tag, pageable))
             .orElseGet(() -> postRepository.findAllPost(pageable));
         return PostSearchResponse.from(posts);
+    }
+
+    public PostResponse findPostsByMember(Long memberId, UserContext userContext, Pageable pageable) {
+        findLoginUser(userContext);
+        Member findMember = validateMember(memberId);
+        Slice<Post> posts = postRepository.findAllByMemberIdOrderByRegisteredAtDesc(
+            findMember.getId(), pageable);
+        return PostResponse.from(posts);
+    }
+
+    private Member validateMember(Long memberId) {
+        return memberRepository.findById(memberId)
+            .orElseThrow(() -> new ApiException(MEMBER_NOT_FOUND));
     }
 
     private void updatePostImages(PostUpdateRequest request, Post post) {
@@ -123,7 +135,7 @@ public class PostService {
         createPostHashtags(request.hashTags(), post);
     }
 
-    private Member findMember(UserContext userContext) {
+    private Member findLoginUser(UserContext userContext) {
         return memberRepository.findById(userContext.id())
             .orElseThrow(() -> new ApiException(AUTHENTICATED_FAIL));
     }
