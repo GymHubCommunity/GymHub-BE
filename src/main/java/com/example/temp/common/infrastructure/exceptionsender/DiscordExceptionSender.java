@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.http.HttpStatus;
 
 @RequiredArgsConstructor
 public class DiscordExceptionSender implements ExceptionSender {
@@ -36,6 +37,11 @@ public class DiscordExceptionSender implements ExceptionSender {
             .contentType(MediaType.APPLICATION_JSON)
             .body(BodyInserters.fromValue(body))
             .retrieve()
+            .onStatus(
+                response -> !response.isSameCodeAs(HttpStatus.NO_CONTENT),
+                clientResponse -> {
+                    throw new ExceptionSenderNotWorkingException();
+                })
             .bodyToMono(Void.class)
             .block();
     }
