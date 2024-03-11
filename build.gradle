@@ -46,6 +46,10 @@ dependencies {
     // WebClient 관련 의존성
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
 
+    // MockWebServer 종속성 추가
+    testImplementation 'com.squareup.okhttp3:okhttp:5.0.0-alpha.12'
+    testImplementation 'com.squareup.okhttp3:mockwebserver:5.0.0-alpha.12'
+
     // jwt 관련 의존성
     // https://github.com/jwtk/jjwt
     implementation 'io.jsonwebtoken:jjwt-api:0.12.5'
