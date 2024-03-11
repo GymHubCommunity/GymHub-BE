@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.example.temp.common.exception.ApiException;
 import com.example.temp.common.exception.ErrorCode;
 import com.example.temp.common.exception.ErrorResponse;
+import com.example.temp.common.exception.ExceptionSenderNotWorkingException;
 import com.example.temp.common.exception.GlobalExceptionHandler;
 import com.example.temp.common.infrastructure.exceptionsender.ExceptionSender;
 import jakarta.servlet.http.HttpServletRequest;
@@ -57,8 +58,22 @@ class GlobalExceptionHandlerUnitTest {
 
         ErrorResponse body = response.getBody();
         assertThat(body.getMessage()).isEqualTo(ErrorResponse.SERVER_ERROR_MSG);
-
     }
+
+@Test
+@DisplayName("ExceptionSenderNotWorkingException이 발생하면 INTERNAL_SERVER_ERROR를 반환한다.")
+void handleExceptionSenderNotWorkingException() throws Exception {
+    // given
+
+    ExceptionSenderNotWorkingException exception = Mockito.mock(ExceptionSenderNotWorkingException.class);
+    Mockito.when(exception.getMessage()).thenReturn("메세지");
+
+    // when
+    ResponseEntity<ErrorResponse> response = handler.handleExceptionSenderNotWorkingException(exception);
+
+    // then
+    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+}
 
     @Test
     @DisplayName("handleBadRequestStatus가 실행되면 BAD_REQUEST 상태를 반환한다")

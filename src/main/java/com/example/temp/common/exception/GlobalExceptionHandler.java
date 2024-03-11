@@ -4,7 +4,6 @@ import com.example.temp.common.dto.UserContext;
 import com.example.temp.common.infrastructure.exceptionsender.ExceptionSender;
 import com.example.temp.common.interceptor.AuthenticationInterceptor;
 import com.example.temp.member.exception.NicknameDuplicatedException;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -83,7 +82,16 @@ public class GlobalExceptionHandler {
             .body(ErrorResponse.createServerError());
     }
 
-    private void sendExceptionInfo(Exception exception, HttpServletRequest request){
+    @ExceptionHandler(ExceptionSenderNotWorkingException.class)
+    public ResponseEntity<ErrorResponse> handleExceptionSenderNotWorkingException(
+        ExceptionSenderNotWorkingException exception) {
+        log.warn(exception.getMessage());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .body(ErrorResponse.createServerError());
+    }
+
+
+    private void sendExceptionInfo(Exception exception, HttpServletRequest request) {
         UserContext userContext = (UserContext) request.getAttribute(AuthenticationInterceptor.MEMBER_INFO);
         ExceptionInfo exceptionInfo = ExceptionInfo.builder()
             .clazz(exception.getClass().getName())
@@ -92,12 +100,7 @@ public class GlobalExceptionHandler {
             .method(request.getMethod())
             .userContextOpt(Optional.ofNullable(userContext))
             .build();
-        try {
-            exceptionSender.send(exceptionInfo);
-        } catch (JsonProcessingException e) {
-            log.warn("예외 메세지 파싱에 실패했습니다.");
-            log.warn(e.getMessage());
-        }
+        exceptionSender.send(exceptionInfo);
     }
 
 }

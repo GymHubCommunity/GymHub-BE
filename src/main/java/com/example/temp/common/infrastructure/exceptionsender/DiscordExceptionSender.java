@@ -2,6 +2,7 @@ package com.example.temp.common.infrastructure.exceptionsender;
 
 import com.example.temp.common.dto.UserContext;
 import com.example.temp.common.exception.ExceptionInfo;
+import com.example.temp.common.exception.ExceptionSenderNotWorkingException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.Serializable;
@@ -22,9 +23,15 @@ public class DiscordExceptionSender implements ExceptionSender {
 
     private final ObjectMapper objectMapper;
 
+    /**
+     * 등록된 디스코드 서버로 발생한 예외에 대한 정보를 전달합니다.
+     *
+     * @param exceptionInfo
+     * @throws ExceptionSenderNotWorkingException : 메세지 전달 과정에서 오류가 발생했을 때 해당 예외를 던집니다.
+     */
     @Override
-    public void send(ExceptionInfo exceptionInfo) throws JsonProcessingException {
-        String body = objectMapper.writeValueAsString(new BodyValue(exceptionInfo));
+    public void send(ExceptionInfo exceptionInfo) {
+        String body = serialize(exceptionInfo);
         WebClient client = WebClient.builder()
             .baseUrl(webhookUrl)
             .build();
@@ -34,6 +41,14 @@ public class DiscordExceptionSender implements ExceptionSender {
             .retrieve()
             .bodyToMono(Void.class)
             .block();
+    }
+
+    private String serialize(ExceptionInfo exceptionInfo) {
+        try {
+            return objectMapper.writeValueAsString(new BodyValue(exceptionInfo));
+        } catch (JsonProcessingException e) {
+            throw new ExceptionSenderNotWorkingException(e);
+        }
     }
 
     @Getter
