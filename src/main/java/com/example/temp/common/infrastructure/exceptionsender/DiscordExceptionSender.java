@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Optional;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -18,10 +18,10 @@ import org.springframework.web.reactive.function.client.WebClient;
 @RequiredArgsConstructor
 public class DiscordExceptionSender implements ExceptionSender {
 
-    @Value("${webhookUrl}")
-    private String webhookUrl;
-
     private final ObjectMapper objectMapper;
+
+    @Qualifier("discordWebClient")
+    private final WebClient discordWebClient;
 
     /**
      * 등록된 디스코드 서버로 발생한 예외에 대한 정보를 전달합니다.
@@ -32,10 +32,7 @@ public class DiscordExceptionSender implements ExceptionSender {
     @Override
     public void send(ExceptionInfo exceptionInfo) {
         String body = serialize(exceptionInfo);
-        WebClient client = WebClient.builder()
-            .baseUrl(webhookUrl)
-            .build();
-        client.post()
+        discordWebClient.post()
             .contentType(MediaType.APPLICATION_JSON)
             .body(BodyInserters.fromValue(body))
             .retrieve()
