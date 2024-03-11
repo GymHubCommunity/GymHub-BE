@@ -11,10 +11,10 @@ import java.util.Optional;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.http.HttpStatus;
 
 @RequiredArgsConstructor
 public class DiscordExceptionSender implements ExceptionSender {
@@ -48,18 +48,18 @@ public class DiscordExceptionSender implements ExceptionSender {
 
     private String serialize(ExceptionInfo exceptionInfo) {
         try {
-            return objectMapper.writeValueAsString(new BodyValue(exceptionInfo));
+            return objectMapper.writeValueAsString(new DiscordBodyValue(exceptionInfo));
         } catch (JsonProcessingException e) {
             throw new ExceptionSenderNotWorkingException(e);
         }
     }
 
     @Getter
-    static class BodyValue implements Serializable {
+    static class DiscordBodyValue implements Serializable {
 
         private final List<Embed> embeds;
 
-        public BodyValue(ExceptionInfo exceptionInfo) {
+        public DiscordBodyValue(ExceptionInfo exceptionInfo) {
             embeds = List.of(new Embed(exceptionInfo));
         }
 
