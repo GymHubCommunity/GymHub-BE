@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-public class UserPostController {
+public class MemberPostController {
 
     private final PostService postService;
 
