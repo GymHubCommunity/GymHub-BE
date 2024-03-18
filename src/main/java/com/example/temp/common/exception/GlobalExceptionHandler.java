@@ -1,6 +1,12 @@
 package com.example.temp.common.exception;
 
+import com.example.temp.common.dto.UserContext;
+import com.example.temp.common.infrastructure.exceptionsender.ExceptionSender;
+import com.example.temp.common.interceptor.AuthenticationInterceptor;
 import com.example.temp.member.exception.NicknameDuplicatedException;
+import jakarta.servlet.http.HttpServletRequest;
+import java.util.Optional;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,8 +20,11 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 @RestControllerAdvice
+@RequiredArgsConstructor
 @Slf4j
 public class GlobalExceptionHandler {
+
+    private final ExceptionSender exceptionSender;
 
     @ExceptionHandler(ApiException.class)
     public ResponseEntity<ErrorResponse> handleApiException(ApiException exception) {
@@ -66,9 +75,32 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleServerException(Exception exception) {
+    public ResponseEntity<ErrorResponse> handleServerException(Exception exception, HttpServletRequest request) {
+        log.error(exception.getMessage());
+        sendExceptionInfo(exception, request);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .body(ErrorResponse.createServerError());
+    }
+
+    @ExceptionHandler(ExceptionSenderNotWorkingException.class)
+    public ResponseEntity<ErrorResponse> handleExceptionSenderNotWorkingException(
+        ExceptionSenderNotWorkingException exception) {
         log.warn(exception.getMessage());
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
             .body(ErrorResponse.createServerError());
     }
+
+
+    private void sendExceptionInfo(Exception exception, HttpServletRequest request) {
+        UserContext userContext = (UserContext) request.getAttribute(AuthenticationInterceptor.MEMBER_INFO);
+        ExceptionInfo exceptionInfo = ExceptionInfo.builder()
+            .clazz(exception.getClass().getName())
+            .message(exception.getMessage())
+            .requestUri(request.getRequestURI())
+            .method(request.getMethod())
+            .userContextOpt(Optional.ofNullable(userContext))
+            .build();
+        exceptionSender.send(exceptionInfo);
+    }
+
 }
