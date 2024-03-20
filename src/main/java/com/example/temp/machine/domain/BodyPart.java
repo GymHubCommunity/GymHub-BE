@@ -2,7 +2,6 @@ package com.example.temp.machine.domain;
 
 import static com.example.temp.machine.domain.BodyPart.BodyCategory.LOWER;
 import static com.example.temp.machine.domain.BodyPart.BodyCategory.UPPER;
-import static com.example.temp.machine.domain.BodyPart.BodyCategory.WHOLE;
 
 import java.util.Arrays;
 import java.util.List;
@@ -11,7 +10,7 @@ import lombok.Getter;
 
 @Getter
 public enum BodyPart {
-
+    WHOLE("전체", null),
     CHEST("가슴", UPPER),
     BACK("등", UPPER),
     SHOULDER("어깨", UPPER),
@@ -20,8 +19,8 @@ public enum BodyPart {
     FOREARM("전완근", UPPER),
     LEG("다리", LOWER),
     HIP("엉덩이", LOWER),
-    CORE("코어", WHOLE),
-    CARDIO("유산소", WHOLE),
+    CORE("코어", BodyCategory.WHOLE),
+    CARDIO("유산소", BodyCategory.WHOLE),
     ETC("기타", null);
 
     private final String text;
