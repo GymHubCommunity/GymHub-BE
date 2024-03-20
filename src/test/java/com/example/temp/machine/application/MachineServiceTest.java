@@ -17,6 +17,7 @@ import com.example.temp.machine.dto.response.MachineSearchUsingBodyCategoryRespo
 import com.example.temp.machine.dto.response.MachineSearchUsingBodyCategoryResponse.MachineSearchElementAboutBodyPart;
 import com.example.temp.machine.dto.response.MachineSummary;
 import jakarta.persistence.EntityManager;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
@@ -123,13 +124,14 @@ class MachineServiceTest {
         MachineSearchUsingBodyCategoryResponse response = machineService.searchUsingBodyCategory(category);
 
         // then
-        assertThat(response.parts()).hasSize(bodyPartsBelongTo.size())
+        assertThat(response.parts()).hasSize(bodyPartsBelongTo.size() + 1)
             .extracting(
                 MachineSearchElementAboutBodyPart::name,
                 extractMachinesName())
             .contains(
                 tuple(BodyPart.SHOULDER, Set.of("머신1")),
-                tuple(BodyPart.CHEST, Set.of("머신2"))
+                tuple(BodyPart.CHEST, Set.of("머신2")),
+                tuple(BodyPart.WHOLE, Set.of("머신1", "머신2"))
             ).doesNotContain(
                 tuple(BodyPart.CORE, Set.of("전신운동"))
             );
@@ -140,8 +142,9 @@ class MachineServiceTest {
     void searchUsingBodyCategoryEmptyResult() throws Exception {
         // given
         BodyCategory category = BodyCategory.WHOLE;
-        List<BodyPart> relatedBodyParts = BodyPart.findAllBelongTo(category);
-
+        List<BodyPart> relatedBodyParts = new ArrayList<>();
+        relatedBodyParts.addAll(BodyPart.findAllBelongTo(category));
+        relatedBodyParts.add(BodyPart.WHOLE);
         // when
         MachineSearchUsingBodyCategoryResponse response = machineService.searchUsingBodyCategory(category);
 

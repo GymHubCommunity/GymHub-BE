@@ -62,6 +62,7 @@ public class MachineService {
         for (Machine machine : machines) {
             addMachineIntoBodyPartMap(machine, hash);
         }
+        hash.put(BodyPart.WHOLE, machines);
         return hash;
     }
 
