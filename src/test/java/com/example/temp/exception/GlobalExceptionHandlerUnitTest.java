@@ -8,6 +8,8 @@ import com.example.temp.common.exception.ErrorResponse;
 import com.example.temp.common.exception.ExceptionSenderNotWorkingException;
 import com.example.temp.common.exception.GlobalExceptionHandler;
 import com.example.temp.common.infrastructure.exceptionsender.ExceptionSender;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.MalformedJwtException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -60,35 +62,44 @@ class GlobalExceptionHandlerUnitTest {
         assertThat(body.getMessage()).isEqualTo(ErrorResponse.SERVER_ERROR_MSG);
     }
 
-@Test
-@DisplayName("ExceptionSenderNotWorkingException이 발생하면 INTERNAL_SERVER_ERROR를 반환한다.")
-void handleExceptionSenderNotWorkingException() throws Exception {
-    // given
-
-    ExceptionSenderNotWorkingException exception = Mockito.mock(ExceptionSenderNotWorkingException.class);
-    Mockito.when(exception.getMessage()).thenReturn("메세지");
-
-    // when
-    ResponseEntity<ErrorResponse> response = handler.handleExceptionSenderNotWorkingException(exception);
-
-    // then
-    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
-}
-
     @Test
-    @DisplayName("handleBadRequestStatus가 실행되면 BAD_REQUEST 상태를 반환한다")
-    void handleNicknameDup() throws Exception {
+    @DisplayName("ExceptionSenderNotWorkingException이 발생하면 INTERNAL_SERVER_ERROR를 반환한다.")
+    void handleExceptionSenderNotWorkingException() throws Exception {
         // given
-        RuntimeException exception = new RuntimeException("msg");
+
+        ExceptionSenderNotWorkingException exception = Mockito.mock(ExceptionSenderNotWorkingException.class);
+        Mockito.when(exception.getMessage()).thenReturn("메세지");
 
         // when
-        ResponseEntity<ErrorResponse> response = handler.handleBadRequestStatus(exception);
+        ResponseEntity<ErrorResponse> response = handler.handleExceptionSenderNotWorkingException(exception);
+
+        // then
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @Test
+    @DisplayName("ExpiredJwtException이 발생하면 BAD_REQUEST 상태를 반환한다")
+    void handleExpiredJwtException() throws Exception {
+        // when
+        ResponseEntity<ErrorResponse> response = handler.handleExpiredJwtException();
 
         // then
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
 
         ErrorResponse body = response.getBody();
-        assertThat(body.getMessage()).isEqualTo(exception.getMessage());
+        assertThat(body.getMessage()).isEqualTo("JWT 토큰이 만료되었습니다.");
+    }
 
+    @Test
+    @DisplayName("MalformedJwtException가 발생하면 BAD_REQUEST 상태를 반환한다")
+    void handleMalformedJwtException() throws Exception {
+        // when
+        ResponseEntity<ErrorResponse> response = handler.handleMalformedJwtException();
+
+        // then
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+
+        ErrorResponse body = response.getBody();
+        assertThat(body.getMessage()).isEqualTo("JWT 토큰의 형태가 잘못되었습니다.");
     }
 }

@@ -4,6 +4,8 @@ import com.example.temp.common.dto.UserContext;
 import com.example.temp.common.infrastructure.exceptionsender.ExceptionSender;
 import com.example.temp.common.interceptor.AuthenticationInterceptor;
 import com.example.temp.member.exception.NicknameDuplicatedException;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.MalformedJwtException;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -103,4 +105,15 @@ public class GlobalExceptionHandler {
         exceptionSender.send(exceptionInfo);
     }
 
+    @ExceptionHandler(ExpiredJwtException.class)
+    public ResponseEntity<ErrorResponse> handleExpiredJwtException() {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+            .body(ErrorResponse.create("JWT 토큰이 만료되었습니다."));
+    }
+
+    @ExceptionHandler(MalformedJwtException.class)
+    public ResponseEntity<ErrorResponse> handleMalformedJwtException() {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+            .body(ErrorResponse.create("JWT 토큰의 형태가 잘못되었습니다."));
+    }
 }
